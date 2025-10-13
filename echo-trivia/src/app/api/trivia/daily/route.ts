@@ -1,7 +1,8 @@
 // Daily quiz endpoint - deterministic quiz for a given date
-// Generates once per day at midnight EST, caches for all users
+// Generates once per day at midnight EST, caches for all users using Next.js cache
 
 import { NextResponse } from "next/server";
+import { unstable_cache } from "next/cache";
 import { getTodayString, getDailySeed, SeededRandom, generateId, shuffleChoices } from "@/lib/quiz-utils";
 import { CATEGORIES } from "@/lib/types";
 import { openai } from "@/echo";
@@ -43,24 +44,9 @@ const SCHEMA_TEMPLATE = `{
   ]
 }`;
 
-// In-memory cache for daily quiz (resets on server restart)
-let dailyQuizCache: { date: string; quiz: any } | null = null;
-
-export async function GET(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const date = searchParams.get("date") || getTodayString();
-
-    // Check cache first
-    if (dailyQuizCache && dailyQuizCache.date === date) {
-      console.log(`Serving cached daily quiz for ${date}`);
-      return NextResponse.json(dailyQuizCache.quiz, {
-        headers: {
-          'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
-        },
-      });
-    }
-
+// Cached quiz generator function - shared across all serverless instances
+const generateDailyQuizForDate = unstable_cache(
+  async (date: string) => {
     console.log(`Generating new daily quiz for ${date}`);
 
     // Generate deterministic category and difficulty for this date
@@ -125,12 +111,26 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
       });
     }
 
-    // Cache the generated quiz
-    dailyQuizCache = { date, quiz };
+    return quiz;
+  },
+  ['daily-quiz'],
+  {
+    revalidate: 86400, // 24 hours in seconds
+    tags: ['daily-quiz'],
+  }
+);
+
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const date = searchParams.get("date") || getTodayString();
+
+    console.log(`Fetching daily quiz for ${date}`);
+    const quiz = await generateDailyQuizForDate(date);
 
     return NextResponse.json(quiz, {
       headers: {
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=172800',
       },
     });
   } catch (error) {

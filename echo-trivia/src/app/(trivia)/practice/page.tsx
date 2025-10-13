@@ -20,7 +20,7 @@ function PracticeContent() {
 
   // Form state
   const [category, setCategory] = useState<Category>("General Knowledge");
-  const [numQuestions, setNumQuestions] = useState<number>(10);
+  const [numQuestions, setNumQuestions] = useState<number>(5);
   const [difficulty, setDifficulty] = useState<Difficulty | "mixed">("mixed");
   const [questionType, setQuestionType] = useState<QuestionType | "mixed">("mixed");
   const [generating, setGenerating] = useState(false);
@@ -147,10 +147,6 @@ function PracticeContent() {
                   <SelectContent>
                     <SelectItem value="5">5 questions</SelectItem>
                     <SelectItem value="10">10 questions</SelectItem>
-                    <SelectItem value="15">15 questions</SelectItem>
-                    <SelectItem value="20">20 questions</SelectItem>
-                    <SelectItem value="25">25 questions</SelectItem>
-                    <SelectItem value="30">30 questions</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

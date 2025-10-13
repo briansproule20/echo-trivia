@@ -1,4 +1,4 @@
-##Trivia Wizard
+## Trivia Wizard
 Test your wits. Bend the algorithm.
 
 _A modern AI-powered trivia platform built on Echo._

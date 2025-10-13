@@ -8,15 +8,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Loader2, Zap } from "lucide-react";
+import { Sparkles, Loader2, Zap, Lock } from "lucide-react";
 import { CATEGORIES, type Category, type Difficulty, type QuestionType, type Quiz, type Session } from "@/lib/types";
 import { usePlayStore } from "@/lib/store";
 import { storage } from "@/lib/storage";
 import { generateId } from "@/lib/quiz-utils";
+import { useEcho } from "@merit-systems/echo-react-sdk";
 
 function PracticeContent() {
   const router = useRouter();
   const { setSession } = usePlayStore();
+  const { user, signIn, isLoading: echoLoading } = useEcho();
 
   // Form state
   const [category, setCategory] = useState<Category>("General Knowledge");
@@ -25,9 +27,16 @@ function PracticeContent() {
   const [questionType, setQuestionType] = useState<QuestionType | "mixed">("mixed");
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
   const handleStartPractice = async () => {
     if (generating) return;
+
+    // Check if user is signed in
+    if (!user) {
+      setError("Please sign in to use AI-powered quiz generation");
+      return;
+    }
 
     setGenerating(true);
     setError(null);
@@ -53,7 +62,7 @@ function PracticeContent() {
       }
 
       const quiz: Quiz = await response.json();
-      
+
       // Customize title/description
       quiz.title = `${category} Practice`;
       quiz.description = `${numQuestions} questions • ${difficulty === "mixed" ? "Mixed" : difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} difficulty`;
@@ -72,6 +81,11 @@ function PracticeContent() {
       setError(err instanceof Error ? err.message : "Failed to generate quiz. Please try again.");
       setGenerating(false);
     }
+  };
+
+  const handleSignIn = () => {
+    setIsSigningIn(true);
+    signIn();
   };
 
   return (
@@ -102,13 +116,44 @@ function PracticeContent() {
                 <div className="space-y-2 flex-1">
                   <CardTitle className="text-3xl">Configure Your Practice</CardTitle>
                   <CardDescription className="text-base">
-                    Choose your category, difficulty, and question count
+                    AI-powered custom quiz generation
                   </CardDescription>
                 </div>
-                <Zap className="h-8 w-8 text-primary" />
+                <Sparkles className="h-8 w-8 text-primary" />
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Sign-in Prompt */}
+              {!user && !echoLoading && (
+                <div className="p-6 bg-primary/5 border-2 border-primary/20 rounded-lg space-y-4">
+                  <div className="flex items-center justify-center space-x-3">
+                    <Lock className="h-6 w-6 text-primary" />
+                    <h3 className="text-lg font-semibold">Sign In Required</h3>
+                  </div>
+                  <p className="text-sm text-center text-muted-foreground">
+                    Connect your Echo account to unlock AI-powered trivia generation
+                  </p>
+                  <Button
+                    onClick={handleSignIn}
+                    disabled={isSigningIn}
+                    className="w-full"
+                    size="lg"
+                  >
+                    {isSigningIn ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Connecting...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Sign In with Echo
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+
               {/* Error Display */}
               {error && (
                 <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
@@ -121,7 +166,7 @@ function PracticeContent() {
                 <Label htmlFor="category" className="text-base font-semibold">
                   Category
                 </Label>
-                <Select value={category} onValueChange={(value) => setCategory(value as Category)}>
+                <Select value={category} onValueChange={(value) => setCategory(value as Category)} disabled={!user}>
                   <SelectTrigger id="category" className="w-full">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
@@ -140,7 +185,7 @@ function PracticeContent() {
                 <Label htmlFor="numQuestions" className="text-base font-semibold">
                   Number of Questions
                 </Label>
-                <Select value={numQuestions.toString()} onValueChange={(value) => setNumQuestions(parseInt(value))}>
+                <Select value={numQuestions.toString()} onValueChange={(value) => setNumQuestions(parseInt(value))} disabled={!user}>
                   <SelectTrigger id="numQuestions" className="w-full">
                     <SelectValue />
                   </SelectTrigger>
@@ -156,7 +201,7 @@ function PracticeContent() {
                 <Label htmlFor="difficulty" className="text-base font-semibold">
                   Difficulty
                 </Label>
-                <Select value={difficulty} onValueChange={(value) => setDifficulty(value as Difficulty | "mixed")}>
+                <Select value={difficulty} onValueChange={(value) => setDifficulty(value as Difficulty | "mixed")} disabled={!user}>
                   <SelectTrigger id="difficulty" className="w-full">
                     <SelectValue />
                   </SelectTrigger>
@@ -174,7 +219,7 @@ function PracticeContent() {
                 <Label htmlFor="questionType" className="text-base font-semibold">
                   Question Type
                 </Label>
-                <Select value={questionType} onValueChange={(value) => setQuestionType(value as QuestionType | "mixed")}>
+                <Select value={questionType} onValueChange={(value) => setQuestionType(value as QuestionType | "mixed")} disabled={!user}>
                   <SelectTrigger id="questionType" className="w-full">
                     <SelectValue />
                   </SelectTrigger>
@@ -201,16 +246,21 @@ function PracticeContent() {
               </div>
 
               {/* Start Button */}
-              <Button 
-                onClick={handleStartPractice} 
-                size="lg" 
+              <Button
+                onClick={handleStartPractice}
+                size="lg"
                 className="w-full"
-                disabled={generating}
+                disabled={generating || !user}
               >
                 {generating ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating Your Practice Quiz...
+                  </>
+                ) : !user ? (
+                  <>
+                    <Lock className="mr-2 h-4 w-4" />
+                    Sign In to Start
                   </>
                 ) : (
                   <>

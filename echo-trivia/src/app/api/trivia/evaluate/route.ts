@@ -1,10 +1,9 @@
 // Evaluate trivia answer
 
-import { isSignedIn, openai } from "@/echo";
+import { openai } from "@/echo";
 import { generateText } from "ai";
 import { EvaluateRequestSchema, EvaluateResponseSchema } from "@/lib/schemas";
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
 const FUZZY_EVAL_SYSTEM_PROMPT = `You are grading a short answer for trivia.
 Decide if the user response is an acceptable alias or equivalent of the canonical answer.
@@ -14,17 +13,6 @@ Be generous with synonyms, common abbreviations, and minor spelling variations.`
 
 export async function POST(req: Request) {
   try {
-    // Check authentication
-    const cookieStore = await cookies();
-    const signedIn = await isSignedIn({ cookies: cookieStore });
-    
-    if (!signedIn) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
     const body = await req.json();
     const { question, response } = EvaluateRequestSchema.parse(body);
 
@@ -52,7 +40,7 @@ export async function POST(req: Request) {
       } else {
         // Use LLM for fuzzy matching
         const evalResult = await generateText({
-          model: openai("gpt-4o", { cookies: cookieStore }),
+          model: openai("gpt-4o", { request: req }),
           system: FUZZY_EVAL_SYSTEM_PROMPT,
           prompt: `Question: ${question.prompt}\nCanonical Answer: ${question.answer}\nUser Response: ${response}\n\nIs the user response acceptable?`,
           temperature: 0.3,

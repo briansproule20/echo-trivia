@@ -36,11 +36,11 @@ export default function HomePage() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <Card className="hover:shadow-lg transition-all cursor-pointer group" onClick={() => router.push("/daily")}>
-            <CardHeader>
+          <Card className="hover:shadow-lg transition-all cursor-pointer group flex flex-col h-full" onClick={() => router.push("/daily")}>
+            <CardHeader className="flex-1">
               <Calendar className="h-12 w-12 text-primary mb-4 group-hover:scale-110 transition-transform" />
               <CardTitle>Daily Quiz</CardTitle>
-              <CardDescription>
+              <CardDescription className="line-clamp-2">
                 One curated quiz per day - test yourself with today's challenge
               </CardDescription>
             </CardHeader>
@@ -51,11 +51,11 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-all cursor-pointer group" onClick={() => router.push("/practice")}>
-            <CardHeader>
+          <Card className="hover:shadow-lg transition-all cursor-pointer group flex flex-col h-full" onClick={() => router.push("/practice")}>
+            <CardHeader className="flex-1">
               <PlayCircle className="h-12 w-12 text-primary mb-4 group-hover:scale-110 transition-transform" />
               <CardTitle>Practice Mode</CardTitle>
-              <CardDescription>
+              <CardDescription className="line-clamp-2">
                 Choose category, difficulty, and style - play instantly
               </CardDescription>
             </CardHeader>
@@ -66,11 +66,11 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-all cursor-pointer group" onClick={() => router.push("/builder")}>
-            <CardHeader>
+          <Card className="hover:shadow-lg transition-all cursor-pointer group flex flex-col h-full" onClick={() => router.push("/builder")}>
+            <CardHeader className="flex-1">
               <Wand2 className="h-12 w-12 text-primary mb-4 group-hover:scale-110 transition-transform" />
               <CardTitle>Quiz Builder</CardTitle>
-              <CardDescription>
+              <CardDescription className="line-clamp-2">
                 Create custom quizzes manually or with AI assistance
               </CardDescription>
             </CardHeader>
@@ -90,37 +90,36 @@ export default function HomePage() {
               {recentSessions.map((session) => {
                 const score = session.submissions.filter((s) => s.correct).length;
                 const percentage = Math.round((score / session.quiz.questions.length) * 100);
+                const timeElapsed = session.endedAt && session.startedAt
+                  ? Math.round((new Date(session.endedAt).getTime() - new Date(session.startedAt).getTime()) / 1000)
+                  : 0;
                 
                 return (
-                  <Card key={session.id} className="hover:shadow-lg transition-shadow">
+                  <Card key={session.id} className="hover:shadow-lg transition-shadow flex flex-col h-full">
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <CardTitle className="text-lg">{session.quiz.title}</CardTitle>
-                          <CardDescription>{session.quiz.category}</CardDescription>
+                          <CardTitle className="text-lg line-clamp-1">{session.quiz.title}</CardTitle>
+                          <CardDescription className="line-clamp-1">{session.quiz.category}</CardDescription>
                         </div>
-                        <Badge variant={percentage >= 70 ? "default" : "secondary"}>
+                        <Badge variant={percentage >= 70 ? "default" : "secondary"} className="ml-2">
                           {percentage}%
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-3">
+                    <CardContent className="space-y-3 flex-1 flex flex-col">
                       <div className="flex items-center text-sm text-muted-foreground">
-                        <Trophy className="mr-2 h-4 w-4" />
+                        <Trophy className="mr-2 h-4 w-4 flex-shrink-0" />
                         {score} / {session.quiz.questions.length} correct
                       </div>
-                      {session.endedAt && session.startedAt && (
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Clock className="mr-2 h-4 w-4" />
-                          {Math.round(
-                            (new Date(session.endedAt).getTime() - new Date(session.startedAt).getTime()) / 1000
-                          )}s
-                        </div>
-                      )}
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Clock className="mr-2 h-4 w-4 flex-shrink-0" />
+                        {timeElapsed}s
+                      </div>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full"
+                        className="w-full mt-auto"
                         onClick={() => router.push(`/results/${session.id}`)}
                       >
                         View Results

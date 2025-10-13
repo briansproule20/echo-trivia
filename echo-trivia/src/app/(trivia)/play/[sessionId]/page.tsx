@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { QuestionCard } from "@/components/trivia/QuestionCard";
-import { ProgressBar } from "@/components/trivia/ProgressBar";
 import { Timer } from "@/components/trivia/Timer";
 import { usePlayStore } from "@/lib/store";
 import { storage } from "@/lib/storage";
@@ -155,32 +154,25 @@ export default function PlayPage() {
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Top Bar */}
-          <div className="flex items-center justify-between">
-            <ProgressBar
-              current={currentQuestionIndex + 1}
-              total={currentSession.quiz.questions.length}
-            />
+          <div className="flex items-center justify-end space-x-3">
+            {/* Timer for speedrun */}
+            {currentSession.quiz.questions.some(() => false) && !currentSubmission && (
+              <Timer
+                seconds={timePerQuestion}
+                onExpire={handleTimeExpire}
+                isPaused={isPaused}
+              />
+            )}
             
-            <div className="flex items-center space-x-3">
-              {/* Timer for speedrun */}
-              {currentSession.quiz.questions.some(() => false) && !currentSubmission && (
-                <Timer
-                  seconds={timePerQuestion}
-                  onExpire={handleTimeExpire}
-                  isPaused={isPaused}
-                />
-              )}
-              
-              {/* Pause button */}
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={togglePause}
-                className="h-10 w-10"
-              >
-                {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-              </Button>
-            </div>
+            {/* Pause button */}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={togglePause}
+              className="h-10 w-10"
+            >
+              {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+            </Button>
           </div>
 
           {/* Question Card */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +32,12 @@ export function QuestionCard({
 }: QuestionCardProps) {
   const [selectedChoice, setSelectedChoice] = useState<string>("");
   const [shortAnswer, setShortAnswer] = useState("");
+
+  // Reset state when question changes
+  useEffect(() => {
+    setSelectedChoice("");
+    setShortAnswer("");
+  }, [question.id]);
 
   const handleSubmit = () => {
     if (question.type === "short_answer") {

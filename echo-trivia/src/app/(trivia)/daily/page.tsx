@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, RefreshCw, Sparkles } from "lucide-react";
+import { RefreshCw, Sparkles } from "lucide-react";
 import { storage } from "@/lib/storage";
 import { getTodayString, generateId } from "@/lib/quiz-utils";
 import { usePlayStore } from "@/lib/store";
@@ -164,20 +164,9 @@ export default function DailyQuizPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="space-y-3">
-                  <Button onClick={handleStartQuiz} size="lg" className="w-full">
-                    Start Today's Quiz
-                  </Button>
-                  <Button
-                    onClick={() => loadDailyQuiz(true)}
-                    variant="outline"
-                    size="lg"
-                    className="w-full"
-                  >
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Generate New Quiz
-                  </Button>
-                </div>
+                <Button onClick={handleStartQuiz} size="lg" className="w-full">
+                  Start Today's Quiz
+                </Button>
               </CardContent>
             </Card>
           )}

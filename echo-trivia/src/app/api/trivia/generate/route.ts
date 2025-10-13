@@ -1,0 +1,131 @@
+// Generate trivia questions using Echo LLM
+
+import { openai } from "@/echo";
+import { generateText } from "ai";
+import { PlaySettingsSchema, QuizSchema } from "@/lib/schemas";
+import { generateId, shuffleChoices } from "@/lib/quiz-utils";
+import { NextResponse } from "next/server";
+
+const GENERATION_SYSTEM_PROMPT = `You are a professional trivia author. Produce high-quality, factual, diverse questions.
+
+Rules:
+- Adhere strictly to the JSON schema provided.
+- Categories: History, Science, Literature, Film & TV, Sports, Geography, Arts, Technology, General Knowledge, or custom.
+- Question types: multiple_choice | true_false | short_answer.
+- Difficulty: easy | medium | hard. Mix when requested.
+- Multiple choice must have 3-5 total options, exactly one correct.
+- Include a concise explanation for each question (1-2 sentences), unless trivially obvious.
+- Avoid ambiguous or opinion-based items. No spoilers for very recent media without warning.
+- Prefer global representation (countries/authors/eras).
+- Use clear phrasing; avoid double negatives.
+- For multiple choice, the "answer" field should be the choice ID (A, B, C, D, etc).
+- For true/false, the "answer" field should be "true" or "false".
+- For short answer, the "answer" field should be the expected text answer.
+
+Output: valid JSON ONLY matching the schema.`;
+
+const SCHEMA_TEMPLATE = `{
+  "title": "string",
+  "description": "string",
+  "category": "string",
+  "questions": [
+    {
+      "id": "string (generate unique IDs)",
+      "type": "multiple_choice | true_false | short_answer",
+      "difficulty": "easy | medium | hard",
+      "category": "string",
+      "prompt": "string",
+      "choices": [{"id":"A","text":"..."},{"id":"B","text":"..."}],
+      "answer": "string (choice id for MCQ, 'true'/'false' for T/F, text for short answer)",
+      "explanation": "string"
+    }
+  ]
+}`;
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const settings = PlaySettingsSchema.parse(body.settings);
+
+    // Build generation prompt
+    const typeInstruction =
+      settings.type === "mixed"
+        ? "Mix of multiple choice, true/false, and short answer questions"
+        : settings.type === "multiple_choice"
+        ? "All questions should be multiple choice with 3-5 options"
+        : settings.type === "true_false"
+        ? "All questions should be true/false"
+        : "All questions should be short answer";
+
+    const difficultyInstruction =
+      settings.difficulty === "mixed"
+        ? "Mix of easy, medium, and hard difficulty"
+        : `All questions should be ${settings.difficulty} difficulty`;
+
+    const prompt = `Generate ${settings.numQuestions} trivia questions about ${settings.category}.
+
+${typeInstruction}.
+${difficultyInstruction}.
+
+Return ONLY valid JSON matching this schema:
+${SCHEMA_TEMPLATE}
+
+Make the quiz engaging and educational. Ensure all questions are factually accurate.`;
+
+    // Generate with Echo LLM
+    const result = await generateText({
+      model: openai("gpt-4o"),
+      system: GENERATION_SYSTEM_PROMPT,
+      prompt,
+      temperature: 0.8,
+    });
+
+    // Parse and validate response
+    let quiz;
+    try {
+      const jsonMatch = result.text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error("No JSON found in response");
+      }
+      const parsed = JSON.parse(jsonMatch[0]);
+      quiz = QuizSchema.parse({
+        ...parsed,
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      // Try to repair JSON with LLM
+      console.error("JSON parsing failed, attempting repair:", error);
+      
+      const repairResult = await generateText({
+        model: openai("gpt-4o"),
+        system: "You fix invalid JSON to match a schema. Return ONLY the corrected JSON.",
+        prompt: `Fix this JSON to match the schema:\n\nInvalid JSON:\n${result.text}\n\nRequired Schema:\n${SCHEMA_TEMPLATE}`,
+      });
+
+      const repairedJson = repairResult.text.match(/\{[\s\S]*\}/)?.[0];
+      if (!repairedJson) {
+        throw new Error("Failed to repair JSON");
+      }
+      
+      const parsed = JSON.parse(repairedJson);
+      quiz = QuizSchema.parse({
+        ...parsed,
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+      });
+    }
+
+    // Shuffle MCQ choices deterministically
+    quiz.questions = quiz.questions.map((q) => shuffleChoices(q));
+
+    return NextResponse.json(quiz);
+  } catch (error) {
+    console.error("Generate error:", error);
+    return NextResponse.json(
+      { error: "Failed to generate quiz", details: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 }
+    );
+  }
+}
+

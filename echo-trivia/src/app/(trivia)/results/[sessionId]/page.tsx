@@ -44,18 +44,37 @@ export default function ResultsPage() {
 
   const handleShare = async () => {
     const percentage = Math.round((score / session.quiz.questions.length) * 100);
-    const text = `I scored ${percentage}% on "${session.quiz.title}" in Trivia Wizard!`;
+    
+    // Generate emoji grid showing correct/incorrect answers
+    const emojiGrid = session.quiz.questions
+      .map((q, idx) => {
+        const submission = session.submissions.find(s => s.questionId === q.id);
+        return submission?.correct ? "🟢" : "🔴";
+      })
+      .join("");
+    
+    const text = `${session.quiz.title}
+${emojiGrid}
+${score}/${session.quiz.questions.length} (${percentage}%)
+
+Play me on https://trivia-wizard-omega.vercel.app`;
     
     if (navigator.share) {
       try {
         await navigator.share({ text });
       } catch (err) {
-        // Fallback to clipboard
-        navigator.clipboard.writeText(text);
-        alert("Copied to clipboard!");
+        console.error("Share failed:", err);
       }
     } else {
-      navigator.clipboard.writeText(text);
+      // Create a temporary textarea to copy
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
       alert("Copied to clipboard!");
     }
   };

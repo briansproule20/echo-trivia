@@ -12,13 +12,10 @@ export function ProgressBar({ current, total, showLabel = true }: ProgressBarPro
   const percentage = (current / total) * 100;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 flex-1 max-w-md">
       {showLabel && (
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>Progress</span>
-          <span>
-            {current} / {total}
-          </span>
+        <div className="text-sm font-medium text-muted-foreground text-center">
+          {current} / {total}
         </div>
       )}
       <Progress value={percentage} className="h-2" />

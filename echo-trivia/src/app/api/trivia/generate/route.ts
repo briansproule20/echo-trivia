@@ -1,10 +1,11 @@
 // Generate trivia questions using Echo LLM
 
-import { openai } from "@/echo";
+import { isSignedIn, openai } from "@/echo";
 import { generateText } from "ai";
 import { PlaySettingsSchema, QuizSchema } from "@/lib/schemas";
 import { generateId, shuffleChoices } from "@/lib/quiz-utils";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 const GENERATION_SYSTEM_PROMPT = `You are a professional trivia author. Produce high-quality, factual, diverse questions.
 
@@ -44,6 +45,17 @@ const SCHEMA_TEMPLATE = `{
 
 export async function POST(req: Request) {
   try {
+    // Check authentication
+    const cookieStore = await cookies();
+    const signedIn = await isSignedIn({ cookies: cookieStore });
+    
+    if (!signedIn) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
     const settings = PlaySettingsSchema.parse(body.settings);
 
@@ -74,7 +86,7 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
 
     // Generate with Echo LLM
     const result = await generateText({
-      model: openai("gpt-4o"),
+      model: openai("gpt-4o", { cookies: cookieStore }),
       system: GENERATION_SYSTEM_PROMPT,
       prompt,
       temperature: 0.8,
@@ -98,7 +110,7 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
       console.error("JSON parsing failed, attempting repair:", error);
       
       const repairResult = await generateText({
-        model: openai("gpt-4o"),
+        model: openai("gpt-4o", { cookies: cookieStore }),
         system: "You fix invalid JSON to match a schema. Return ONLY the corrected JSON.",
         prompt: `Fix this JSON to match the schema:\n\nInvalid JSON:\n${result.text}\n\nRequired Schema:\n${SCHEMA_TEMPLATE}`,
       });

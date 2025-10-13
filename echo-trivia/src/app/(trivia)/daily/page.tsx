@@ -5,69 +5,102 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RefreshCw, Sparkles } from "lucide-react";
+import { Sparkles, Loader2 } from "lucide-react";
 import { storage } from "@/lib/storage";
 import { getTodayString, generateId } from "@/lib/quiz-utils";
 import { usePlayStore } from "@/lib/store";
 import type { Quiz, Session } from "@/lib/types";
 
+interface DailyChallenge {
+  date: string;
+  category: string;
+  title: string;
+  description: string;
+  numQuestions: number;
+  difficulty: string;
+  type: string;
+}
+
 export default function DailyQuizPage() {
   const router = useRouter();
-  const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [challenge, setChallenge] = useState<DailyChallenge | null>(null);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setSession } = usePlayStore();
 
-  const loadDailyQuiz = async (forceNew = false) => {
+  const loadDailyChallenge = async () => {
     setLoading(true);
     setError(null);
 
     try {
       const today = getTodayString();
-
-      // Check cache if not forcing new
-      if (!forceNew) {
-        const cached = await storage.getDailyQuiz(today);
-        if (cached) {
-          setQuiz(cached);
-          setLoading(false);
-          return;
-        }
-      }
-
-      // Fetch from API
       const response = await fetch(`/api/trivia/daily?date=${today}`);
       if (!response.ok) {
-        throw new Error("Failed to load daily quiz");
+        throw new Error("Failed to load daily challenge");
       }
 
-      const dailyQuiz = await response.json();
-      setQuiz(dailyQuiz);
-      await storage.saveDailyQuiz(today, dailyQuiz);
+      const dailyChallenge = await response.json();
+      setChallenge(dailyChallenge);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load daily quiz");
+      setError(err instanceof Error ? err.message : "Failed to load daily challenge");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadDailyQuiz();
+    loadDailyChallenge();
   }, []);
 
   const handleStartQuiz = async () => {
-    if (!quiz) return;
+    if (!challenge || generating) return;
 
-    const session: Session = {
-      id: generateId(),
-      quiz,
-      startedAt: new Date().toISOString(),
-      submissions: [],
-    };
+    setGenerating(true);
+    setError(null);
 
-    setSession(session);
-    await storage.saveSession(session);
-    router.push(`/play/${session.id}`);
+    try {
+      // Generate quiz based on daily challenge (this charges the user)
+      const response = await fetch("/api/trivia/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          settings: {
+            category: challenge.category,
+            numQuestions: challenge.numQuestions,
+            difficulty: challenge.difficulty,
+            type: challenge.type,
+            style: "classic",
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate quiz");
+      }
+
+      const quiz: Quiz = await response.json();
+      
+      // Mark as daily quiz
+      quiz.title = challenge.title;
+      quiz.description = challenge.description;
+      quiz.seeded = true;
+
+      const session: Session = {
+        id: generateId(),
+        quiz,
+        startedAt: new Date().toISOString(),
+        submissions: [],
+      };
+
+      setSession(session);
+      await storage.saveSession(session);
+      router.push(`/play/${session.id}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to generate quiz. Please try again.");
+      setGenerating(false);
+    }
   };
 
   const getTimeUntilTomorrow = () => {
@@ -94,11 +127,11 @@ export default function DailyQuizPage() {
                 className="h-12 w-12 object-contain"
               />
               <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                Daily Quiz
+                Daily Challenge
               </h1>
             </div>
             <p className="text-xl text-muted-foreground">
-              {getTodayString()} - One quiz per day
+              {getTodayString()} - One challenge per day, infinite attempts
             </p>
           </div>
 
@@ -117,55 +150,66 @@ export default function DailyQuizPage() {
           )}
 
           {/* Error State */}
-          {error && (
+          {error && !generating && (
             <Card className="border-destructive">
               <CardHeader>
-                <CardTitle className="text-destructive">Error Loading Quiz</CardTitle>
+                <CardTitle className="text-destructive">Error</CardTitle>
                 <CardDescription>{error}</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button onClick={() => loadDailyQuiz()} className="w-full">
-                  <RefreshCw className="mr-2 h-4 w-4" />
+                <Button onClick={loadDailyChallenge} className="w-full">
                   Try Again
                 </Button>
               </CardContent>
             </Card>
           )}
 
-          {/* Quiz Card */}
-          {quiz && !loading && (
+          {/* Challenge Card */}
+          {challenge && !loading && (
             <Card className="shadow-xl">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="space-y-2 flex-1">
-                    <CardTitle className="text-3xl">{quiz.title}</CardTitle>
-                    <CardDescription className="text-base">{quiz.description}</CardDescription>
+                    <CardTitle className="text-3xl">{challenge.title}</CardTitle>
+                    <CardDescription className="text-base">{challenge.description}</CardDescription>
                   </div>
                   <Sparkles className="h-8 w-8 text-primary" />
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Quiz Info */}
+                {/* Challenge Info */}
                 <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
                   <div>
                     <div className="text-sm text-muted-foreground">Category</div>
-                    <div className="font-semibold">{quiz.category}</div>
+                    <div className="font-semibold">{challenge.category}</div>
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground">Questions</div>
-                    <div className="font-semibold">{quiz.questions.length}</div>
+                    <div className="font-semibold">{challenge.numQuestions}</div>
                   </div>
                 </div>
 
                 {/* Countdown */}
-                <div className="text-center p-4 border rounded-lg bg-primary/5">
-                  <div className="text-sm text-muted-foreground mb-1">Next quiz in</div>
+                <div className="text-center p-4 border rounded-lg bg-muted/50">
+                  <div className="text-sm text-muted-foreground mb-1">Next challenge in</div>
                   <div className="text-2xl font-bold text-primary">{getTimeUntilTomorrow()}</div>
                 </div>
 
-                {/* Actions */}
-                <Button onClick={handleStartQuiz} size="lg" className="w-full">
-                  Start Today's Quiz
+                {/* Start Button */}
+                <Button 
+                  onClick={handleStartQuiz} 
+                  size="lg" 
+                  className="w-full"
+                  disabled={generating}
+                >
+                  {generating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating Your Quiz...
+                    </>
+                  ) : (
+                    "Start Challenge"
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -175,4 +219,3 @@ export default function DailyQuizPage() {
     </div>
   );
 }
-

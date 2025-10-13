@@ -1,63 +1,14 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { BuilderForm } from "@/components/trivia/BuilderForm";
-import { useBuilderStore, usePlayStore } from "@/lib/store";
-import { generateId } from "@/lib/quiz-utils";
-import { storage } from "@/lib/storage";
-import type { Session } from "@/lib/types";
+import { Suspense } from "react";
+import { useRouter } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Lock, ArrowLeft } from "lucide-react";
 
 function PracticeContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { settings, setSettings } = useBuilderStore();
-  const { setSession } = usePlayStore();
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  useEffect(() => {
-    // Pre-fill category from URL if provided
-    const category = searchParams.get("category");
-    if (category) {
-      setSettings({ ...settings, category });
-    }
-  }, [searchParams]);
-
-  const handleGenerate = async () => {
-    setIsGenerating(true);
-
-    try {
-      const response = await fetch("/api/trivia/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ settings }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to generate quiz");
-      }
-
-      const quiz = await response.json();
-
-      // Create session
-      const session: Session = {
-        id: generateId(),
-        quiz,
-        startedAt: new Date().toISOString(),
-        submissions: [],
-      };
-
-      setSession(session);
-      await storage.saveSession(session);
-      router.push(`/play/${session.id}`);
-    } catch (error) {
-      console.error("Generation error:", error);
-      alert("Failed to generate quiz. Please try again.");
-    } finally {
-      setIsGenerating(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -80,13 +31,26 @@ function PracticeContent() {
             </p>
           </div>
 
-          {/* Form */}
-          <BuilderForm
-            settings={settings}
-            onChange={setSettings}
-            onGenerate={handleGenerate}
-            isGenerating={isGenerating}
-          />
+          {/* Locked State */}
+          <Card className="border-2 border-dashed">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <div className="rounded-full bg-muted p-6">
+                  <Lock className="h-12 w-12 text-muted-foreground" />
+                </div>
+              </div>
+              <CardTitle className="text-2xl">Coming Soon</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center space-y-6">
+              <p className="text-muted-foreground">
+                Practice Mode is currently under development. Try the Daily Quiz to get started with Trivia Wizard!
+              </p>
+              <Button onClick={() => router.push("/daily")} size="lg" className="w-full">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Go to Daily Quiz
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

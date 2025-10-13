@@ -1,19 +1,83 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Lock, ArrowLeft } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles, Loader2, Zap } from "lucide-react";
+import { CATEGORIES, type Category, type Difficulty, type QuestionType, type Quiz, type Session } from "@/lib/types";
+import { usePlayStore } from "@/lib/store";
+import { storage } from "@/lib/storage";
+import { generateId } from "@/lib/quiz-utils";
 
 function PracticeContent() {
   const router = useRouter();
+  const { setSession } = usePlayStore();
+
+  // Form state
+  const [category, setCategory] = useState<Category>("General Knowledge");
+  const [numQuestions, setNumQuestions] = useState<number>(10);
+  const [difficulty, setDifficulty] = useState<Difficulty | "mixed">("mixed");
+  const [questionType, setQuestionType] = useState<QuestionType | "mixed">("mixed");
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleStartPractice = async () => {
+    if (generating) return;
+
+    setGenerating(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/trivia/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          settings: {
+            category,
+            numQuestions,
+            difficulty,
+            type: questionType,
+            style: "classic",
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate quiz");
+      }
+
+      const quiz: Quiz = await response.json();
+      
+      // Customize title/description
+      quiz.title = `${category} Practice`;
+      quiz.description = `${numQuestions} questions • ${difficulty === "mixed" ? "Mixed" : difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} difficulty`;
+
+      const session: Session = {
+        id: generateId(),
+        quiz,
+        startedAt: new Date().toISOString(),
+        submissions: [],
+      };
+
+      setSession(session);
+      await storage.saveSession(session);
+      router.push(`/play/${session.id}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to generate quiz. Please try again.");
+      setGenerating(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12 space-y-4">
             <div className="flex items-center justify-center space-x-3">
@@ -31,23 +95,133 @@ function PracticeContent() {
             </p>
           </div>
 
-          {/* Locked State */}
-          <Card className="border-2 border-dashed">
-            <CardHeader className="text-center">
-              <div className="flex justify-center mb-4">
-                <div className="rounded-full bg-muted p-6">
-                  <Lock className="h-12 w-12 text-muted-foreground" />
+          {/* Practice Configuration Card */}
+          <Card className="shadow-xl">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="space-y-2 flex-1">
+                  <CardTitle className="text-3xl">Configure Your Practice</CardTitle>
+                  <CardDescription className="text-base">
+                    Choose your category, difficulty, and question count
+                  </CardDescription>
+                </div>
+                <Zap className="h-8 w-8 text-primary" />
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Error Display */}
+              {error && (
+                <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <p className="text-sm text-destructive">{error}</p>
+                </div>
+              )}
+
+              {/* Category Selection */}
+              <div className="space-y-3">
+                <Label htmlFor="category" className="text-base font-semibold">
+                  Category
+                </Label>
+                <Select value={category} onValueChange={(value) => setCategory(value as Category)}>
+                  <SelectTrigger id="category" className="w-full">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Number of Questions */}
+              <div className="space-y-3">
+                <Label htmlFor="numQuestions" className="text-base font-semibold">
+                  Number of Questions
+                </Label>
+                <Select value={numQuestions.toString()} onValueChange={(value) => setNumQuestions(parseInt(value))}>
+                  <SelectTrigger id="numQuestions" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5 questions</SelectItem>
+                    <SelectItem value="10">10 questions</SelectItem>
+                    <SelectItem value="15">15 questions</SelectItem>
+                    <SelectItem value="20">20 questions</SelectItem>
+                    <SelectItem value="25">25 questions</SelectItem>
+                    <SelectItem value="30">30 questions</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Difficulty */}
+              <div className="space-y-3">
+                <Label htmlFor="difficulty" className="text-base font-semibold">
+                  Difficulty
+                </Label>
+                <Select value={difficulty} onValueChange={(value) => setDifficulty(value as Difficulty | "mixed")}>
+                  <SelectTrigger id="difficulty" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mixed">Mixed</SelectItem>
+                    <SelectItem value="easy">Easy</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="hard">Hard</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Question Type */}
+              <div className="space-y-3">
+                <Label htmlFor="questionType" className="text-base font-semibold">
+                  Question Type
+                </Label>
+                <Select value={questionType} onValueChange={(value) => setQuestionType(value as QuestionType | "mixed")}>
+                  <SelectTrigger id="questionType" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mixed">Mixed</SelectItem>
+                    <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
+                    <SelectItem value="true_false">True/False</SelectItem>
+                    <SelectItem value="short_answer">Short Answer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Summary */}
+              <div className="p-4 bg-muted rounded-lg space-y-3">
+                <div className="text-sm font-semibold text-muted-foreground">Practice Summary</div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="secondary">{category}</Badge>
+                  <Badge variant="secondary">{numQuestions} questions</Badge>
+                  <Badge variant="secondary">{difficulty === "mixed" ? "Mixed" : difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</Badge>
+                  <Badge variant="secondary">
+                    {questionType === "mixed" ? "Mixed types" : questionType === "multiple_choice" ? "Multiple Choice" : questionType === "true_false" ? "True/False" : "Short Answer"}
+                  </Badge>
                 </div>
               </div>
-              <CardTitle className="text-2xl">Coming Soon</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center space-y-6">
-              <p className="text-muted-foreground">
-                Practice Mode is currently under development. Try the Daily Quiz to get started with Trivia Wizard!
-              </p>
-              <Button onClick={() => router.push("/daily")} size="lg" className="w-full">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Go to Daily Quiz
+
+              {/* Start Button */}
+              <Button 
+                onClick={handleStartPractice} 
+                size="lg" 
+                className="w-full"
+                disabled={generating}
+              >
+                {generating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating Your Practice Quiz...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Start Practice
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>
@@ -62,9 +236,9 @@ export default function PracticePage() {
     <Suspense fallback={
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
         <div className="container mx-auto px-4 py-12">
-          <div className="max-w-2xl mx-auto space-y-4">
+          <div className="max-w-3xl mx-auto space-y-4">
             <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-96 w-full" />
           </div>
         </div>
       </div>

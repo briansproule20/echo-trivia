@@ -7,7 +7,7 @@ import { QuestionCard } from "@/components/trivia/QuestionCard";
 import { Timer } from "@/components/trivia/Timer";
 import { usePlayStore } from "@/lib/store";
 import { storage } from "@/lib/storage";
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Submission } from "@/lib/types";
 
 export default function PlayPage() {
@@ -153,27 +153,16 @@ export default function PlayPage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Top Bar */}
-          <div className="flex items-center justify-end space-x-3">
-            {/* Timer for speedrun */}
-            {currentSession.quiz.questions.some(() => false) && !currentSubmission && (
+          {/* Top Bar - Timer for speedrun mode only */}
+          {currentSession.quiz.questions.some(() => false) && !currentSubmission && (
+            <div className="flex items-center justify-end">
               <Timer
                 seconds={timePerQuestion}
                 onExpire={handleTimeExpire}
                 isPaused={isPaused}
               />
-            )}
-            
-            {/* Pause button */}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={togglePause}
-              className="h-10 w-10"
-            >
-              {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-            </Button>
-          </div>
+            </div>
+          )}
 
           {/* Question Card */}
           <QuestionCard

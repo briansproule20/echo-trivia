@@ -85,7 +85,12 @@ export default function HomePage() {
         {/* Recent Sessions */}
         {recentSessions.length > 0 && (
           <div>
-            <h2 className="text-3xl font-bold mb-6">Recent Sessions</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold">Recent Sessions</h2>
+              <Button variant="outline" onClick={() => router.push("/history")}>
+                View All
+              </Button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {recentSessions.map((session) => {
                 const score = session.submissions.filter((s) => s.correct).length;

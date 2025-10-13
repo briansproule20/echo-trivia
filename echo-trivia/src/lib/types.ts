@@ -65,6 +65,17 @@ export const CATEGORIES = [
   "Arts",
   "Technology",
   "General Knowledge",
+  "Music",
+  "Food & Drink",
+  "Nature & Animals",
+  "Mythology",
+  "Space & Astronomy",
+  "Video Games",
+  "Politics & Government",
+  "Business & Economics",
+  "Health & Medicine",
+  "Architecture",
+  "Fashion",
 ] as const;
 
 export type Category = typeof CATEGORIES[number];

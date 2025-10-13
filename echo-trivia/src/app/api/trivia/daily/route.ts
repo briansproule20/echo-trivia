@@ -19,7 +19,7 @@ export async function GET(req: Request) {
 
     // Mix of difficulties for daily
     const difficulty = "mixed";
-    const numQuestions = 10;
+    const numQuestions = 5;
 
     // Generate quiz using the generate endpoint
     const baseUrl = new URL(req.url).origin;

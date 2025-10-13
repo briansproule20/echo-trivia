@@ -18,7 +18,7 @@ An AI-powered trivia platform built with Next.js, Echo billing integration, and 
 - **Billing**: Echo metered LLM usage
 - **State**: Zustand
 - **Validation**: Zod
-- **Storage**: LocalStorage (with optional DB support)
+- **Storage**: IndexedDB (for sessions, quizzes, stats)
 
 ## Getting Started
 
@@ -65,7 +65,8 @@ src/
 │   ├── types.ts           # TypeScript types
 │   ├── schemas.ts         # Zod schemas
 │   ├── store.ts           # Zustand stores
-│   ├── storage.ts         # LocalStorage utilities
+│   ├── db.ts              # IndexedDB wrapper
+│   ├── storage.ts         # Storage API (exports from db.ts)
 │   └── quiz-utils.ts      # Quiz helpers
 └── echo/
     └── index.ts           # Echo SDK setup
@@ -124,6 +125,20 @@ The app uses Echo for:
 - AI provider integration (GPT-4o)
 
 All LLM calls go through Echo's metered API, ensuring transparent usage tracking.
+
+## Storage
+
+The app uses **IndexedDB** for client-side storage:
+- **Sessions**: Last 20 quiz sessions with full history
+- **Daily Quizzes**: Cached daily quizzes by date
+- **Favorites**: Saved favorite quizzes
+- **Stats**: Category performance tracking
+
+IndexedDB provides:
+- Better performance than localStorage
+- Larger storage capacity (50MB+)
+- Structured data storage
+- Async API for non-blocking operations
 
 ## Features to Implement (Optional)
 

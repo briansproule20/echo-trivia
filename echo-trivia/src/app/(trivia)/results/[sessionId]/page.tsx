@@ -18,12 +18,15 @@ export default function ResultsPage() {
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    const loadedSession = storage.getSession(sessionId);
-    if (loadedSession) {
-      setSession(loadedSession);
-    } else {
-      router.push("/");
-    }
+    const loadSession = async () => {
+      const loadedSession = await storage.getSession(sessionId);
+      if (loadedSession) {
+        setSession(loadedSession);
+      } else {
+        router.push("/");
+      }
+    };
+    loadSession();
   }, [sessionId]);
 
   if (!session) {

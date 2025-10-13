@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BuilderForm } from "@/components/trivia/BuilderForm";
 import { useBuilderStore, usePlayStore } from "@/lib/store";
 import { generateId } from "@/lib/quiz-utils";
 import { storage } from "@/lib/storage";
 import type { Session } from "@/lib/types";
-import { PlayCircle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function PracticePage() {
+function PracticeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { settings, setSettings } = useBuilderStore();
@@ -90,6 +90,23 @@ export default function PracticePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PracticePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-2xl mx-auto space-y-4">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-64 w-full" />
+          </div>
+        </div>
+      </div>
+    }>
+      <PracticeContent />
+    </Suspense>
   );
 }
 

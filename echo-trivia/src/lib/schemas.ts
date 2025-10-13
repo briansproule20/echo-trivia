@@ -20,7 +20,22 @@ export const QuestionSchema = z.object({
   choices: z.array(ChoiceSchema).optional(),
   answer: z.string(),
   explanation: z.string().optional(),
-});
+}).refine(
+  (data) => {
+    // If it's multiple choice, must have exactly 4 choices with IDs A, B, C, D
+    if (data.type === "multiple_choice") {
+      if (!data.choices || data.choices.length !== 4) {
+        return false;
+      }
+      const ids = data.choices.map(c => c.id).sort();
+      return ids.join('') === 'ABCD';
+    }
+    return true;
+  },
+  {
+    message: "Multiple choice questions must have exactly 4 choices with IDs A, B, C, D",
+  }
+);
 
 export const QuizSchema = z.object({
   id: z.string().optional(),

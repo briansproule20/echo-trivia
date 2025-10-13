@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, PlayCircle, Wand2, Trophy, Clock } from "lucide-react";
+import { Calendar, PlayCircle, Trophy, Clock } from "lucide-react";
 import { storage } from "@/lib/storage";
 import type { Session } from "@/lib/types";
 
@@ -35,7 +35,7 @@ export default function HomePage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 max-w-3xl mx-auto">
           <Card className="hover:shadow-lg transition-all cursor-pointer group flex flex-col h-full" onClick={() => router.push("/daily")}>
             <CardHeader className="flex-1">
               <Calendar className="h-12 w-12 text-primary mb-4 group-hover:scale-110 transition-transform" />
@@ -62,21 +62,6 @@ export default function HomePage() {
             <CardContent>
               <Button className="w-full" variant="outline">
                 Start Practicing
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-all cursor-pointer group flex flex-col h-full" onClick={() => router.push("/builder")}>
-            <CardHeader className="flex-1">
-              <Wand2 className="h-12 w-12 text-primary mb-4 group-hover:scale-110 transition-transform" />
-              <CardTitle>Quiz Builder</CardTitle>
-              <CardDescription className="line-clamp-2">
-                Create custom quizzes manually or with AI assistance
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full" variant="outline">
-                Build a Quiz
               </Button>
             </CardContent>
           </Card>

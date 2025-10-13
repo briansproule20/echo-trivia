@@ -26,12 +26,20 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto px-4 py-12">
         {/* Hero Section */}
-        <div className="text-center mb-12 space-y-4">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Welcome to Trivia Wizard
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Test knowledge, challenge yourself, and learn something new every day
+        <div className="text-center mb-16 space-y-6">
+          <div className="space-y-3">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight">
+              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                Trivia Wizard
+              </span>
+            </h1>
+            <div className="h-px w-24 mx-auto bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+          </div>
+          <p className="text-lg sm:text-xl lg:text-2xl text-foreground/80 max-w-4xl mx-auto leading-relaxed">
+            Infinite trivia on any topic you can imagine
+          </p>
+          <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
+            Fully customized to match your preferences
           </p>
         </div>
 
@@ -40,9 +48,9 @@ export default function HomePage() {
           <Card className="hover:shadow-lg transition-all cursor-pointer group flex flex-col h-full" onClick={() => router.push("/daily")}>
             <CardHeader className="flex-1">
               <Calendar className="h-12 w-12 text-primary mb-4 group-hover:scale-110 transition-transform" />
-              <CardTitle>Daily Quiz</CardTitle>
+              <CardTitle className="text-xl">Daily Quiz</CardTitle>
               <CardDescription className="line-clamp-2">
-                One curated quiz per day - test yourself with today's challenge
+                One curated challenge every day
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -55,9 +63,9 @@ export default function HomePage() {
           <Card className="hover:shadow-lg transition-all cursor-pointer group flex flex-col h-full" onClick={() => router.push("/practice")}>
             <CardHeader className="flex-1">
               <PlayCircle className="h-12 w-12 text-primary mb-4 group-hover:scale-110 transition-transform" />
-              <CardTitle>Practice Mode</CardTitle>
+              <CardTitle className="text-xl">Practice Mode</CardTitle>
               <CardDescription className="line-clamp-2">
-                Choose category, difficulty, and style - play instantly
+                Unlimited quizzes on any topic you want
               </CardDescription>
             </CardHeader>
             <CardContent>

@@ -165,15 +165,17 @@ Play me on https://trivia-wizard-omega.vercel.app`;
           </Card>
 
           {/* Actions */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className={`grid grid-cols-1 ${session.quiz.seeded ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-4`}>
             <Button onClick={handleRetry} size="lg" variant="outline">
               <RotateCcw className="mr-2 h-4 w-4" />
               Practice Similar
             </Button>
-            <Button onClick={handleShare} size="lg" variant="outline">
-              <Share2 className="mr-2 h-4 w-4" />
-              Share Score
-            </Button>
+            {session.quiz.seeded && (
+              <Button onClick={handleShare} size="lg" variant="outline">
+                <Share2 className="mr-2 h-4 w-4" />
+                Share Score
+              </Button>
+            )}
             <Button onClick={() => router.push("/")} size="lg">
               <Home className="mr-2 h-4 w-4" />
               Home

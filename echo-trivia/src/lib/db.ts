@@ -103,11 +103,35 @@ class TriviaDB {
       request.onsuccess = () => {
         const sessions = request.result || [];
         // Sort by startedAt descending
-        sessions.sort((a, b) => 
+        sessions.sort((a, b) =>
           new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
         );
         resolve(sessions);
       };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async deleteSession(id: string): Promise<void> {
+    const db = await this.init();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([STORES.SESSIONS], "readwrite");
+      const store = transaction.objectStore(STORES.SESSIONS);
+      const request = store.delete(id);
+
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async deleteAllSessions(): Promise<void> {
+    const db = await this.init();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([STORES.SESSIONS], "readwrite");
+      const store = transaction.objectStore(STORES.SESSIONS);
+      const request = store.clear();
+
+      request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
   }
@@ -245,14 +269,16 @@ export const storage = {
   saveSession: (session: Session) => db.saveSession(session).catch(console.error),
   getSession: (id: string) => db.getSession(id).catch(() => null),
   getSessions: () => db.getSessions().catch(() => []),
-  
+  deleteSession: (id: string) => db.deleteSession(id).catch(console.error),
+  deleteAllSessions: () => db.deleteAllSessions().catch(console.error),
+
   saveDailyQuiz: (date: string, quiz: Quiz) => db.saveDailyQuiz(date, quiz).catch(console.error),
   getDailyQuiz: (date: string) => db.getDailyQuiz(date).catch(() => null),
-  
+
   saveFavoriteQuiz: (quiz: Quiz) => db.saveFavoriteQuiz(quiz).catch(console.error),
   getFavoriteQuizzes: () => db.getFavoriteQuizzes().catch(() => []),
   removeFavoriteQuiz: (id: string) => db.removeFavoriteQuiz(id).catch(console.error),
-  
+
   trackCategoryPerformance: (category: string, correct: number, total: number) =>
     db.trackCategoryPerformance(category, correct, total).catch(console.error),
   getCategoryStats: () => db.getCategoryStats().catch(() => ({})),

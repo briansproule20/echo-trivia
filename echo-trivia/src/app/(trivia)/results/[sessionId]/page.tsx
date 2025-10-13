@@ -39,7 +39,34 @@ export default function ResultsPage() {
     : undefined;
 
   const handleRetry = () => {
-    router.push(`/practice?category=${encodeURIComponent(session.quiz.category)}`);
+    // For daily quizzes, redirect to practice with the same category
+    if (session.quiz.seeded) {
+      router.push(`/practice?category=${encodeURIComponent(session.quiz.category)}`);
+      return;
+    }
+
+    // For practice quizzes, try to reconstruct the original settings
+    const numQuestions = session.quiz.questions.length;
+
+    // Infer difficulty from questions
+    const difficulties = session.quiz.questions.map(q => q.difficulty);
+    const uniqueDifficulties = [...new Set(difficulties)];
+    const difficulty = uniqueDifficulties.length > 1 ? "mixed" : difficulties[0];
+
+    // Infer question type from questions
+    const types = session.quiz.questions.map(q => q.type);
+    const uniqueTypes = [...new Set(types)];
+    const type = uniqueTypes.length > 1 ? "mixed" : types[0];
+
+    // Build URL with all settings
+    const params = new URLSearchParams({
+      category: session.quiz.category,
+      numQuestions: numQuestions.toString(),
+      difficulty,
+      type,
+    });
+
+    router.push(`/practice?${params.toString()}`);
   };
 
   const handleShare = async () => {

@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,6 +18,7 @@ import { useEcho } from "@merit-systems/echo-react-sdk";
 
 function PracticeContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setSession } = usePlayStore();
   const { user, signIn, isLoading: echoLoading } = useEcho();
 
@@ -30,6 +31,41 @@ function PracticeContent() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
+
+  // Load settings from URL parameters
+  useEffect(() => {
+    const urlCategory = searchParams.get("category");
+    const urlNumQuestions = searchParams.get("numQuestions");
+    const urlDifficulty = searchParams.get("difficulty");
+    const urlType = searchParams.get("type");
+
+    if (urlCategory) {
+      // Check if it's a preset category
+      const isPresetCategory = CATEGORIES.includes(urlCategory as Category);
+      if (isPresetCategory) {
+        setCategory(urlCategory as Category);
+      } else {
+        // It's a custom category
+        setCategory("custom");
+        setCustomCategory(urlCategory);
+      }
+    }
+
+    if (urlNumQuestions) {
+      const num = parseInt(urlNumQuestions);
+      if (!isNaN(num)) {
+        setNumQuestions(num);
+      }
+    }
+
+    if (urlDifficulty) {
+      setDifficulty(urlDifficulty as Difficulty | "mixed");
+    }
+
+    if (urlType) {
+      setQuestionType(urlType as QuestionType | "mixed");
+    }
+  }, [searchParams]);
 
   const handleStartPractice = async () => {
     if (generating) return;
@@ -73,9 +109,10 @@ function PracticeContent() {
 
       const quiz: Quiz = await response.json();
 
-      // Customize title/description
+      // Customize title/description and ensure category is preserved
       quiz.title = `${finalCategory} Practice`;
       quiz.description = `${numQuestions} questions • ${difficulty === "mixed" ? "Mixed" : difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} difficulty`;
+      quiz.category = finalCategory; // Explicitly set the category to ensure custom categories are preserved
 
       const session: Session = {
         id: generateId(),

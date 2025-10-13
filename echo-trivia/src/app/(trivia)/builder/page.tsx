@@ -63,7 +63,7 @@ export default function BuilderPage() {
       };
 
       setSession(session);
-      storage.saveSession(session);
+      await storage.saveSession(session);
       router.push(`/play/${session.id}`);
     } catch (error) {
       console.error("Generation error:", error);
@@ -111,7 +111,7 @@ export default function BuilderPage() {
     });
   };
 
-  const handleStartManualQuiz = () => {
+  const handleStartManualQuiz = async () => {
     if (manualQuestions.length === 0) {
       alert("Please add at least one question");
       return;
@@ -133,7 +133,7 @@ export default function BuilderPage() {
     };
 
     setSession(session);
-    storage.saveSession(session);
+    await storage.saveSession(session);
     clearManualQuestions();
     router.push(`/play/${session.id}`);
   };

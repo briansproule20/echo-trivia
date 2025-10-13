@@ -24,14 +24,17 @@ export default function PlayPage() {
 
   useEffect(() => {
     // Load session from storage if not in state
-    if (!currentSession || currentSession.id !== sessionId) {
-      const session = storage.getSession(sessionId);
-      if (session) {
-        setSession(session);
-      } else {
-        router.push("/");
+    const loadSession = async () => {
+      if (!currentSession || currentSession.id !== sessionId) {
+        const session = await storage.getSession(sessionId);
+        if (session) {
+          setSession(session);
+        } else {
+          router.push("/");
+        }
       }
-    }
+    };
+    loadSession();
   }, [sessionId, currentSession]);
 
   useEffect(() => {
@@ -84,7 +87,7 @@ export default function PlayPage() {
         ...currentSession,
         submissions: [...currentSession.submissions, submission],
       };
-      storage.saveSession(updatedSession);
+      await storage.saveSession(updatedSession);
     } catch (error) {
       console.error("Evaluation error:", error);
       alert("Failed to evaluate answer. Please try again.");
@@ -112,18 +115,18 @@ export default function PlayPage() {
     }
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     endSession();
     const finalSession = {
       ...currentSession,
       endedAt: new Date().toISOString(),
       score: currentSession.submissions.filter((s) => s.correct).length,
     };
-    storage.saveSession(finalSession);
+    await storage.saveSession(finalSession);
     
     // Track category performance
     const correct = finalSession.submissions.filter((s) => s.correct).length;
-    storage.trackCategoryPerformance(finalSession.quiz.category, correct, finalSession.quiz.questions.length);
+    await storage.trackCategoryPerformance(finalSession.quiz.category, correct, finalSession.quiz.questions.length);
     
     router.push(`/results/${sessionId}`);
   };

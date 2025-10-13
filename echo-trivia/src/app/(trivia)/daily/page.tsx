@@ -27,7 +27,7 @@ export default function DailyQuizPage() {
 
       // Check cache if not forcing new
       if (!forceNew) {
-        const cached = storage.getDailyQuiz(today);
+        const cached = await storage.getDailyQuiz(today);
         if (cached) {
           setQuiz(cached);
           setLoading(false);
@@ -43,7 +43,7 @@ export default function DailyQuizPage() {
 
       const dailyQuiz = await response.json();
       setQuiz(dailyQuiz);
-      storage.saveDailyQuiz(today, dailyQuiz);
+      await storage.saveDailyQuiz(today, dailyQuiz);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load daily quiz");
     } finally {
@@ -55,7 +55,7 @@ export default function DailyQuizPage() {
     loadDailyQuiz();
   }, []);
 
-  const handleStartQuiz = () => {
+  const handleStartQuiz = async () => {
     if (!quiz) return;
 
     const session: Session = {
@@ -66,7 +66,7 @@ export default function DailyQuizPage() {
     };
 
     setSession(session);
-    storage.saveSession(session);
+    await storage.saveSession(session);
     router.push(`/play/${session.id}`);
   };
 

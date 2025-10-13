@@ -14,7 +14,11 @@ export default function HomePage() {
   const [recentSessions, setRecentSessions] = useState<Session[]>([]);
 
   useEffect(() => {
-    setRecentSessions(storage.getSessions().slice(0, 3));
+    const loadSessions = async () => {
+      const sessions = await storage.getSessions();
+      setRecentSessions(sessions.slice(0, 3));
+    };
+    loadSessions();
   }, []);
 
   return (

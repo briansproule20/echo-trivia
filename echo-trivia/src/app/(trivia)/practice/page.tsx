@@ -49,7 +49,7 @@ export default function PracticePage() {
       };
 
       setSession(session);
-      storage.saveSession(session);
+      await storage.saveSession(session);
       router.push(`/play/${session.id}`);
     } catch (error) {
       console.error("Generation error:", error);

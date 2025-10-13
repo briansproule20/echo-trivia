@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 import { EchoAccount } from "@/components/echo-account-next";
 import EchoBalance from "@/components/balance";
 import { useEcho } from "@merit-systems/echo-react-sdk";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
@@ -59,6 +60,12 @@ export function Navbar() {
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col space-y-6 mt-8">
+                  {/* Theme Toggle */}
+                  <div className="flex items-center justify-between px-3 py-2 border-b">
+                    <span className="text-sm font-medium">Theme</span>
+                    <ThemeToggle />
+                  </div>
+
                   {/* Navigation Links */}
                   <nav className="flex flex-col space-y-3">
                     {NAV_ITEMS.map((item) => (

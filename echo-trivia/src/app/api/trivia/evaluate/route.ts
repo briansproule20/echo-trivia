@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       } else {
         // Use LLM for fuzzy matching
         const evalResult = await generateText({
-          model: openai("gpt-4o", { request: req }),
+          model: openai("gpt-4o"),
           system: FUZZY_EVAL_SYSTEM_PROMPT,
           prompt: `Question: ${question.prompt}\nCanonical Answer: ${question.answer}\nUser Response: ${response}\n\nIs the user response acceptable?`,
           temperature: 0.3,

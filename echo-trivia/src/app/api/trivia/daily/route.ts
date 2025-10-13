@@ -2,11 +2,10 @@
 // Generates once per day at midnight EST, caches for all users
 
 import { NextResponse } from "next/server";
-import { getTodayString, getDailySeed, SeededRandom } from "@/lib/quiz-utils";
+import { getTodayString, getDailySeed, SeededRandom, generateId, shuffleChoices } from "@/lib/quiz-utils";
 import { CATEGORIES } from "@/lib/types";
 import { openai } from "@/echo";
 import { generateText } from "ai";
-import { generateId, shuffleChoices } from "@/lib/quiz-utils";
 
 const GENERATION_SYSTEM_PROMPT = `You are a professional trivia author. Produce high-quality, factual, diverse questions.
 
@@ -117,11 +116,13 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
     quiz.description = `${date} - A new challenge every day at midnight EST`;
 
     if (quiz.questions) {
-      quiz.questions = quiz.questions.map((q: any) => ({
-        ...q,
-        id: q.id || generateId(),
-        choices: q.choices ? shuffleChoices(q.choices, getDailySeed(date + q.prompt)) : undefined,
-      }));
+      quiz.questions = quiz.questions.map((q: any) => {
+        const question = {
+          ...q,
+          id: q.id || generateId(),
+        };
+        return shuffleChoices(question);
+      });
     }
 
     // Cache the generated quiz

@@ -72,9 +72,9 @@ ${SCHEMA_TEMPLATE}
 
 Make the quiz engaging and educational. Ensure all questions are factually accurate.`;
 
-    // Generate with Echo LLM - pass request context for auth
+    // Generate with Echo LLM
     const result = await generateText({
-      model: openai("gpt-4o", { request: req }),
+      model: openai("gpt-4o"),
       system: GENERATION_SYSTEM_PROMPT,
       prompt,
       temperature: 0.8,
@@ -98,7 +98,7 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
       console.error("JSON parsing failed, attempting repair:", error);
       
       const repairResult = await generateText({
-        model: openai("gpt-4o", { request: req }),
+        model: openai("gpt-4o"),
         system: "You fix invalid JSON to match a schema. Return ONLY the corrected JSON.",
         prompt: `Fix this JSON to match the schema:\n\nInvalid JSON:\n${result.text}\n\nRequired Schema:\n${SCHEMA_TEMPLATE}`,
       });

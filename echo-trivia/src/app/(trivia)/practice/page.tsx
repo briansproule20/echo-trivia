@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Sparkles, Loader2, Zap, Lock } from "lucide-react";
 import { CATEGORIES, type Category, type Difficulty, type QuestionType, type Quiz, type Session } from "@/lib/types";
 import { usePlayStore } from "@/lib/store";
@@ -21,7 +22,8 @@ function PracticeContent() {
   const { user, signIn, isLoading: echoLoading } = useEcho();
 
   // Form state
-  const [category, setCategory] = useState<Category>("General Knowledge");
+  const [category, setCategory] = useState<Category | "custom">("General Knowledge");
+  const [customCategory, setCustomCategory] = useState<string>("");
   const [numQuestions, setNumQuestions] = useState<number>(5);
   const [difficulty, setDifficulty] = useState<Difficulty | "mixed">("mixed");
   const [questionType, setQuestionType] = useState<QuestionType | "mixed">("mixed");
@@ -38,16 +40,24 @@ function PracticeContent() {
       return;
     }
 
+    // Validate custom category if selected
+    if (category === "custom" && !customCategory.trim()) {
+      setError("Please enter a custom category");
+      return;
+    }
+
     setGenerating(true);
     setError(null);
 
     try {
+      const finalCategory = category === "custom" ? customCategory.trim() : category;
+
       const response = await fetch("/api/trivia/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           settings: {
-            category,
+            category: finalCategory,
             numQuestions,
             difficulty,
             type: questionType,
@@ -64,7 +74,7 @@ function PracticeContent() {
       const quiz: Quiz = await response.json();
 
       // Customize title/description
-      quiz.title = `${category} Practice`;
+      quiz.title = `${finalCategory} Practice`;
       quiz.description = `${numQuestions} questions • ${difficulty === "mixed" ? "Mixed" : difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} difficulty`;
 
       const session: Session = {
@@ -94,16 +104,9 @@ function PracticeContent() {
         <div className="max-w-3xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12 space-y-4">
-            <div className="flex items-center justify-center space-x-3">
-              <img 
-                src="/trivia-wizard-logo.png" 
-                alt="Trivia Wizard" 
-                className="h-12 w-12 object-contain"
-              />
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                Practice Mode
-              </h1>
-            </div>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent leading-tight pb-1">
+              Practice Mode
+            </h1>
             <p className="text-xl text-muted-foreground">
               Customize and play instantly
             </p>
@@ -166,7 +169,7 @@ function PracticeContent() {
                 <Label htmlFor="category" className="text-base font-semibold">
                   Category
                 </Label>
-                <Select value={category} onValueChange={(value) => setCategory(value as Category)} disabled={!user}>
+                <Select value={category} onValueChange={(value) => setCategory(value as Category | "custom")} disabled={!user}>
                   <SelectTrigger id="category" className="w-full">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
@@ -176,9 +179,31 @@ function PracticeContent() {
                         {cat}
                       </SelectItem>
                     ))}
+                    <SelectItem value="custom">Custom Category...</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Custom Category Input */}
+              {category === "custom" && (
+                <div className="space-y-3">
+                  <Label htmlFor="customCategory" className="text-base font-semibold">
+                    Custom Category
+                  </Label>
+                  <Input
+                    id="customCategory"
+                    type="text"
+                    placeholder="e.g., Lord of the Rings, Star Wars, Marvel..."
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    disabled={!user}
+                    className="w-full"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter any topic you'd like to be quizzed on
+                  </p>
+                </div>
+              )}
 
               {/* Number of Questions */}
               <div className="space-y-3">
@@ -236,7 +261,9 @@ function PracticeContent() {
               <div className="p-4 bg-muted rounded-lg space-y-3">
                 <div className="text-sm font-semibold text-muted-foreground">Practice Summary</div>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">{category}</Badge>
+                  <Badge variant="secondary">
+                    {category === "custom" ? (customCategory || "Custom Category") : category}
+                  </Badge>
                   <Badge variant="secondary">{numQuestions} questions</Badge>
                   <Badge variant="secondary">{difficulty === "mixed" ? "Mixed" : difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</Badge>
                   <Badge variant="secondary">

@@ -13,12 +13,13 @@ Rules:
 - Categories: History, Science, Literature, Film & TV, Sports, Geography, Arts, Technology, General Knowledge, or custom.
 - Question types: multiple_choice | true_false | short_answer.
 - Difficulty: easy | medium | hard. Mix when requested.
-- Multiple choice must have 3-5 total options, exactly one correct.
+- Multiple choice MUST have exactly 4 options with IDs: A, B, C, D (in that order). Exactly one correct.
+- The choices array must contain exactly 4 objects in order: [{"id":"A","text":"..."}, {"id":"B","text":"..."}, {"id":"C","text":"..."}, {"id":"D","text":"..."}]
 - Include a concise explanation for each question (1-2 sentences), unless trivially obvious.
 - Avoid ambiguous or opinion-based items. No spoilers for very recent media without warning.
 - Prefer global representation (countries/authors/eras).
 - Use clear phrasing; avoid double negatives.
-- For multiple choice, the "answer" field should be the choice ID (A, B, C, D, etc).
+- For multiple choice, the "answer" field should be the choice ID (A, B, C, or D).
 - For true/false, the "answer" field should be "true" or "false".
 - For short answer, the "answer" field should be the expected text answer.
 
@@ -35,8 +36,8 @@ const SCHEMA_TEMPLATE = `{
       "difficulty": "easy | medium | hard",
       "category": "string",
       "prompt": "string",
-      "choices": [{"id":"A","text":"..."},{"id":"B","text":"..."}],
-      "answer": "string (choice id for MCQ, 'true'/'false' for T/F, text for short answer)",
+      "choices": [{"id":"A","text":"..."},{"id":"B","text":"..."},{"id":"C","text":"..."},{"id":"D","text":"..."}],
+      "answer": "string (A, B, C, or D for MCQ, 'true'/'false' for T/F, text for short answer)",
       "explanation": "string"
     }
   ]
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
       settings.type === "mixed"
         ? "Mix of multiple choice, true/false, and short answer questions"
         : settings.type === "multiple_choice"
-        ? "All questions should be multiple choice with 3-5 options"
+        ? "All questions should be multiple choice with EXACTLY 4 options (A, B, C, D)"
         : settings.type === "true_false"
         ? "All questions should be true/false"
         : "All questions should be short answer";
@@ -116,8 +117,24 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
       });
     }
 
-    // Shuffle MCQ choices deterministically
-    quiz.questions = quiz.questions.map((q) => shuffleChoices(q));
+    // Ensure choices are in A, B, C, D order and normalize format
+    quiz.questions = quiz.questions.map((q) => {
+      if (q.type === "multiple_choice" && q.choices) {
+        // Sort choices by ID to ensure A, B, C, D order
+        const sortedChoices = [...q.choices].sort((a, b) => a.id.localeCompare(b.id));
+
+        // If we don't have exactly 4 choices, something went wrong
+        if (sortedChoices.length !== 4) {
+          console.warn(`Question ${q.id} has ${sortedChoices.length} choices, expected 4`);
+        }
+
+        return {
+          ...q,
+          choices: sortedChoices,
+        };
+      }
+      return q;
+    });
 
     return NextResponse.json(quiz);
   } catch (error) {

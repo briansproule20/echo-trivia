@@ -1,5 +1,6 @@
 ## Trivia Wizard
-Test your wits. Bend the algorithm.
+
+Infinite trivia on any topic you can imagine, customized to match your preferences
 
 _A modern AI-powered trivia platform built on Echo._
 
@@ -10,9 +11,7 @@ _A modern AI-powered trivia platform built on Echo._
 ## 🧠 Features
 
 ### 🎯 Home
-- Browse curated trivia categories
 - Continue your last game or jump into the Daily Quiz
-- Track your progress and streaks
 
 ### 🌅 Daily Quiz
 - New quiz every day, generated via Echo’s LLM seed logic
@@ -21,30 +20,17 @@ _A modern AI-powered trivia platform built on Echo._
 ### 🧩 Practice Mode
 - Choose your difficulty, question type, and timer
 - Instant feedback and explanations
+- Customizable prompts
 
-### ⚙️ Trivia Builder
-- Create quizzes manually or with AI assistance
-- Save, edit, and export trivia packs
 
 ---
 
 ## 🧰 Stack
 
 - **Framework:** Next.js (App Router, TypeScript)
-- **UI:** Tailwind + shadcn/ui
+- **UI:** Tailwind + shadcn/ui + framer
 - **AI Backend:** Echo + Vercel AI SDK
-- **State:** Zustand
-- **Validation:** Zod
-- **Optional DB:** Drizzle + SQLite (leaderboards, history)
 
----
-
-## 🎨 Design Language
-A minimal, high-contrast interface inspired by Echo’s core aesthetic:
-- Deep matte onyx backgrounds
-- Amber-gold accents for intellect
-- Cobalt blue for interactive focus
-- Smooth transitions, tactile feedback, and dark elegance
 
 ---
 

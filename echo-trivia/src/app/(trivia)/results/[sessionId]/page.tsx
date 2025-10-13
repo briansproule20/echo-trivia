@@ -71,7 +71,7 @@ export default function ResultsPage() {
 
   const handleShare = async () => {
     const percentage = Math.round((score / session.quiz.questions.length) * 100);
-    
+
     // Generate emoji grid showing correct/incorrect answers
     const emojiGrid = session.quiz.questions
       .map((q, idx) => {
@@ -79,13 +79,16 @@ export default function ResultsPage() {
         return submission?.correct ? "🟢" : "🔴";
       })
       .join("");
-    
-    const text = `${session.quiz.title}
-${emojiGrid}
-${score}/${session.quiz.questions.length} (${percentage}%)
 
-Play me on https://trivia-wizard-omega.vercel.app`;
-    
+    const text = `I just completed today's Daily Challenge on Trivia Wizard! 🧙‍♂️
+
+Category: ${session.quiz.category}
+${emojiGrid}
+Score: ${score}/${session.quiz.questions.length} (${percentage}%)
+
+Think you can beat me? Play at:
+https://trivia-wizard-omega.vercel.app`;
+
     if (navigator.share) {
       try {
         await navigator.share({ text });

@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScoreBanner } from "@/components/trivia/ScoreBanner";
 import { storage } from "@/lib/storage";
-import { CheckCircle2, XCircle, RotateCcw, Home, Share2 } from "lucide-react";
+import { getTodayString } from "@/lib/quiz-utils";
+import { generateDailyShareText, copyToClipboard } from "@/lib/share-utils";
+import { CheckCircle2, XCircle, RotateCcw, Home, Share2, Copy, Check } from "lucide-react";
 import type { Session } from "@/lib/types";
 
 export default function ResultsPage() {
@@ -16,6 +18,7 @@ export default function ResultsPage() {
   const sessionId = params.sessionId as string;
   
   const [session, setSession] = useState<Session | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const loadSession = async () => {
@@ -43,20 +46,43 @@ export default function ResultsPage() {
   };
 
   const handleShare = async () => {
-    const percentage = Math.round((score / session.quiz.questions.length) * 100);
-    const text = `I scored ${percentage}% on "${session.quiz.title}" in Trivia Wizard!`;
+    const isDailyQuiz = session.quiz.seeded === true;
     
-    if (navigator.share) {
-      try {
-        await navigator.share({ text });
-      } catch (err) {
-        // Fallback to clipboard
-        navigator.clipboard.writeText(text);
-        alert("Copied to clipboard!");
+    if (isDailyQuiz) {
+      // Generate daily quiz share text with emoji grid
+      const shareText = generateDailyShareText(
+        score,
+        session.quiz.questions.length,
+        getTodayString()
+      );
+      
+      const success = await copyToClipboard(shareText);
+      if (success) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
       }
     } else {
-      navigator.clipboard.writeText(text);
-      alert("Copied to clipboard!");
+      // Regular quiz share
+      const percentage = Math.round((score / session.quiz.questions.length) * 100);
+      const text = `I scored ${percentage}% on "${session.quiz.title}" in Trivia Wizard!\n\nPlay: https://trivia-wizard-omega.vercel.app/`;
+      
+      if (navigator.share) {
+        try {
+          await navigator.share({ text });
+        } catch (err) {
+          const success = await copyToClipboard(text);
+          if (success) {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          }
+        }
+      } else {
+        const success = await copyToClipboard(text);
+        if (success) {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        }
+      }
     }
   };
 
@@ -145,16 +171,54 @@ export default function ResultsPage() {
             </CardContent>
           </Card>
 
+          {/* Share Card for Daily Quiz */}
+          {session.quiz.seeded && (
+            <Card className="bg-gradient-to-br from-primary/5 to-primary/10">
+              <CardHeader>
+                <CardTitle className="text-lg">Share Your Score</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 rounded-lg bg-background/80 border font-mono text-sm whitespace-pre-line">
+                  {generateDailyShareText(score, session.quiz.questions.length, getTodayString())}
+                </div>
+                <Button onClick={handleShare} size="lg" className="w-full" variant={copied ? "default" : "outline"}>
+                  {copied ? (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="mr-2 h-4 w-4" />
+                      Copy Score Card
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Actions */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Button onClick={handleRetry} size="lg" variant="outline">
               <RotateCcw className="mr-2 h-4 w-4" />
-              Practice Similar
+              {session.quiz.seeded ? "Try Tomorrow" : "Practice Similar"}
             </Button>
-            <Button onClick={handleShare} size="lg" variant="outline">
-              <Share2 className="mr-2 h-4 w-4" />
-              Share Score
-            </Button>
+            {!session.quiz.seeded && (
+              <Button onClick={handleShare} size="lg" variant="outline">
+                {copied ? (
+                  <>
+                    <Check className="mr-2 h-4 w-4" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share Score
+                  </>
+                )}
+              </Button>
+            )}
             <Button onClick={() => router.push("/")} size="lg">
               <Home className="mr-2 h-4 w-4" />
               Home

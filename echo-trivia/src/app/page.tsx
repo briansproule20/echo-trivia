@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, PlayCircle, Trophy, Clock } from "lucide-react";
+import { Calendar, PlayCircle, Trophy, Clock, TrendingUp, Award } from "lucide-react";
 import { storage } from "@/lib/storage";
 import type { Session } from "@/lib/types";
+import { motion } from "framer-motion";
 
 export default function HomePage() {
   const router = useRouter();
@@ -69,53 +70,97 @@ export default function HomePage() {
 
         {/* Recent Sessions */}
         {recentSessions.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold">Recent Sessions</h2>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <h2 className="text-3xl font-bold tracking-tight">Recent Sessions</h2>
+                <p className="text-sm text-muted-foreground">Your latest quiz performances</p>
+              </div>
               <Button variant="outline" onClick={() => router.push("/history")}>
                 View All
               </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {recentSessions.map((session) => {
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {recentSessions.map((session, idx) => {
                 const score = session.submissions.filter((s) => s.correct).length;
                 const percentage = Math.round((score / session.quiz.questions.length) * 100);
                 const timeElapsed = session.endedAt && session.startedAt
                   ? Math.round((new Date(session.endedAt).getTime() - new Date(session.startedAt).getTime()) / 1000)
                   : 0;
-                
+
                 return (
-                  <Card key={session.id} className="hover:shadow-lg transition-shadow flex flex-col h-full">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg line-clamp-1">{session.quiz.title}</CardTitle>
-                          <CardDescription className="line-clamp-1">{session.quiz.category}</CardDescription>
+                  <motion.div
+                    key={session.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: idx * 0.1 }}
+                    onClick={() => router.push(`/results/${session.id}`)}
+                    className="cursor-pointer"
+                  >
+                    <Card className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-border hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                      {/* Gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                      <CardHeader className="space-y-3 pb-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <CardTitle className="text-base font-semibold line-clamp-1 group-hover:text-primary transition-colors">
+                              {session.quiz.title}
+                            </CardTitle>
+                            <CardDescription className="text-xs line-clamp-1">
+                              {session.quiz.category}
+                            </CardDescription>
+                          </div>
+                          <Badge
+                            variant={percentage >= 70 ? "default" : "secondary"}
+                            className="flex items-center gap-1 px-2.5 py-1 text-sm font-semibold shrink-0"
+                          >
+                            {percentage >= 70 && <Award className="h-3 w-3" />}
+                            {percentage}%
+                          </Badge>
                         </div>
-                        <Badge variant={percentage >= 70 ? "default" : "secondary"} className="ml-2">
-                          {percentage}%
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3 flex-1 flex flex-col">
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Trophy className="mr-2 h-4 w-4 flex-shrink-0" />
-                        {score} / {session.quiz.questions.length} correct
-                      </div>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Clock className="mr-2 h-4 w-4 flex-shrink-0" />
-                        {timeElapsed}s
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full mt-auto"
-                        onClick={() => router.push(`/results/${session.id}`)}
-                      >
-                        View Results
-                      </Button>
-                    </CardContent>
-                  </Card>
+                      </CardHeader>
+
+                      <CardContent className="space-y-3 pt-0 flex-1 flex flex-col">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm">
+                            <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 text-primary">
+                              <Trophy className="h-4 w-4" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-xs text-muted-foreground">Score</p>
+                              <p className="text-sm font-semibold">
+                                {score} / {session.quiz.questions.length}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-sm">
+                            <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-muted text-muted-foreground">
+                              <Clock className="h-4 w-4" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-xs text-muted-foreground">Time</p>
+                              <p className="text-sm font-semibold">{timeElapsed}s</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full mt-auto group-hover:bg-primary group-hover:text-primary-foreground transition-colors pointer-events-none md:pointer-events-auto"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/results/${session.id}`);
+                          }}
+                        >
+                          View Results
+                          <TrendingUp className="ml-2 h-3.5 w-3.5" />
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 );
               })}
             </div>

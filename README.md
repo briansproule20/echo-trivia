@@ -4,7 +4,7 @@ Infinite trivia on any topic you can imagine, customized to match your preferenc
 
 _A modern AI-powered trivia platform built on Echo._
 
-**EchoTrivia** is a full-featured trivia experience powered by the Merit System's Echo Infrastructure — blending intelligence, design, and replayable daily challenges. Choose your categories, customize quizzes, or let the AI craft perfect brain workouts.
+**TriviaWizard** is a full-featured trivia experience powered by the Merit System's Echo Infrastructure — blending intelligence, design, and replayable daily challenges. Choose your categories, customize quizzes, and let the AI craft perfect brain workouts.
 
 ---
 

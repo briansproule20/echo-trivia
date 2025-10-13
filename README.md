@@ -1,7 +1,6 @@
-# echo-trivia
+# EchoTrivia
 Test your wits. Bend the algorithm.
 
-# EchoIQ
 _A modern AI-powered trivia platform built on Echo._
 
 **EchoIQ** is a full-featured trivia experience powered by the Echo LLM — blending intelligence, design, and replayable daily challenges. Choose your categories, customize quizzes, or let the AI craft perfect brain workouts.

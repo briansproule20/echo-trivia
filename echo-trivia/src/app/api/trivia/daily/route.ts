@@ -6,35 +6,39 @@ import { unstable_cache } from "next/cache";
 import { getTodayString, getDailySeed, SeededRandom } from "@/lib/quiz-utils";
 import { CATEGORIES } from "@/lib/types";
 
-// Cached challenge generator - generates once per day
-const generateDailyChallengeForDate = unstable_cache(
-  async (date: string) => {
-    console.log(`Generating new daily challenge for ${date}`);
+// Cached challenge generator - generates once per day with date-specific cache key
+async function getDailyChallenge(date: string) {
+  return unstable_cache(
+    async () => {
+      console.log(`Generating new daily challenge for ${date}`);
 
-    // Generate deterministic category for this date
-    const seed = getDailySeed(date);
-    const rng = new SeededRandom(seed);
+      // Generate deterministic category for this date
+      // Use hash of date to ensure even distribution across all categories
+      const seed = getDailySeed(date);
 
-    // Pick category based on day
-    const categoryIndex = Math.floor(rng.next() * CATEGORIES.length);
-    const category = CATEGORIES[categoryIndex];
+      // Instead of using random selection which can cluster,
+      // use the hash to cycle through categories in a pseudo-random but complete way
+      // This ensures all categories appear over time
+      const categoryIndex = seed % CATEGORIES.length;
+      const category = CATEGORIES[categoryIndex];
 
-    return {
-      date,
-      category,
-      title: `Today's Challenge: ${category}`,
-      description: `${date} - A new challenge every day at midnight EST`,
-      numQuestions: 5,
-      difficulty: "mixed" as const,
-      type: "mixed" as const,
-    };
-  },
-  ['daily-challenge'],
-  {
-    revalidate: 86400, // 24 hours
-    tags: ['daily-challenge'],
-  }
-);
+      return {
+        date,
+        category,
+        title: `Today's Challenge: ${category}`,
+        description: `${date} - A new challenge every day at midnight EST`,
+        numQuestions: 5,
+        difficulty: "mixed" as const,
+        type: "mixed" as const,
+      };
+    },
+    [`daily-challenge-${date}`], // Include date in cache key
+    {
+      revalidate: 86400, // 24 hours
+      tags: [`daily-challenge-${date}`],
+    }
+  )();
+}
 
 export async function GET(req: Request) {
   try {
@@ -42,11 +46,11 @@ export async function GET(req: Request) {
     const date = searchParams.get("date") || getTodayString();
 
     console.log(`Fetching daily challenge for ${date}`);
-    const challenge = await generateDailyChallengeForDate(date);
+    const challenge = await getDailyChallenge(date);
 
     return NextResponse.json(challenge, {
       headers: {
-        'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=172800',
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200',
       },
     });
   } catch (error) {

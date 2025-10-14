@@ -2,14 +2,20 @@
 
 import type { Quiz, Question } from "./types";
 
-// Generate deterministic seed from string
+// Generate deterministic seed from string with better distribution
 export function hashString(str: string): number {
-  let hash = 0;
+  let hash = 5381;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32bit integer
+    // DJB2 hash algorithm with XOR for better distribution
+    hash = ((hash << 5) + hash) ^ char; // hash * 33 ^ char
   }
+  // Additional mixing to improve distribution for similar inputs
+  hash = hash ^ (hash >>> 16);
+  hash = Math.imul(hash, 0x85ebca6b);
+  hash = hash ^ (hash >>> 13);
+  hash = Math.imul(hash, 0xc2b2ae35);
+  hash = hash ^ (hash >>> 16);
   return Math.abs(hash);
 }
 
@@ -58,10 +64,16 @@ export function getDailySeed(date: string): number {
   return hashString(`daily-quiz-${date}`);
 }
 
-// Get current date in YYYY-MM-DD format
+// Get current date in YYYY-MM-DD format (EST timezone)
 export function getTodayString(): string {
   const now = new Date();
-  return now.toISOString().split("T")[0];
+  // Convert to EST (UTC-5) or EDT (UTC-4)
+  // Use America/New_York timezone for automatic DST handling
+  const estDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const year = estDate.getFullYear();
+  const month = String(estDate.getMonth() + 1).padStart(2, '0');
+  const day = String(estDate.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 // Calculate quiz score

@@ -23,6 +23,15 @@ Rules:
 - For true/false, the "answer" field should be "true" or "false".
 - For short answer, the "answer" field should be the expected text answer.
 
+CRITICAL - Variety & Freshness:
+- EASY questions: Can use well-known, accessible trivia that most people might know.
+- MEDIUM questions: Should explore more specific topics. Avoid the most overused facts. Use interesting angles.
+- HARD questions: Must be unique and challenging. Dig deep into lesser-known facts, surprising connections, or edge cases.
+- Explore diverse subtopics within each category. Don't recycle the same angles or famous examples repeatedly.
+- For each quiz, vary time periods, regions, people, events, or concepts.
+- Avoid patterns like "always asking about the same wars, same scientists, same books, same movies."
+- Each quiz should feel distinct from previous quizzes, especially at medium/hard difficulty.
+
 Output: valid JSON ONLY matching the schema.`;
 
 const SCHEMA_TEMPLATE = `{
@@ -63,10 +72,17 @@ export async function POST(req: Request) {
         ? "Mix of easy, medium, and hard difficulty"
         : `All questions should be ${settings.difficulty} difficulty`;
 
+    // Add timestamp to ensure each generation is unique
+    const timestamp = Date.now();
+
     const prompt = `Generate ${settings.numQuestions} trivia questions about ${settings.category}.
 
 ${typeInstruction}.
 ${difficultyInstruction}.
+
+IMPORTANT: Easy questions can be well-known trivia. Medium and hard questions should be more unique - avoid clichéd facts, explore interesting angles, lesser-known details, and diverse examples within this topic. For each quiz, pick different time periods, regions, people, events, or concepts. Make this quiz feel distinct and original.
+
+Generation ID: ${timestamp}
 
 Return ONLY valid JSON matching this schema:
 ${SCHEMA_TEMPLATE}

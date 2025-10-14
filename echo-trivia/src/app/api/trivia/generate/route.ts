@@ -1,6 +1,6 @@
 // Generate trivia questions using Echo LLM
 
-import { openai } from "@/echo";
+import { anthropic } from "@/echo";
 import { generateText } from "ai";
 import { PlaySettingsSchema, QuizSchema } from "@/lib/schemas";
 import { generateId, shuffleChoices } from "@/lib/quiz-utils";
@@ -75,7 +75,7 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
 
     // Generate with Echo LLM
     const result = await generateText({
-      model: openai("gpt-4o"),
+      model: anthropic("claude-sonnet-4-20250514"),
       system: GENERATION_SYSTEM_PROMPT,
       prompt,
       temperature: 0.8,
@@ -99,7 +99,7 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
       console.error("JSON parsing failed, attempting repair:", error);
       
       const repairResult = await generateText({
-        model: openai("gpt-4o"),
+        model: anthropic("claude-sonnet-4-20250514"),
         system: "You fix invalid JSON to match a schema. Return ONLY the corrected JSON.",
         prompt: `Fix this JSON to match the schema:\n\nInvalid JSON:\n${result.text}\n\nRequired Schema:\n${SCHEMA_TEMPLATE}`,
       });

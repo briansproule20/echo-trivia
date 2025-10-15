@@ -119,10 +119,14 @@ export default function DailyQuizPage() {
 
   const getTimeUntilTomorrow = () => {
     const now = new Date();
-    const tomorrow = new Date(now);
+    // Get current time in EST
+    const estNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    // Get tomorrow midnight EST
+    const tomorrow = new Date(estNow);
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(0, 0, 0, 0);
-    const diff = tomorrow.getTime() - now.getTime();
+    // Calculate difference from current actual time to tomorrow midnight EST
+    const diff = tomorrow.getTime() - estNow.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     return `${hours}h ${minutes}m`;

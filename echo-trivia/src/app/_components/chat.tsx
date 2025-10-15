@@ -40,6 +40,14 @@ import { Suggestion, Suggestions } from '@/components/ai-elements/suggestion';
 
 const models = [
   {
+    name: 'Claude Sonnet 4',
+    value: 'claude-sonnet-4-20250514',
+  },
+  {
+    name: 'Claude 3.5 Sonnet',
+    value: 'claude-3-5-sonnet-20241022',
+  },
+  {
     name: 'GPT 4o',
     value: 'gpt-4o',
   },

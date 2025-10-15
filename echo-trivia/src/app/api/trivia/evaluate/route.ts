@@ -1,6 +1,6 @@
 // Evaluate trivia answer
 
-import { openai } from "@/echo";
+import { anthropic } from "@/echo";
 import { generateText } from "ai";
 import { EvaluateRequestSchema, EvaluateResponseSchema } from "@/lib/schemas";
 import { NextResponse } from "next/server";
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       } else {
         // Use LLM for fuzzy matching
         const evalResult = await generateText({
-          model: openai("gpt-4o"),
+          model: anthropic("claude-sonnet-4-20250514"),
           system: FUZZY_EVAL_SYSTEM_PROMPT,
           prompt: `Question: ${question.prompt}\nCanonical Answer: ${question.answer}\nUser Response: ${response}\n\nIs the user response acceptable?`,
           temperature: 0.3,

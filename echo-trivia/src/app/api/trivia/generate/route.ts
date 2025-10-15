@@ -10,7 +10,8 @@ const GENERATION_SYSTEM_PROMPT = `You are a professional trivia author. Produce 
 
 Rules:
 - Adhere strictly to the JSON schema provided.
-- Categories: History, Science, Literature, Film & TV, Sports, Geography, Arts, Technology, General Knowledge, or custom.
+- Categories: History, Science, Literature, Film & TV, Sports, Geography, Arts, Technology, General Knowledge, Music, Food & Drink, Nature & Animals, Mythology, Space & Astronomy, Video Games, Politics & Government, Business & Economics, Health & Medicine, Architecture, Fashion
+- IMPORTANT: Use the EXACT category name provided in the user prompt. Do NOT change or normalize category names.
 - Question types: multiple_choice | true_false | short_answer.
 - Difficulty: easy | medium | hard. Mix when requested.
 - Multiple choice MUST have exactly 4 options with IDs: A, B, C, D (in that order). Exactly one correct.
@@ -79,6 +80,9 @@ export async function POST(req: Request) {
 
 ${typeInstruction}.
 ${difficultyInstruction}.
+
+CRITICAL: The "category" field in your response MUST be EXACTLY: "${settings.category}"
+Do NOT change, normalize, or abbreviate the category name. Use it character-for-character as provided.
 
 IMPORTANT: Easy questions can be well-known trivia. Medium and hard questions should be more unique - avoid clichéd facts, explore interesting angles, lesser-known details, and diverse examples within this topic. For each quiz, pick different time periods, regions, people, events, or concepts. Make this quiz feel distinct and original.
 
@@ -151,6 +155,15 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
       }
       return q;
     });
+
+    // CRITICAL: Force the category to match exactly what was requested
+    // The LLM sometimes normalizes categories (e.g., "Space & Astronomy" -> "Science")
+    // This ensures the share message shows the exact daily challenge category
+    quiz.category = settings.category;
+    quiz.questions = quiz.questions.map((q) => ({
+      ...q,
+      category: settings.category,
+    }));
 
     return NextResponse.json(quiz);
   } catch (error) {

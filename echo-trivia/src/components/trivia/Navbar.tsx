@@ -20,11 +20,13 @@ const NAV_ITEMS = [
 export function Navbar() {
   const pathname = usePathname();
   const echo = useEcho();
+  const isAuthenticated = !!echo.user;
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
+    <>
+      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4">
+          <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <img
@@ -123,6 +125,34 @@ export function Navbar() {
         </div>
       </div>
     </nav>
+
+      {/* Mobile-only banner for unauthenticated users */}
+      {!isAuthenticated && pathname !== "/getting-started" && (
+        <div className="md:hidden sticky top-16 z-40 border-b bg-gradient-to-r from-primary/10 via-primary/5 to-transparent backdrop-blur-sm">
+          <div className="container mx-auto px-4 py-3">
+            <Link
+              href="/getting-started"
+              className="flex items-center justify-between gap-3 group"
+            >
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <BookOpen className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">First Time Here?</p>
+                  <p className="text-xs text-muted-foreground">Check out Getting Started</p>
+                </div>
+              </div>
+              <div className="text-primary group-hover:translate-x-1 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m9 18 6-6-6-6"/>
+                </svg>
+              </div>
+            </Link>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

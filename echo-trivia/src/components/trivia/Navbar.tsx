@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import { Menu, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { EchoAccount } from "@/components/echo-account-next";
@@ -36,6 +36,18 @@ export function Navbar() {
               Trivia Wizard
             </span>
           </Link>
+
+          {/* Center/Desktop Nav Links */}
+          {pathname === "/" && (
+            <div className="hidden md:flex items-center gap-6">
+              <Link
+                href="/getting-started"
+                className="text-sm font-medium transition-colors hover:text-primary text-muted-foreground"
+              >
+                Getting Started
+              </Link>
+            </div>
+          )}
 
           {/* Right Side - Echo Account & Menu Button */}
           <div className="flex items-center gap-2">
@@ -90,6 +102,19 @@ export function Navbar() {
                     <div className="px-3">
                       <EchoAccount />
                     </div>
+
+                    {/* Getting Started - Below Echo Account */}
+                    <Link
+                      href="/getting-started"
+                      className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
+                        pathname === "/getting-started"
+                          ? "text-primary bg-primary/10"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      <BookOpen className="h-4 w-4" />
+                      Getting Started
+                    </Link>
                   </div>
                 </div>
               </SheetContent>

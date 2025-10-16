@@ -9,6 +9,7 @@ import { Calendar, PlayCircle, Trophy, Clock, TrendingUp, Award } from "lucide-r
 import { storage } from "@/lib/storage";
 import type { Session } from "@/lib/types";
 import { motion } from "framer-motion";
+import { DotBackground } from "@/components/ui/dot-background";
 
 export default function HomePage() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <DotBackground className="min-h-screen">
       <div className="container mx-auto px-4 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16 space-y-6">
@@ -175,6 +176,6 @@ export default function HomePage() {
           </div>
         )}
       </div>
-    </div>
+    </DotBackground>
   );
 }

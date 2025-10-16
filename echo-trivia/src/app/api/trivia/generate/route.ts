@@ -25,13 +25,14 @@ Rules:
 - For short answer, the "answer" field should be the expected text answer.
 
 CRITICAL - Variety & Freshness:
-- EASY questions: Can use well-known, accessible trivia that most people might know.
+- EASY questions: Should be accessible but NOT obvious or trivial. Avoid the most famous/clichéd facts everyone knows (e.g., "What is the capital of France?"). Instead, use interesting-but-approachable facts that are educational and make people think. Easy should mean "solvable with basic knowledge" not "everyone already knows this."
 - MEDIUM questions: Should explore more specific topics. Avoid the most overused facts. Use interesting angles.
 - HARD questions: Must be unique and challenging. Dig deep into lesser-known facts, surprising connections, or edge cases.
 - Explore diverse subtopics within each category. Don't recycle the same angles or famous examples repeatedly.
 - For each quiz, vary time periods, regions, people, events, or concepts.
 - Avoid patterns like "always asking about the same wars, same scientists, same books, same movies."
-- Each quiz should feel distinct from previous quizzes, especially at medium/hard difficulty.
+- Each quiz should feel distinct from previous quizzes at ALL difficulty levels.
+- NEVER repeat the same question or extremely similar variations across different generations.
 
 Output: valid JSON ONLY matching the schema.`;
 
@@ -84,7 +85,7 @@ ${difficultyInstruction}.
 CRITICAL: The "category" field in your response MUST be EXACTLY: "${settings.category}"
 Do NOT change, normalize, or abbreviate the category name. Use it character-for-character as provided.
 
-IMPORTANT: Easy questions can be well-known trivia. Medium and hard questions should be more unique - avoid clichéd facts, explore interesting angles, lesser-known details, and diverse examples within this topic. For each quiz, pick different time periods, regions, people, events, or concepts. Make this quiz feel distinct and original.
+IMPORTANT: Easy questions should be accessible but NOT obvious or trivial - avoid the most famous facts everyone already knows. Medium and hard questions should be progressively more unique - avoid clichéd facts, explore interesting angles, lesser-known details, and diverse examples within this topic. For each quiz, pick different time periods, regions, people, events, or concepts. Make this quiz feel distinct and original. NEVER reuse the same questions or extremely similar variations.
 
 Generation ID: ${timestamp}
 

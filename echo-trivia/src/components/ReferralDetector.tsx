@@ -3,10 +3,11 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useEcho } from "@merit-systems/echo-react-sdk";
+import { Echo } from "@merit-systems/echo-typescript-sdk";
 
 /**
  * Global component that detects referral codes in URL and registers them
- * Listens for ?referral_code=USER_ID query parameter
+ * Listens for ?referral_code=USER_ID query parameter (snake_case to match Echo app)
  */
 export function ReferralDetector() {
   const searchParams = useSearchParams();
@@ -17,7 +18,7 @@ export function ReferralDetector() {
     // Only run once per page load
     if (hasRegistered.current) return;
 
-    // Get referral code from URL
+    // Get referral code from URL - using snake_case to match Echo app
     const referralCode = searchParams.get("referral_code");
     if (!referralCode) return;
 
@@ -43,7 +44,10 @@ export function ReferralDetector() {
       }
 
       console.log("Registering referral code:", referralCode);
-      const result = await echo.users.registerReferralCode(appId, referralCode);
+
+      // Create Echo SDK instance
+      const echoSDK = new Echo({ appId });
+      const result = await echoSDK.users.registerReferralCode(appId, referralCode);
 
       if (result.success) {
         console.log("✅ Referral registered successfully:", result.message);
@@ -54,7 +58,7 @@ export function ReferralDetector() {
       console.error("Failed to register referral:", error);
       hasRegistered.current = false; // Allow retry on next page load
     }
-  }, [searchParams, echo.user, echo.users]);
+  }, [searchParams, echo.user]);
 
   useEffect(() => {
     registerReferral();

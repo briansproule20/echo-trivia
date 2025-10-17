@@ -75,7 +75,11 @@ export default function FaqsAndDocsPage() {
               <AccordionContent className="text-muted-foreground pb-4">
                 Our referral program allows you to earn 10% of the app's revenue when you share Trivia Wizard with friends.
                 When someone signs up using your referral link and makes purchases, you receive a 10% commission on their spending.
-                This helps promote our trivia-based alternative to doom scrolling while rewarding our community. Learn more about the{" "}
+                This helps promote our trivia-based alternative to doom scrolling while rewarding our community.{" "}
+                <Link href="https://echo.merit.systems/app/135d6f0a-3ac9-4ff2-baba-fa1664a0bc65/referrals" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
+                  Get your referral link here! <ExternalLink className="h-3 w-3" />
+                </Link>{" "}
+                Learn more about the{" "}
                 <Link href="https://echo.merit.systems/docs/money/claiming-profits#referrals" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
                   Echo referral system <ExternalLink className="h-3 w-3" />
                 </Link>.
@@ -219,6 +223,11 @@ export default function FaqsAndDocsPage() {
                 </p>
                 <p>
                   Echo's built-in referral system automatically tracks your referrals and calculates your 10% commission earnings.
+                </p>
+                <p>
+                  <Link href="https://echo.merit.systems/app/135d6f0a-3ac9-4ff2-baba-fa1664a0bc65/referrals" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
+                    Get your referral link here! <ExternalLink className="h-3 w-3" />
+                  </Link>
                 </p>
                 <p>
                   Help us promote a healthier alternative to mindless scrolling while earning passive income. View the full{" "}

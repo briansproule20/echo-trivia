@@ -7,6 +7,7 @@ import { QuestionCard } from "@/components/trivia/QuestionCard";
 import { Timer } from "@/components/trivia/Timer";
 import { usePlayStore } from "@/lib/store";
 import { storage } from "@/lib/storage";
+import { getRandomTitle, calculateScore } from "@/lib/quiz-utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Submission } from "@/lib/types";
 
@@ -116,17 +117,24 @@ export default function PlayPage() {
 
   const handleFinish = async () => {
     endSession();
+
+    // Calculate score and generate title
+    const correct = currentSession.submissions.filter((s) => s.correct).length;
+    const percentage = calculateScore(currentSession.quiz, currentSession.submissions);
+    const { title, tier } = getRandomTitle(percentage);
+
     const finalSession = {
       ...currentSession,
       endedAt: new Date().toISOString(),
-      score: currentSession.submissions.filter((s) => s.correct).length,
+      score: correct,
+      earnedTitle: title,
+      earnedTier: tier,
     };
     await storage.saveSession(finalSession);
-    
+
     // Track category performance
-    const correct = finalSession.submissions.filter((s) => s.correct).length;
     await storage.trackCategoryPerformance(finalSession.quiz.category, correct, finalSession.quiz.questions.length);
-    
+
     router.push(`/results/${sessionId}`);
   };
 

@@ -206,41 +206,55 @@ function PracticeContent() {
                 <Label htmlFor="category" className="text-base font-semibold">
                   Category
                 </Label>
-                <Select value={category} onValueChange={(value) => setCategory(value as Category | "custom")} disabled={!user}>
-                  <SelectTrigger id="category" className="w-full">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[300px]">
-                    {CATEGORIES.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
-                    <SelectItem value="custom">Custom Category...</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {/* Preset Category Dropdown */}
+                  <div className="space-y-2">
+                    <Label htmlFor="presetCategory" className="text-sm text-muted-foreground">
+                      Preset Categories
+                    </Label>
+                    <Select value={category} onValueChange={(value) => setCategory(value as Category | "custom")} disabled={!user}>
+                      <SelectTrigger id="presetCategory" className="w-full">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[300px]">
+                        {CATEGORIES.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {cat}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="custom">Custom Category</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              {/* Custom Category Input */}
-              {category === "custom" && (
-                <div className="space-y-3">
-                  <Label htmlFor="customCategory" className="text-base font-semibold">
-                    Custom Category
-                  </Label>
-                  <Input
-                    id="customCategory"
-                    type="text"
-                    placeholder="e.g., Lord of the Rings, Star Wars, Marvel..."
-                    value={customCategory}
-                    onChange={(e) => setCustomCategory(e.target.value)}
-                    disabled={!user}
-                    className="w-full"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Enter any topic you'd like to be quizzed on
-                  </p>
+                  {/* Custom Category Input - Always Visible */}
+                  <div className="space-y-2">
+                    <Label htmlFor="customCategory" className="text-sm text-muted-foreground">
+                      Or Create Your Own
+                    </Label>
+                    <Input
+                      id="customCategory"
+                      type="text"
+                      placeholder="e.g., Star Wars, Marvel..."
+                      value={customCategory}
+                      onChange={(e) => {
+                        setCustomCategory(e.target.value);
+                        // Auto-select "custom" when user types
+                        if (e.target.value.trim() && category !== "custom") {
+                          setCategory("custom");
+                        }
+                      }}
+                      disabled={!user}
+                      className="w-full"
+                    />
+                  </div>
                 </div>
-              )}
+                <p className="text-xs text-muted-foreground">
+                  {category === "custom" && customCategory.trim()
+                    ? `Quiz will be generated on: ${customCategory}`
+                    : `Using ${category === "custom" ? "custom category" : category}`}
+                </p>
+              </div>
 
               {/* Number of Questions */}
               <div className="space-y-3">

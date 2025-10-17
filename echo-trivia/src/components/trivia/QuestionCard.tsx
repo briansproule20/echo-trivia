@@ -72,7 +72,7 @@ export function QuestionCard({
                 key={choice.id}
                 variant={selectedChoice === choice.id ? "default" : "outline"}
                 className={cn(
-                  "w-full justify-start text-left h-auto py-3 px-4",
+                  "w-full justify-start text-left h-auto py-3 px-4 whitespace-normal",
                   submitted &&
                     choice.id === question.answer &&
                     "border-green-500 bg-green-50 dark:bg-green-950",
@@ -84,8 +84,8 @@ export function QuestionCard({
                 onClick={() => !disabled && setSelectedChoice(choice.id)}
                 disabled={disabled}
               >
-                <span className="font-semibold mr-2">{choice.id}.</span>
-                {choice.text}
+                <span className="font-semibold mr-2 shrink-0">{choice.id}.</span>
+                <span className="break-words">{choice.text}</span>
               </Button>
             ))}
           </div>

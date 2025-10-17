@@ -168,7 +168,7 @@ export function Navbar() {
       )}
 
       {/* Referral banner for authenticated users */}
-      {isAuthenticated && <ReferralBanner />}
+      {isAuthenticated && pathname !== "/faqs-and-docs" && <ReferralBanner />}
     </>
   );
 }

@@ -1,10 +1,12 @@
-// Generate trivia questions using Echo LLM
+// Generate trivia questions using Echo LLM with recipe system
 
 import { anthropic } from "@/echo";
 import { generateText } from "ai";
 import { PlaySettingsSchema, QuizSchema } from "@/lib/schemas";
-import { generateId, shuffleChoices } from "@/lib/quiz-utils";
+import { generateId, shuffleChoices, getDailySeed, hashString } from "@/lib/quiz-utils";
 import { NextResponse } from "next/server";
+import { generateSeed } from "@/lib/rand";
+import { buildRecipeFromSeed, DIFFICULTY_CURVES, Labels, categoryEnumToString, categoryStringToEnum } from "@/lib/recipe";
 
 const GENERATION_SYSTEM_PROMPT = `You are a professional trivia author. Produce high-quality, factual, diverse questions.
 
@@ -59,8 +61,53 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const settings = PlaySettingsSchema.parse(body.settings);
+    const { dailyDate } = body; // Optional: for daily quizzes
 
-    // Build generation prompt
+    // Generate deterministic seed
+    let seedHex: string;
+    if (dailyDate) {
+      // For daily quizzes: deterministic seed based on date + category
+      const dailyHash = hashString(`${dailyDate}-${settings.category}`);
+      seedHex = dailyHash.toString(16).padStart(64, '0').slice(0, 64);
+    } else {
+      // For practice quizzes: random seed
+      seedHex = generateSeed();
+    }
+
+    // Map category string to enum (if it exists in our predefined categories)
+    const categoryEnum = categoryStringToEnum(settings.category);
+
+    // Build recipe from seed
+    const recipe = buildRecipeFromSeed(seedHex, {
+      fixedNumQuestions: settings.numQuestions === 5 ? 5 : 10,
+    });
+
+    // If user specified a category that's in our enum, use it as primary category
+    // Otherwise, use the first category from the recipe mix
+    const primaryCategory = categoryEnum !== undefined
+      ? categoryEnumToString(categoryEnum)
+      : settings.category; // Use custom category as-is
+
+    // Get categories to include in the quiz
+    const categoryStrings = categoryEnum !== undefined
+      ? [primaryCategory] // Use only the specified category for focused quizzes
+      : recipe.categoryMix.map(cat => categoryEnumToString(cat)); // Use recipe mix for variety
+
+    // Get the difficulty curve for this recipe
+    const curve = DIFFICULTY_CURVES[recipe.difficultyCurveId].slice(0, recipe.numQuestions);
+
+    // Convert difficulty curve values to difficulty labels based on user's preference
+    const difficultyLabels = curve.map(val => {
+      if (settings.difficulty !== "mixed") {
+        return settings.difficulty; // Respect user's difficulty choice
+      }
+      // Use curve for mixed difficulty
+      if (val < 0.4) return "easy";
+      if (val < 0.7) return "medium";
+      return "hard";
+    });
+
+    // Build generation prompt using recipe
     const typeInstruction =
       settings.type === "mixed"
         ? "Mix of multiple choice, true/false, and short answer questions"
@@ -70,32 +117,48 @@ export async function POST(req: Request) {
         ? "All questions should be true/false"
         : "All questions should be short answer";
 
-    const difficultyInstruction =
-      settings.difficulty === "mixed"
-        ? "Mix of easy, medium, and hard difficulty"
-        : `All questions should be ${settings.difficulty} difficulty`;
+    // Helper to convert enum arrays to label arrays
+    const toLabel = (arr: number[], labels: readonly string[]) => arr.map(i => labels[i]);
 
-    // Add timestamp to ensure each generation is unique
-    const timestamp = Date.now();
+    const prompt = `Generate ${recipe.numQuestions} trivia questions about ${primaryCategory}.
 
-    const prompt = `Generate ${settings.numQuestions} trivia questions about ${settings.category}.
+RECIPE CONSTRAINTS:
+- tone: ${Labels.Tone[recipe.tone]}
+- era: ${Labels.Era[recipe.era]}
+- region: ${Labels.Region[recipe.region]}
+- distractor_styles: ${toLabel(recipe.distractors as unknown as number[], Labels.DistractorStyle).join(", ")}
+- explanation_style: ${Labels.ExplanationStyle[recipe.explanation]}
 
 ${typeInstruction}.
-${difficultyInstruction}.
 
-CRITICAL: The "category" field in your response MUST be EXACTLY: "${settings.category}"
+CRITICAL: The "category" field in your response MUST be EXACTLY: "${primaryCategory}"
 Do NOT change, normalize, or abbreviate the category name. Use it character-for-character as provided.
 
-IMPORTANT: Easy questions should be accessible but NOT obvious or trivial - avoid the most famous facts everyone already knows. Medium and hard questions should be progressively more unique - avoid clichéd facts, explore interesting angles, lesser-known details, and diverse examples within this topic. For each quiz, pick different time periods, regions, people, events, or concepts. Make this quiz feel distinct and original. NEVER reuse the same questions or extremely similar variations.
+DIFFICULTY ASSIGNMENT (CRITICAL):
+You must generate EXACTLY ${recipe.numQuestions} questions with the following difficulty for each question IN ORDER:
+${difficultyLabels.map((d, i) => `Question ${i + 1}: difficulty="${d}"`).join('\n')}
 
-Generation ID: ${timestamp}
+INSTRUCTIONS:
+- Create ${recipe.numQuestions} questions matching the recipe
+- CRITICAL: Set the "difficulty" field for each question EXACTLY as specified above (question 1 = "${difficultyLabels[0]}", question 2 = "${difficultyLabels[1]}", etc.)
+- For multiple_choice, include exactly 4 options with exactly 1 correct
+- Use distractor styles: ${toLabel(recipe.distractors as unknown as number[], Labels.DistractorStyle).join(", ")}
+- Write explanations in the "${Labels.ExplanationStyle[recipe.explanation]}" style
+- Apply the "${Labels.Tone[recipe.tone]}" tone throughout
+- Focus on the "${Labels.Era[recipe.era]}" era and "${Labels.Region[recipe.region]}" region when relevant
+- EASY questions: Should be accessible but NOT obvious or trivial - avoid the most famous facts everyone already knows
+- MEDIUM questions: Should explore more specific topics and interesting angles
+- HARD questions: Must be unique and challenging with lesser-known facts
+- Make this quiz feel distinct and original. NEVER reuse the same questions or extremely similar variations
+
+Generation Seed: ${seedHex.slice(0, 8)}...
 
 Return ONLY valid JSON matching this schema:
 ${SCHEMA_TEMPLATE}
 
 Make the quiz engaging and educational. Ensure all questions are factually accurate.`;
 
-    // Generate with Echo LLM
+    // Generate with Echo LLM (keep existing temperature)
     const result = await generateText({
       model: anthropic("claude-sonnet-4-20250514"),
       system: GENERATION_SYSTEM_PROMPT,

@@ -81,6 +81,7 @@ export default function DailyQuizPage() {
             type: challenge.type,
             style: "classic",
           },
+          dailyDate: challenge.date, // Pass date for deterministic seed
         }),
       });
 

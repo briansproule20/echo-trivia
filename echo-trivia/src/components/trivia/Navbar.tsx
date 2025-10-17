@@ -9,6 +9,7 @@ import { EchoAccount } from "@/components/echo-account-next";
 import EchoBalance from "@/components/balance";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { ReferralBanner } from "@/components/ReferralBanner";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
@@ -165,6 +166,9 @@ export function Navbar() {
           </div>
         </div>
       )}
+
+      {/* Referral banner for authenticated users */}
+      {isAuthenticated && <ReferralBanner />}
     </>
   );
 }

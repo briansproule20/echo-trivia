@@ -10,52 +10,137 @@ import { storage } from "@/lib/storage";
 import { CheckCircle2, XCircle, RotateCcw, Home, Share2 } from "lucide-react";
 import type { Session } from "@/lib/types";
 
-// Title grading system
+// Title grading system (20% ranges)
 const TITLE_TIERS: Record<number, { tier: string; titles: string[] }> = {
   0: {
-    tier: "Disaster Tier",
-    titles: ["Answerless Wanderer", "Trivia Amnesiac", "Factually Bankrupt", "Lost in the Question Void", "Did You Even Try?"]
-  },
-  10: {
-    tier: "Barely Conscious",
-    titles: ["Maybe Next Time, Champ", "The Guess Whisperer", "Partial Credit Collector", "Wrong But Confident", "Future Honorary Participant"]
+    tier: "Disaster Zone",
+    titles: [
+      "Answerless Wanderer",
+      "Trivia Amnesiac",
+      "Factually Bankrupt",
+      "Lost in the Question Void",
+      "Did You Even Try?",
+      "Professional Guesser (And Misser)",
+      "Brain.exe Has Stopped Responding",
+      "The Great Forgetter",
+      "Confidently Incorrect Champion",
+      "Zero Hero",
+      "Maybe Next Time, Champ",
+      "The Guess Whisperer",
+      "Partial Credit Collector",
+      "Wrong But Confident",
+      "Future Honorary Participant",
+      "Barely Awake Scholar",
+      "One Star Yelp Reviewer of Facts",
+      "Lucky Accident Specialist",
+      "Participation Trophy Enthusiast",
+      "Error 404: Knowledge Not Found"
+    ]
   },
   20: {
-    tier: "Early Apprentice",
-    titles: ["Trivia Tadpole", "Wizard's Intern", "Novice of Nonsense", "Fact Fumbler", "On the Syllabus, Just Not Studied"]
-  },
-  30: {
-    tier: "Getting Warmer",
-    titles: ["Trivia Tourist", "Apprentice of Approximation", "Slightly Educated Guessmaster", "Almost Smart", "Learning Adjacent"]
+    tier: "Rookie Realm",
+    titles: [
+      "Trivia Tadpole",
+      "Wizard's Intern",
+      "Novice of Nonsense",
+      "Fact Fumbler",
+      "On the Syllabus, Just Not Studied",
+      "Baby's First Quiz",
+      "The Struggling Student",
+      "Homework? What Homework?",
+      "Knowledge in Training Wheels",
+      "Part-Time Brain User",
+      "Trivia Tourist",
+      "Apprentice of Approximation",
+      "Slightly Educated Guessmaster",
+      "Almost Smart",
+      "Learning Adjacent",
+      "Wiki-Skimmer Extraordinaire",
+      "The Lukewarm Scholar",
+      "Vaguely Informed Citizen",
+      "TL;DR Specialist",
+      "Kinda Sorta Maybe Right"
+    ]
   },
   40: {
-    tier: "Mid-Wit Magic",
-    titles: ["Half-Right Hero", "Coin-Flip Conjuror", "C-Student Sorcerer", "The Mediocre Mage", "Master of the Maybe"]
-  },
-  50: {
-    tier: "Passing, Technically",
-    titles: ["Barely Brilliant", "Certified Average", "Adequate Alchemist", "Competent but Confused", "Didn't Fail Club President"]
+    tier: "Middle Ground",
+    titles: [
+      "Half-Right Hero",
+      "Coin-Flip Conjuror",
+      "C-Student Sorcerer",
+      "The Mediocre Mage",
+      "Master of the Maybe",
+      "Peak Average Performance",
+      "Solidly Mid Savant",
+      "The Gray Area Expert",
+      "Acceptably Acceptable",
+      "Neither Here Nor There Knight",
+      "Barely Brilliant",
+      "Certified Average",
+      "Adequate Alchemist",
+      "Competent but Confused",
+      "Didn't Fail Club President",
+      "The Minimum Viable Scholar",
+      "Passed By One Point",
+      "Good Enough Guru",
+      "Half Full Glass Philosopher",
+      "Survivor of the Bell Curve"
+    ]
   },
   60: {
-    tier: "Solid Effort",
-    titles: ["Journeyman of Trivia", "Sorcerer's Associate", "The Guess Knight", "Fact-Finder Apprentice", "On the Honor Roll (of Shame)"]
-  },
-  70: {
-    tier: "Actually Smart",
-    titles: ["Trivia Scholar", "Potion of Partial Genius", "Knowledge Knight", "Sage-ish", "Well-Read Rascal"]
+    tier: "Sharp Mind",
+    titles: [
+      "Journeyman of Trivia",
+      "Sorcerer's Associate",
+      "The Guess Knight",
+      "Fact-Finder Apprentice",
+      "On the Honor Roll (of Shame)",
+      "Pretty Okay Professor",
+      "Above Average Andy",
+      "B-Tier Brain Trust",
+      "The Decently Informed",
+      "Respectable, Not Remarkable",
+      "Trivia Scholar",
+      "Potion of Partial Genius",
+      "Knowledge Knight",
+      "Sage-ish",
+      "Well-Read Rascal",
+      "Nerd (Affectionate)",
+      "The Smart Friend",
+      "Quiz Night MVP Runner-Up",
+      "Impressively Informed",
+      "Humble Brainiac"
+    ]
   },
   80: {
-    tier: "Elite Tier",
-    titles: ["Quiz Conqueror", "Grand Archivist", "Fact Wizard Supreme", "Master of the Multichoice", "Cloaked in Correctness"]
-  },
-  90: {
-    tier: "Legendary Status",
-    titles: ["The Trivia Wizard", "Omniscient Oracle", "Supreme Sage of the Known Universe", "Walking Encyclopedia", "Knows Too Much, Frankly"]
+    tier: "Legendary Elite",
+    titles: [
+      "Quiz Conqueror",
+      "Grand Archivist",
+      "Fact Wizard Supreme",
+      "Master of the Multichoice",
+      "Cloaked in Correctness",
+      "The Know-It-Most",
+      "Trivia Royalty",
+      "Big Brain Energy Incarnate",
+      "Certified Smarty-Pants",
+      "Answer Whisperer Deluxe",
+      "The Trivia Wizard",
+      "Omniscient Oracle",
+      "Supreme Sage of the Known Universe",
+      "Walking Encyclopedia",
+      "Knows Too Much, Frankly",
+      "Basically Google But Human",
+      "Ridiculously Overpowered",
+      "The Final Boss of Trivia",
+      "Frighteningly Smart",
+      "Touch Grass (After This Victory Lap)"
+    ]
   }
 };
 
 function getRandomTitle(percentage: number): { title: string; tier: string } {
-  const range = Math.floor(percentage / 10) * 10;
+  const range = Math.floor(percentage / 20) * 20;
   const tierData = TITLE_TIERS[range];
   const randomTitle = tierData.titles[Math.floor(Math.random() * tierData.titles.length)];
   return { title: randomTitle, tier: tierData.tier };

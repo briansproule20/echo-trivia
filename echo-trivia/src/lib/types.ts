@@ -53,6 +53,8 @@ export interface Session {
   endedAt?: string;
   submissions: Submission[];
   score?: number;
+  earnedTitle?: string;
+  earnedTier?: string;
 }
 
 export const CATEGORIES = [

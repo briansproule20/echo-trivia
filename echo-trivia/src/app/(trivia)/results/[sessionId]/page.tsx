@@ -91,7 +91,7 @@ ${emojiGrid}
 Score: ${score}/${session.quiz.questions.length} (${percentage}%)
 
 Think you can beat me? Play at:
-https://trivia-wizard-omega.vercel.app`;
+<https://trivia-wizard-omega.vercel.app>`;
 
     if (navigator.share) {
       try {

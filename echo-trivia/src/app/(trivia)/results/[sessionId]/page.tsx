@@ -10,6 +10,57 @@ import { storage } from "@/lib/storage";
 import { CheckCircle2, XCircle, RotateCcw, Home, Share2 } from "lucide-react";
 import type { Session } from "@/lib/types";
 
+// Title grading system
+const TITLE_TIERS: Record<number, { tier: string; titles: string[] }> = {
+  0: {
+    tier: "Disaster Tier",
+    titles: ["Answerless Wanderer", "Trivia Amnesiac", "Factually Bankrupt", "Lost in the Question Void", "Did You Even Try?"]
+  },
+  10: {
+    tier: "Barely Conscious",
+    titles: ["Maybe Next Time, Champ", "The Guess Whisperer", "Partial Credit Collector", "Wrong But Confident", "Future Honorary Participant"]
+  },
+  20: {
+    tier: "Early Apprentice",
+    titles: ["Trivia Tadpole", "Wizard's Intern", "Novice of Nonsense", "Fact Fumbler", "On the Syllabus, Just Not Studied"]
+  },
+  30: {
+    tier: "Getting Warmer",
+    titles: ["Trivia Tourist", "Apprentice of Approximation", "Slightly Educated Guessmaster", "Almost Smart", "Learning Adjacent"]
+  },
+  40: {
+    tier: "Mid-Wit Magic",
+    titles: ["Half-Right Hero", "Coin-Flip Conjuror", "C-Student Sorcerer", "The Mediocre Mage", "Master of the Maybe"]
+  },
+  50: {
+    tier: "Passing, Technically",
+    titles: ["Barely Brilliant", "Certified Average", "Adequate Alchemist", "Competent but Confused", "Didn't Fail Club President"]
+  },
+  60: {
+    tier: "Solid Effort",
+    titles: ["Journeyman of Trivia", "Sorcerer's Associate", "The Guess Knight", "Fact-Finder Apprentice", "On the Honor Roll (of Shame)"]
+  },
+  70: {
+    tier: "Actually Smart",
+    titles: ["Trivia Scholar", "Potion of Partial Genius", "Knowledge Knight", "Sage-ish", "Well-Read Rascal"]
+  },
+  80: {
+    tier: "Elite Tier",
+    titles: ["Quiz Conqueror", "Grand Archivist", "Fact Wizard Supreme", "Master of the Multichoice", "Cloaked in Correctness"]
+  },
+  90: {
+    tier: "Legendary Status",
+    titles: ["The Trivia Wizard", "Omniscient Oracle", "Supreme Sage of the Known Universe", "Walking Encyclopedia", "Knows Too Much, Frankly"]
+  }
+};
+
+function getRandomTitle(percentage: number): { title: string; tier: string } {
+  const range = Math.floor(percentage / 10) * 10;
+  const tierData = TITLE_TIERS[range];
+  const randomTitle = tierData.titles[Math.floor(Math.random() * tierData.titles.length)];
+  return { title: randomTitle, tier: tierData.tier };
+}
+
 export default function ResultsPage() {
   const params = useParams();
   const router = useRouter();
@@ -34,6 +85,8 @@ export default function ResultsPage() {
   }
 
   const score = session.submissions.filter((s) => s.correct).length;
+  const percentage = Math.round((score / session.quiz.questions.length) * 100);
+  const { title: earnedTitle, tier: earnedTier } = getRandomTitle(percentage);
   const totalTime = session.endedAt && session.startedAt
     ? new Date(session.endedAt).getTime() - new Date(session.startedAt).getTime()
     : undefined;
@@ -70,8 +123,6 @@ export default function ResultsPage() {
   };
 
   const handleShare = async () => {
-    const percentage = Math.round((score / session.quiz.questions.length) * 100);
-
     // Generate emoji grid showing correct/incorrect answers
     const emojiGrid = session.quiz.questions
       .map((q, idx) => {
@@ -96,7 +147,7 @@ export default function ResultsPage() {
       dateString = date.toLocaleDateString('en-US', options);
     }
 
-    const text = `I just completed the ${dateString} Daily Challenge on Trivia Wizard! 🧙‍♂️
+    const text = `I received the rank of "${earnedTitle}" on Trivia Wizard while playing the ${dateString} Daily Challenge! 🧙‍♂️
 
 Category: ${session.quiz.category}
 ${emojiGrid}
@@ -135,6 +186,25 @@ Think you can beat me? Play at:
             totalQuestions={session.quiz.questions.length}
             timeElapsed={totalTime}
           />
+
+          {/* Earned Title Card */}
+          <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-transparent">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-3">
+                <div className="flex items-center justify-center gap-2">
+                  <Badge variant="outline" className="text-xs">
+                    {earnedTier}
+                  </Badge>
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  {earnedTitle}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Your rank for this quiz
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Quiz Info */}
           <Card>

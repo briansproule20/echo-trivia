@@ -40,7 +40,7 @@ export function Navbar() {
           </Link>
 
           {/* Center/Desktop Nav Links */}
-          {pathname === "/" && (
+          {!isAuthenticated && pathname === "/" && (
             <div className="hidden md:flex items-center gap-6">
               <Link
                 href="/getting-started"

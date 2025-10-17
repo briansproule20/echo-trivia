@@ -73,12 +73,14 @@ export default function FaqsAndDocsPage() {
                 <span className="font-semibold">What is the referral program?</span>
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground pb-4">
-                Our referral program allows you to earn 10% of the app's revenue when you share Trivia Wizard with friends.
-                When someone signs up using your referral link and makes purchases, you receive a 10% commission on their spending.
-                This helps promote our trivia-based alternative to doom scrolling while rewarding our community.{" "}
+                Our referral program allows you to earn 10% of the revenue from users YOU refer. The more users you bring
+                in and the more they play, the more revenue you earn - it's that simple! Your referral link is automatically
+                included when you share your quiz results, or you can get your personal referral link directly from the{" "}
                 <Link href="https://echo.merit.systems/app/135d6f0a-3ac9-4ff2-baba-fa1664a0bc65/referrals" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
-                  Get your referral link here! <ExternalLink className="h-3 w-3" />
+                  Echo app page <ExternalLink className="h-3 w-3" />
                 </Link>{" "}
+                to share anywhere. When someone signs up using your referral link (either from your shared scores or direct link)
+                and makes purchases, you receive 10% of their spending. More players = more revenue for you!
                 Learn more about the{" "}
                 <Link href="https://echo.merit.systems/docs/money/claiming-profits#referrals" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
                   Echo referral system <ExternalLink className="h-3 w-3" />
@@ -219,19 +221,24 @@ export default function FaqsAndDocsPage() {
                   </div>
                   <CardTitle>Referral Program</CardTitle>
                 </div>
-                <CardDescription>Earn by sharing</CardDescription>
+                <CardDescription>Earn 10% from users you refer</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 text-sm text-muted-foreground">
                 <p>
-                  Share Trivia Wizard with friends and earn 10% of the app's revenue from users who sign up with your referral link.
+                  <strong>Automatic Referrals:</strong> When you share your quiz results, your personal referral link is automatically
+                  included. Anyone who signs up through your shared scores becomes your referral!
                 </p>
                 <p>
-                  Echo's built-in referral system automatically tracks your referrals and calculates your 10% commission earnings.
-                </p>
-                <p>
+                  <strong>Direct Sharing:</strong> Get your personal referral link from the{" "}
                   <Link href="https://echo.merit.systems/app/135d6f0a-3ac9-4ff2-baba-fa1664a0bc65/referrals" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
-                    Get your referral link here! <ExternalLink className="h-3 w-3" />
-                  </Link>
+                    Echo app page <ExternalLink className="h-3 w-3" />
+                  </Link>{" "}
+                  to share on social media, with friends, or anywhere you'd like.
+                </p>
+                <p>
+                  <strong>More Players = More Revenue:</strong> You earn 10% of the revenue from every user you refer. The more
+                  people you bring in and the more they play, the more you earn. Echo automatically tracks all your referrals
+                  and calculates your earnings.
                 </p>
                 <p>
                   Help us promote a healthier alternative to mindless scrolling while earning passive income. View the full{" "}
@@ -251,21 +258,24 @@ export default function FaqsAndDocsPage() {
                   </div>
                   <CardTitle>Merit Systems & Echo</CardTitle>
                 </div>
-                <CardDescription>The platform powering this app</CardDescription>
+                <CardDescription>Infrastructure for usage-based pricing</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 text-sm text-muted-foreground">
                 <p>
+                  <strong>About Merit Systems:</strong> {" "}
                   <Link href="https://www.merit.systems/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
                     Merit Systems <ExternalLink className="h-3 w-3" />
                   </Link>
-                  {" "}provides Echo, an infrastructure platform for building usage-based AI applications.
+                  {" "}is a fintech platform backed by a16z and Blockchain Capital. They build financial infrastructure for open-source software, enabling developers to monetize their work and compensate contributors globally with instant stablecoin payments.
                 </p>
                 <p>
-                  Echo handles authentication, payment processing, usage tracking, and referral management - letting developers
-                  focus on building great apps.
+                  <strong>Echo Platform:</strong> Echo is Merit's product for monetizing AI applications. It provides authentication, payment processing, usage tracking, and referral management - letting developers build pay-per-use AI apps in minutes without building payment infrastructure from scratch.
                 </p>
                 <p>
-                  This enables transparent, pay-per-use pricing without complex subscription tiers or hidden fees.
+                  <strong>Usage-Based Pricing:</strong> No monthly subscriptions - pay only for what you use. Track your spending in real-time with your{" "}
+                  <Link href="https://echo.merit.systems/dashboard" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
+                    Echo dashboard <ExternalLink className="h-3 w-3" />
+                  </Link>.
                 </p>
               </CardContent>
             </Card>
@@ -284,7 +294,7 @@ export default function FaqsAndDocsPage() {
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
             <p>
-              We are an open source project building on the Merit Systems' Echo infrastructure. I've chosen to build
+              This is an open source project building on Merit Systems' Echo infrastructure. I've chosen to build
               Trivia Wizard on this platform because it's a service I'd like to use: trivia practice on any topic I
               want with no subscription fees.
             </p>
@@ -293,13 +303,18 @@ export default function FaqsAndDocsPage() {
               <Link href="https://briansproule.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                 me, a real human
               </Link>
-              ), not a large corporation. This allows us to maintain fair pricing and keep improving the service based
-              on what users actually need.
+              ), not a large corporation. This allows me to maintain fair pricing and keep improving the service based
+              on what users want and need.
             </p>
             <p>
-              To help promote our trivia-based alternative to doom scrolling, we offer a user referral program to
-              anyone that shares the app with friends. Refer users and get paid 10% of the app's revenue -
-              it's our way of building a community around learning and curiosity instead of mindless content consumption.
+              To help promote my trivia-based alternative to doom scrolling, I offer a user referral program.
+              When you share your quiz results, your referral link is automatically included - or you can get your
+              personal link from the{" "}
+              <Link href="https://echo.merit.systems/app/135d6f0a-3ac9-4ff2-baba-fa1664a0bc65/referrals" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                Echo app page
+              </Link>. Earn 10% of the revenue from every user you refer - the more players you bring in and the
+              more they play, the more you earn. It's my way of building a community around learning and curiosity
+              instead of mindless content consumption.
             </p>
             <div className="pt-4 flex flex-wrap gap-4">
               <Link

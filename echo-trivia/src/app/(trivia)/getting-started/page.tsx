@@ -180,7 +180,7 @@ export default function GettingStartedPage() {
                   <div className="space-y-1">
                     <p className="font-semibold text-sm">Example Cost</p>
                     <p className="text-sm text-muted-foreground">
-                      A typical 10-question quiz costs about $0.02 USD (2 cents). That's 50 quizzes per dollar!
+                      A typical 5-question quiz costs about $0.02 USD (2 cents). That's 50 quizzes per dollar!
                     </p>
                   </div>
                 </div>

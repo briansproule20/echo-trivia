@@ -82,7 +82,14 @@ export default function ResultsPage() {
 
     // Extract date from quiz description if available (format: "YYYY-MM-DD - A new challenge...")
     const dateMatch = session.quiz.description?.match(/^(\d{4}-\d{2}-\d{2})/);
-    const dateString = dateMatch ? dateMatch[1] : "today";
+    let dateString = "today";
+
+    if (dateMatch) {
+      const [year, month, day] = dateMatch[1].split('-');
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+      dateString = date.toLocaleDateString('en-US', options);
+    }
 
     const text = `I just completed ${dateString === "today" ? "today's" : dateString + "'s"} Daily Challenge on Trivia Wizard! 🧙‍♂️
 

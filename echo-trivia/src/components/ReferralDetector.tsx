@@ -6,7 +6,7 @@ import { useEcho } from "@merit-systems/echo-react-sdk";
 
 /**
  * Global component that detects referral codes in URL and registers them
- * Listens for ?ref=USER_ID query parameter
+ * Listens for ?referral_code=USER_ID query parameter
  */
 export function ReferralDetector() {
   const searchParams = useSearchParams();
@@ -19,7 +19,7 @@ export function ReferralDetector() {
       if (hasRegistered.current) return;
 
       // Get referral code from URL
-      const referralCode = searchParams.get("ref");
+      const referralCode = searchParams.get("referral_code");
       if (!referralCode) return;
 
       // User must be authenticated to register a referral

@@ -238,7 +238,7 @@ export default function ResultsPage() {
     let shareUrl = "https://trivia-wizard-omega.vercel.app";
     try {
       if (echo.user?.id) {
-        shareUrl += `?ref=${echo.user.id}`;
+        shareUrl += `?referral_code=${echo.user.id}`;
       }
     } catch (error) {
       console.error("Failed to get user referral code:", error);

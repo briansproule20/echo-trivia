@@ -43,14 +43,10 @@ export function ReferralDetector() {
           return;
         }
 
-        console.log("Registering referral code:", referralCode);
-        const result = await echo.users.registerReferralCode(appId, referralCode);
-
-        if (result.success) {
-          console.log("✅ Referral registered successfully:", result.message);
-        } else {
-          console.log("ℹ️ Referral registration:", result.message);
-        }
+        console.log("Referral code detected:", referralCode);
+        // Store referral code in localStorage for later processing
+        localStorage.setItem('pendingReferralCode', referralCode);
+        console.log("✅ Referral code stored for processing");
       } catch (error) {
         console.error("Failed to register referral:", error);
         hasRegistered.current = false; // Allow retry on next page load
@@ -58,7 +54,7 @@ export function ReferralDetector() {
     };
 
     registerReferral();
-  }, [searchParams, echo.user, echo.users]);
+  }, [searchParams, echo.user]);
 
   // This component doesn't render anything
   return null;

@@ -9,6 +9,7 @@ import { ScoreBanner } from "@/components/trivia/ScoreBanner";
 import { storage } from "@/lib/storage";
 import { CheckCircle2, XCircle, RotateCcw, Home, Share2 } from "lucide-react";
 import type { Session } from "@/lib/types";
+import { useEcho } from "@merit-systems/echo-react-sdk";
 
 // Title grading system (20% ranges)
 const TITLE_TIERS: Record<number, { tier: string; titles: string[] }> = {
@@ -150,7 +151,8 @@ export default function ResultsPage() {
   const params = useParams();
   const router = useRouter();
   const sessionId = params.sessionId as string;
-  
+  const echo = useEcho();
+
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
@@ -232,6 +234,16 @@ export default function ResultsPage() {
       dateString = date.toLocaleDateString('en-US', options);
     }
 
+    // Get user's referral code and add to URL
+    let shareUrl = "https://trivia-wizard-omega.vercel.app";
+    try {
+      if (echo.user?.id) {
+        shareUrl += `?ref=${echo.user.id}`;
+      }
+    } catch (error) {
+      console.error("Failed to get user referral code:", error);
+    }
+
     const text = `I received the rank of "${earnedTitle}" on Trivia Wizard while playing the ${dateString} Daily Challenge! 🧙‍♂️
 
 Category: ${session.quiz.category}
@@ -239,7 +251,7 @@ ${emojiGrid}
 Score: ${score}/${session.quiz.questions.length} (${percentage}%)
 
 Think you can beat me? Play at:
-<https://trivia-wizard-omega.vercel.app>`;
+<${shareUrl}>`;
 
     if (navigator.share) {
       try {

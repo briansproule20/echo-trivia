@@ -73,9 +73,6 @@ export enum Region {
   AMERICAS = 1,
   EUROPE = 2,
   ASIA = 3,
-  AFRICA = 4,
-  OCEANIA = 5,
-  MIXED = 6,
 }
 const REGIONS = Object.values(Region).filter(v => typeof v === "number") as Region[];
 
@@ -148,7 +145,7 @@ export const Labels = {
   QuestionType: ["multiple_choice", "true_false", "fill_blank", "ordering"],
   Tone: ["scholarly", "playful", "cinematic", "pub_quiz", "deadpan", "sports_banter"],
   Era: ["ancient", "medieval", "early_modern", "modern", "contemporary", "mixed"],
-  Region: ["global", "americas", "europe", "asia", "africa", "oceania", "mixed"],
+  Region: ["global", "americas", "europe", "asia"],
   DistractorStyle: ["close_shaves", "same_category", "temporal_confusion", "numerical_nearby"],
   ExplanationStyle: ["one_line_fact", "compare_contrast", "mini_story", "why_wrong"],
 } as const;

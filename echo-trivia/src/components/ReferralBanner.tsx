@@ -1,15 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export function ReferralBanner() {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    // Check if banner has been closed before
+    const bannerClosed = localStorage.getItem("referralBannerClosed");
+    if (!bannerClosed) {
+      setIsVisible(true);
+    }
+  }, []);
 
   const handleClose = () => {
     setIsVisible(false);
+    localStorage.setItem("referralBannerClosed", "true");
   };
 
   if (!isVisible) return null;

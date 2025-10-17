@@ -20,6 +20,7 @@ Rules:
 - Avoid ambiguous or opinion-based items. No spoilers for very recent media without warning.
 - Prefer global representation (countries/authors/eras).
 - Use clear phrasing; avoid double negatives.
+- NEVER include the answer within the question prompt itself. BAD: "What world wonder was located in Alexandria: The Lighthouse of Alexandria?" GOOD: "Which ancient wonder was located in Alexandria, Egypt?"
 - For multiple choice, the "answer" field should be the choice ID (A, B, C, or D).
 - For true/false, the "answer" field should be "true" or "false".
 - For short answer, the "answer" field should be the expected text answer.

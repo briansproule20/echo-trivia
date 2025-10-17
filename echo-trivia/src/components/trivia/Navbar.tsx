@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, BookOpen } from "lucide-react";
+import { Menu, BookOpen, FileQuestion } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { EchoAccount } from "@/components/echo-account-next";
@@ -61,8 +61,8 @@ export function Navbar() {
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-                <SheetHeader>
+              <SheetContent side="right" className="w-[300px] sm:w-[400px] flex flex-col">
+                <SheetHeader className="shrink-0">
                   <SheetTitle className="flex items-center space-x-2">
                     <img
                       src="/trivia-wizard-logo.png"
@@ -72,7 +72,7 @@ export function Navbar() {
                     <span>Navigation</span>
                   </SheetTitle>
                 </SheetHeader>
-                <div className="flex flex-col space-y-6 mt-8">
+                <div className="flex flex-col space-y-6 mt-8 overflow-y-auto flex-1 pr-2">
                   {/* Theme Toggle */}
                   <div className="flex items-center justify-between px-3 py-2 border-b">
                     <span className="text-sm font-medium">Theme</span>
@@ -116,6 +116,19 @@ export function Navbar() {
                     >
                       <BookOpen className="h-4 w-4" />
                       Getting Started
+                    </Link>
+
+                    {/* FAQs and Docs */}
+                    <Link
+                      href="/faqs-and-docs"
+                      className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
+                        pathname === "/faqs-and-docs"
+                          ? "text-primary bg-primary/10"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      <FileQuestion className="h-4 w-4" />
+                      FAQs & Docs
                     </Link>
                   </div>
                 </div>

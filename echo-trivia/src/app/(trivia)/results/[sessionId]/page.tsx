@@ -11,7 +11,7 @@ import { CheckCircle2, XCircle, RotateCcw, Home, Share2 } from "lucide-react";
 import type { Session } from "@/lib/types";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 
-// Title grading system (20% ranges)
+// Title grading system
 const TITLE_TIERS: Record<number, { tier: string; titles: string[] }> = {
   0: {
     tier: "Disaster Zone",
@@ -120,27 +120,65 @@ const TITLE_TIERS: Record<number, { tier: string; titles: string[] }> = {
       "Grand Archivist",
       "Fact Wizard Supreme",
       "Master of the Multichoice",
-      "Cloaked in Correctness",
       "The Know-It-Most",
       "Trivia Royalty",
-      "Big Brain Energy Incarnate",
       "Certified Smarty-Pants",
       "Answer Whisperer Deluxe",
       "The Trivia Wizard",
+      "Walking Encyclopedia",
+      "Elite Scholar",
+      "Knowledge Virtuoso",
+      "Trivia Champion",
+      "Nearly Unstoppable",
+      "High Scorer Extraordinaire",
+      "Wisdom Keeper",
+      "Master Quizzer",
+      "Exceptional Mind",
+      "Top-Tier Intellect",
+      "Almost Flawless"
+    ]
+  },
+  100: {
+    tier: "Absolute Perfection",
+    titles: [
+      "Flawless Victory",
+      "Perfect Score Prodigy",
+      "Untouchable Genius",
+      "Zero Mistakes Deity",
       "Omniscient Oracle",
       "Supreme Sage of the Known Universe",
-      "Walking Encyclopedia",
+      "Maximum Brain Power",
+      "The Chosen One",
+      "Unbeatable Champion",
+      "Peak Human Performance",
+      "God-Tier Intellect",
+      "Infallible Oracle",
+      "Literally Perfect",
+      "Built Different",
+      "Nobody Does It Better",
+      "The GOAT",
       "Knows Too Much, Frankly",
       "Basically Google But Human",
       "Ridiculously Overpowered",
       "The Final Boss of Trivia",
       "Frighteningly Smart",
-      "Touch Grass (After This Victory Lap)"
+      "Touch Grass (After This Victory Lap)",
+      "Big Brain Energy Incarnate",
+      "Cloaked in Correctness",
+      "Error-Free Excellence"
     ]
   }
 };
 
 function getRandomTitle(percentage: number): { title: string; tier: string } {
+  // Special case for perfect score
+  if (percentage === 100) {
+    const tierData = TITLE_TIERS[100];
+    const randomTitle = tierData.titles[Math.floor(Math.random() * tierData.titles.length)];
+    return { title: randomTitle, tier: tierData.tier };
+  }
+
+  // For all other scores, use 20% ranges
   const range = Math.floor(percentage / 20) * 20;
   const tierData = TITLE_TIERS[range];
   const randomTitle = tierData.titles[Math.floor(Math.random() * tierData.titles.length)];

@@ -4,11 +4,12 @@ An AI-powered trivia platform built with Next.js, Echo billing integration, and 
 
 ## Features
 
-- **Daily Quiz** - One curated quiz per day with deterministic seeding
+- **Daily Quiz** - One curated quiz per day with deterministic category rotation
 - **Practice Mode** - Customize category, difficulty, question type, and style
 - **Quiz Builder** - Create custom quizzes manually or with AI assistance
 - **Interactive Play** - Beautiful quiz runner with timer, progress tracking, and keyboard shortcuts
 - **Results & Review** - Detailed scoring, explanations, and performance tracking
+- **Recipe System** - Deterministic quiz generation with configurable variety (tone, era, region, difficulty curves)
 
 ## Tech Stack
 
@@ -67,15 +68,43 @@ src/
 │   ├── store.ts           # Zustand stores
 │   ├── db.ts              # IndexedDB wrapper
 │   ├── storage.ts         # Storage API (exports from db.ts)
-│   └── quiz-utils.ts      # Quiz helpers
+│   ├── quiz-utils.ts      # Quiz helpers & title generation
+│   ├── rand.ts            # Deterministic randomness utilities
+│   └── recipe.ts          # Recipe system (enums, builder)
 └── echo/
     └── index.ts           # Echo SDK setup
 ```
 
+## Quiz Generation: Seed → Recipe → LLM Pipeline
+
+Trivia Wizard uses a deterministic recipe system for quiz generation:
+
+1. **Seed Generation**
+   - **Daily Quizzes**: Deterministic seed based on `date + category` (same inputs = same recipe)
+   - **Practice Quizzes**: Random 32-byte seed (unique recipe every time)
+
+2. **Recipe Building**
+   A recipe is deterministically generated from the seed and includes:
+   - **Tone**: scholarly, playful, cinematic, pub_quiz, deadpan, sports_banter
+   - **Era**: ancient, medieval, early_modern, modern, contemporary, mixed
+   - **Region**: global, americas, europe, asia
+   - **Difficulty Curve**: 3 predefined patterns (ramp, wave, valley)
+   - **Distractor Styles**: close_shaves, same_category, temporal_confusion, numerical_nearby
+   - **Explanation Style**: one_line_fact, compare_contrast, mini_story, why_wrong
+
+3. **LLM Generation**
+   The LLM receives the recipe as constraints and generates questions matching the specified tone, era, region, and difficulty progression. The LLM **never decides config** - it only fills content based on the deterministic recipe.
+
+**Why this approach?**
+- Daily quizzes are reproducible (same recipe for the same day's challenge)
+- Practice quizzes have infinite variety (random recipes)
+- No free-form config strings - all parameters are predefined enums
+- Large permutation space ensures unique quiz experiences
+
 ## API Routes
 
 ### POST /api/trivia/generate
-Generate quiz questions using AI.
+Generate quiz questions using AI with recipe system.
 
 **Request:**
 ```json
@@ -84,9 +113,9 @@ Generate quiz questions using AI.
     "category": "Science",
     "numQuestions": 10,
     "difficulty": "mixed",
-    "type": "mixed",
-    "style": "classic"
-  }
+    "type": "mixed"
+  },
+  "dailyDate": "2025-10-17"  // Optional: for deterministic daily quizzes
 }
 ```
 

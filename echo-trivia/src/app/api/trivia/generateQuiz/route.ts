@@ -73,7 +73,6 @@ RECIPE:
 - question_types: ${toLabel(recipe.questionTypes as unknown as number[], Labels.QuestionType).join(", ")}
 - tone: ${Labels.Tone[recipe.tone]}
 - era: ${Labels.Era[recipe.era]}
-- region: ${Labels.Region[recipe.region]}
 - distractor_styles: ${toLabel(recipe.distractors as unknown as number[], Labels.DistractorStyle).join(", ")}
 - explanation_style: ${Labels.ExplanationStyle[recipe.explanation]}
 
@@ -86,7 +85,7 @@ INSTRUCTIONS:
 - Use distractor styles: ${toLabel(recipe.distractors as unknown as number[], Labels.DistractorStyle).join(", ")}
 - Write explanations in the "${Labels.ExplanationStyle[recipe.explanation]}" style
 - Apply the "${Labels.Tone[recipe.tone]}" tone throughout
-- Focus on the "${Labels.Era[recipe.era]}" era and "${Labels.Region[recipe.region]}" region when relevant
+- Focus on the "${Labels.Era[recipe.era]}" era when relevant
 - Use question types: ${toLabel(recipe.questionTypes as unknown as number[], Labels.QuestionType).join(", ")}
 
 Generate a creative title and description for this quiz based on the recipe.

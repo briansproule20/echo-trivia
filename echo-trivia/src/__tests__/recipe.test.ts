@@ -69,10 +69,9 @@ function testEnumSafety() {
   assert(recipe.questionTypes.length > 0, "questionTypes must not be empty");
   assert(recipe.distractors.length === 2, "distractors must have exactly 2 elements");
 
-  // Check tone, era, region, explanation are numbers (enum values)
+  // Check tone, era, explanation are numbers (enum values)
   assert(typeof recipe.tone === "number", "tone must be an enum number");
   assert(typeof recipe.era === "number", "era must be an enum number");
-  assert(typeof recipe.region === "number", "region must be an enum number");
   assert(typeof recipe.explanation === "number", "explanation must be an enum number");
 
   console.log("✓ Enum safety test passed");

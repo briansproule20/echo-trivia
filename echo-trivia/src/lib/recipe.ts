@@ -68,14 +68,6 @@ export enum Era {
 }
 const ERAS = Object.values(Era).filter(v => typeof v === "number") as Era[];
 
-export enum Region {
-  GLOBAL = 0,
-  AMERICAS = 1,
-  EUROPE = 2,
-  ASIA = 3,
-}
-const REGIONS = Object.values(Region).filter(v => typeof v === "number") as Region[];
-
 export enum DistractorStyle {
   CLOSE_SHAVES = 0,
   SAME_CATEGORY = 1,
@@ -106,7 +98,6 @@ export interface Recipe {
   questionTypes: QuestionType[];
   tone: Tone;
   era: Era;
-  region: Region;
   distractors: DistractorStyle[];
   explanation: ExplanationStyle;
 }
@@ -118,7 +109,6 @@ export function buildRecipeFromSeed(seedHex: string, opts?: { fixedNumQuestions?
 
   const tone = rollFrom(seedHex, "tone", TONES);
   const era = rollFrom(seedHex, "era", ERAS);
-  const region = rollFrom(seedHex, "region", REGIONS);
   const categoryMix = rollSample(seedHex, "categories", CATEGORIES, kCats);
   const questionTypes = rollSample(seedHex, "qtypes", QT, kQTypes);
   const distractors = rollSample(seedHex, "distractors", DS, 2);
@@ -133,7 +123,6 @@ export function buildRecipeFromSeed(seedHex: string, opts?: { fixedNumQuestions?
     questionTypes,
     tone,
     era,
-    region,
     distractors,
     explanation,
   };
@@ -145,7 +134,6 @@ export const Labels = {
   QuestionType: ["multiple_choice", "true_false", "fill_blank", "ordering"],
   Tone: ["scholarly", "playful", "cinematic", "pub_quiz", "deadpan", "sports_banter"],
   Era: ["ancient", "medieval", "early_modern", "modern", "contemporary", "mixed"],
-  Region: ["global", "americas", "europe", "asia"],
   DistractorStyle: ["close_shaves", "same_category", "temporal_confusion", "numerical_nearby"],
   ExplanationStyle: ["one_line_fact", "compare_contrast", "mini_story", "why_wrong"],
 } as const;

@@ -32,7 +32,7 @@ CRITICAL - Variety & Freshness:
 - MEDIUM questions: Should explore more specific topics. Avoid the most overused facts. Use interesting angles.
 - HARD questions: Must be unique and challenging. Dig deep into lesser-known facts, surprising connections, or edge cases.
 - Explore diverse subtopics within each category. Don't recycle the same angles or famous examples repeatedly.
-- For each quiz, vary time periods, regions, people, events, or concepts.
+- For each quiz, vary time periods, people, events, or concepts.
 - Avoid patterns like "always asking about the same wars, same scientists, same books, same movies."
 - Each quiz should feel distinct from previous quizzes at ALL difficulty levels.
 - NEVER repeat the same question or extremely similar variations across different generations.
@@ -125,7 +125,6 @@ export async function POST(req: Request) {
 RECIPE CONSTRAINTS:
 - tone: ${Labels.Tone[recipe.tone]}
 - era: ${Labels.Era[recipe.era]}
-- region: ${Labels.Region[recipe.region]}
 - distractor_styles: ${toLabel(recipe.distractors as unknown as number[], Labels.DistractorStyle).join(", ")}
 - explanation_style: ${Labels.ExplanationStyle[recipe.explanation]}
 
@@ -145,7 +144,7 @@ INSTRUCTIONS:
 - Use distractor styles: ${toLabel(recipe.distractors as unknown as number[], Labels.DistractorStyle).join(", ")}
 - Write explanations in the "${Labels.ExplanationStyle[recipe.explanation]}" style
 - Apply the "${Labels.Tone[recipe.tone]}" tone throughout
-- Focus on the "${Labels.Era[recipe.era]}" era and "${Labels.Region[recipe.region]}" region when relevant
+- Focus on the "${Labels.Era[recipe.era]}" era when relevant
 - EASY questions: Should be accessible but NOT obvious or trivial - avoid the most famous facts everyone already knows
 - MEDIUM questions: Should explore more specific topics and interesting angles
 - HARD questions: Must be unique and challenging with lesser-known facts

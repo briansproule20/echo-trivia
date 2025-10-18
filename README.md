@@ -15,9 +15,8 @@ An AI-powered trivia platform built with Next.js, Echo billing integration, and 
 - **Styling**: Tailwind CSS + shadcn/ui
 - **AI**: Vercel AI SDK + Echo LLM Provider
 - **Billing**: Echo metered LLM usage
-- **State**: Zustand
-- **Validation**: Zod
 - **Storage**: IndexedDB (for sessions, quizzes, stats)
+- **Hosting**: Vercel
 
 ## Getting Started
 
@@ -47,8 +46,6 @@ src/
 │   ├── (trivia)/
 │   │   ├── daily/          # Daily quiz page
 │   │   ├── practice/       # Practice mode
-│   │   ├── builder/        # Quiz builder
-│   │   ├── play/          # Quiz runner
 │   │   └── results/       # Results page
 │   ├── api/
 │   │   ├── echo/          # Echo auth routes
@@ -166,7 +163,7 @@ IndexedDB provides:
 - Structured data storage
 - Async API for non-blocking operations
 
-## Features to Implement (Optional)
+## Features Coming Soon!
 
 - [ ] Leaderboard (local & server)
 - [ ] Image-based questions

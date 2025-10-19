@@ -119,7 +119,7 @@ ${emojiGrid}
 Score: ${score}/${session.quiz.questions.length} (${percentage}%)
 
 Think you can beat me? Play at:
-<${shareUrl}>`;
+${shareUrl}`;
 
     if (navigator.share) {
       try {

@@ -3,7 +3,14 @@
     "allow": [
       "Bash(npm install:*)",
       "Bash(npm run dev)",
-      "Bash(node test-daily.js)"
+      "Bash(node test-daily.js)",
+      "Read(//Users/briansproule/**)",
+      "Bash(cd:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Read(//var/folders/yf/0r8xvrz93yb1d86j9r8pz7900000gn/T/TemporaryItems/NSIRD_screencaptureui_7N8fIV/**)",
+      "Bash(convert trivia-wizard-logo.png -resize 200x200 -strip -quality 85 og-image.png)",
+      "WebFetch(domain:www.merit.systems)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

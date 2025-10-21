@@ -37,12 +37,28 @@ export function ReferralDetector() {
       hasRegistered.current = true;
       console.log("Referral code detected:", referralCode);
 
-      // Store referral code for later use
-      // The referral system will be implemented in a future update
-      localStorage.setItem("pending_referral_code", referralCode);
-      console.log("✅ Referral code saved for registration");
+      // Make POST request to Echo API to register the referral
+      const response = await fetch("https://echo.merit.systems/api/v1/user/referral", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          echoAppId: process.env.NEXT_PUBLIC_ECHO_APP_ID,
+          code: referralCode,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to register referral: ${response.status} ${response.statusText}`);
+      }
+
+      console.log("✅ Referral code successfully registered");
+
+      // Clear any pending referral code from localStorage
+      localStorage.removeItem("pending_referral_code");
     } catch (error) {
-      console.error("Failed to save referral code:", error);
+      console.error("Failed to register referral code:", error);
       hasRegistered.current = false; // Allow retry on next page load
     }
   }, [searchParams, echo.user]);

@@ -112,13 +112,12 @@ export default function ResultsPage() {
       console.error("Failed to get user referral code:", error);
     }
 
-    const text = `I received the rank of "${earnedTitle}" on Trivia Wizard while playing the ${dateString} Daily Challenge! 🧙‍♂️
+    const text = `I received the rank of "${earnedTitle}" on Trivia Wizard! 🧙‍♂️
 
 Category: ${session.quiz.category}
 ${emojiGrid}
 Score: ${score}/${session.quiz.questions.length} (${percentage}%)
 
-Think you can beat me? Play at:
 ${shareUrl}`;
 
     if (navigator.share) {

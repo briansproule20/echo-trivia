@@ -18,25 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Trivia Wizard - AI-Powered Trivia Platform',
-  description: 'Test knowledge, challenge yourself, and learn something new every day with AI-powered trivia quizzes.',
-  openGraph: {
-    title: 'Trivia Wizard',
-    description: 'AI-Powered Trivia - Test your knowledge!',
-    images: [{
-      url: '/trivia-wizard-logo.png',
-      width: 1200,
-      height: 630,
-      alt: 'Trivia Wizard Logo',
-    }],
-    type: 'website',
-    siteName: 'Trivia Wizard',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Trivia Wizard',
-    description: 'AI-Powered Trivia - Test your knowledge!',
-    images: ['/trivia-wizard-logo.png'],
-  },
+  description: 'Daily challenge + infinite practice. Built on Echo.',
   icons: {
     icon: '/trivia-wizard-logo.png',
     apple: '/trivia-wizard-logo.png',

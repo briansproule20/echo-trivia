@@ -10,7 +10,15 @@
       "Read(//var/folders/yf/0r8xvrz93yb1d86j9r8pz7900000gn/T/TemporaryItems/NSIRD_screencaptureui_7N8fIV/**)",
       "Bash(convert trivia-wizard-logo.png -resize 200x200 -strip -quality 85 og-image.png)",
       "WebFetch(domain:www.merit.systems)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(convert:*)",
+      "Read(//var/folders/yf/0r8xvrz93yb1d86j9r8pz7900000gn/T/TemporaryItems/NSIRD_screencaptureui_Hk8uCH/**)",
+      "Read(//var/folders/yf/0r8xvrz93yb1d86j9r8pz7900000gn/T/TemporaryItems/NSIRD_screencaptureui_5zX5hY/**)",
+      "Bash(identify:*)",
+      "Bash(git add:*)",
+      "Bash(lsof:*)",
+      "Bash(kill:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

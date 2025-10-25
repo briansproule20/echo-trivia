@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Trivia Wizard - AI-Powered Trivia Platform',
+  title: 'Trivia Wizard',
   description: 'Daily challenge + infinite practice. Built on Echo.',
   icons: {
     icon: '/trivia-wizard-logo.png',

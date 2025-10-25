@@ -57,12 +57,139 @@ const SCHEMA_TEMPLATE = `{
   ]
 }`;
 
+// Simple non-seeded generation for custom categories
+async function generateCustomCategoryQuiz(settings: any) {
+  try {
+    const typeInstruction =
+      settings.type === "mixed"
+        ? "Mix of multiple choice, true/false, and short answer questions"
+        : settings.type === "multiple_choice"
+        ? "All questions should be multiple choice with EXACTLY 4 options (A, B, C, D)"
+        : settings.type === "true_false"
+        ? "All questions should be true/false"
+        : "All questions should be short answer";
+
+    const difficultyInstruction =
+      settings.difficulty === "mixed"
+        ? "Mix easy, medium, and hard questions"
+        : `All questions should be ${settings.difficulty} difficulty`;
+
+    const prompt = `Generate ${settings.numQuestions} trivia questions about ${settings.category}.
+
+${typeInstruction}.
+${difficultyInstruction}.
+
+CRITICAL: The "category" field in your response MUST be EXACTLY: "${settings.category}"
+Do NOT change, normalize, or abbreviate the category name.
+
+INSTRUCTIONS:
+- Create ${settings.numQuestions} diverse, interesting questions
+- For multiple_choice, include exactly 4 options with exactly 1 correct
+- EASY questions: accessible but NOT trivial - avoid overly famous facts
+- MEDIUM questions: more specific topics and interesting angles
+- HARD questions: unique and challenging with lesser-known facts
+- Include concise explanations (1-2 sentences) for each question
+- Make each question feel distinct and original
+
+Return ONLY valid JSON matching this schema:
+${SCHEMA_TEMPLATE}
+
+Make the quiz engaging and educational. Ensure all questions are factually accurate.`;
+
+    // Generate without recipe system
+    const result = await generateText({
+      model: anthropic("claude-sonnet-4-20250514"),
+      system: GENERATION_SYSTEM_PROMPT,
+      prompt,
+      temperature: 1.0, // Higher temperature for more variety in custom quizzes
+    });
+
+    // Parse and validate response
+    let quiz;
+    try {
+      const jsonMatch = result.text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error("No JSON found in response");
+      }
+      const parsed = JSON.parse(jsonMatch[0]);
+      quiz = QuizSchema.parse({
+        ...parsed,
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      // Try to repair JSON with LLM
+      console.error("JSON parsing failed, attempting repair:", error);
+
+      const repairResult = await generateText({
+        model: anthropic("claude-sonnet-4-20250514"),
+        system: "You fix invalid JSON to match a schema. Return ONLY the corrected JSON.",
+        prompt: `Fix this JSON to match the schema:\n\nInvalid JSON:\n${result.text}\n\nRequired Schema:\n${SCHEMA_TEMPLATE}`,
+      });
+
+      const repairedJson = repairResult.text.match(/\{[\s\S]*\}/)?.[0];
+      if (!repairedJson) {
+        throw new Error("Failed to repair JSON");
+      }
+
+      const parsed = JSON.parse(repairedJson);
+      quiz = QuizSchema.parse({
+        ...parsed,
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+      });
+    }
+
+    // Ensure choices are in A, B, C, D order
+    quiz.questions = quiz.questions.map((q) => {
+      if (q.type === "multiple_choice" && q.choices) {
+        const sortedChoices = [...q.choices].sort((a, b) => a.id.localeCompare(b.id));
+
+        if (sortedChoices.length !== 4) {
+          console.warn(`Question ${q.id} has ${sortedChoices.length} choices, expected 4`);
+        }
+
+        return {
+          ...q,
+          choices: sortedChoices,
+        };
+      }
+      return q;
+    });
+
+    // Force the category to match exactly what was requested
+    quiz.category = settings.category;
+    quiz.questions = quiz.questions.map((q) => ({
+      ...q,
+      category: settings.category,
+    }));
+
+    return NextResponse.json(quiz);
+  } catch (error) {
+    console.error("Generate custom category quiz error:", error);
+    return NextResponse.json(
+      { error: "Failed to generate quiz", details: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const settings = PlaySettingsSchema.parse(body.settings);
     const { dailyDate } = body; // Optional: for daily quizzes
 
+    // Map category string to enum (if it exists in our predefined categories)
+    const categoryEnum = categoryStringToEnum(settings.category);
+    const isCustomCategory = categoryEnum === undefined;
+
+    // For custom categories: skip recipe system and use simple generation
+    if (isCustomCategory && !dailyDate) {
+      return generateCustomCategoryQuiz(settings);
+    }
+
+    // For daily quizzes and established categories: use seeded recipe system
     // Generate deterministic seed
     let seedHex: string;
     if (dailyDate) {
@@ -70,28 +197,20 @@ export async function POST(req: Request) {
       const dailyHash = hashString(`${dailyDate}-${settings.category}`);
       seedHex = dailyHash.toString(16).padStart(64, '0').slice(0, 64);
     } else {
-      // For practice quizzes: random seed
+      // For practice quizzes with established categories: random seed
       seedHex = generateSeed();
     }
-
-    // Map category string to enum (if it exists in our predefined categories)
-    const categoryEnum = categoryStringToEnum(settings.category);
 
     // Build recipe from seed
     const recipe = buildRecipeFromSeed(seedHex, {
       fixedNumQuestions: settings.numQuestions === 5 ? 5 : 10,
     });
 
-    // If user specified a category that's in our enum, use it as primary category
-    // Otherwise, use the first category from the recipe mix
-    const primaryCategory = categoryEnum !== undefined
-      ? categoryEnumToString(categoryEnum)
-      : settings.category; // Use custom category as-is
+    // Use the specified category as primary category
+    const primaryCategory = categoryEnumToString(categoryEnum);
 
-    // Get categories to include in the quiz
-    const categoryStrings = categoryEnum !== undefined
-      ? [primaryCategory] // Use only the specified category for focused quizzes
-      : recipe.categoryMix.map(cat => categoryEnumToString(cat)); // Use recipe mix for variety
+    // Get categories to include in the quiz (only the specified category)
+    const categoryStrings = [primaryCategory];
 
     // Get the difficulty curve for this recipe
     const curve = DIFFICULTY_CURVES[recipe.difficultyCurveId].slice(0, recipe.numQuestions);

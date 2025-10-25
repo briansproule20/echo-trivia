@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles, Loader2, Lock } from "lucide-react";
 import { storage } from "@/lib/storage";
-import { getTodayString, generateId } from "@/lib/quiz-utils";
+import { getTodayString, getTodayFormatted, generateId } from "@/lib/quiz-utils";
 import { usePlayStore } from "@/lib/store";
 import type { Quiz, Session } from "@/lib/types";
 import { useEcho } from "@merit-systems/echo-react-sdk";
@@ -135,16 +135,21 @@ export default function DailyQuizPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pb-8">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-3xl mx-auto space-y-8">
+      <div className="container mx-auto px-3 py-6 sm:px-4 sm:py-12">
+        <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
           {/* Header */}
-          <div className="text-center mb-12 space-y-4">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent leading-tight pb-1">
+          <div className="text-center mb-6 sm:mb-12 space-y-2 sm:space-y-4">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent leading-tight pb-1">
               Daily Challenge
             </h1>
-            <p className="text-xl text-muted-foreground">
-              {getTodayString()} - One challenge per day, infinite attempts
-            </p>
+            <div className="space-y-1">
+              <p className="text-base sm:text-lg font-semibold text-foreground">
+                {getTodayFormatted()}
+              </p>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                One challenge per day, infinite attempts
+              </p>
+            </div>
           </div>
 
           {/* Loading State */}

@@ -24,17 +24,17 @@ export function ScoreBanner({ score, totalQuestions, timeElapsed }: ScoreBannerP
   const { grade, color, emoji } = getGrade(accuracy);
 
   return (
-    <Card className="p-8 text-center bg-gradient-to-br from-primary/5 to-primary/10">
-      <div className="space-y-6">
-        <div className="text-6xl">{emoji}</div>
+    <Card className="p-4 sm:p-6 lg:p-8 text-center bg-gradient-to-br from-primary/5 to-primary/10">
+      <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+        <div className="text-4xl sm:text-5xl lg:text-6xl">{emoji}</div>
         <div>
-          <div className={`text-6xl font-bold ${color} mb-2`}>{percentage}%</div>
-          <div className="text-2xl font-semibold text-muted-foreground mb-1">
+          <div className={`text-4xl sm:text-5xl lg:text-6xl font-bold ${color} mb-1 sm:mb-2`}>{percentage}%</div>
+          <div className="text-lg sm:text-xl lg:text-2xl font-semibold text-muted-foreground mb-1">
             Grade: {grade}
           </div>
         </div>
 
-        <div className="flex justify-center gap-8 text-sm">
+        <div className="flex justify-center gap-4 sm:gap-6 lg:gap-8 text-sm">
           <div className="flex flex-col items-center">
             <Target className="h-5 w-5 text-muted-foreground mb-1" />
             <div className="font-semibold">

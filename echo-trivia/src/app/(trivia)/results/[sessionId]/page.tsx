@@ -142,8 +142,8 @@ ${shareUrl}`;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <div className="container mx-auto px-3 py-6 sm:px-4 sm:py-12">
+        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
           {/* Score Banner */}
           <ScoreBanner
             score={score}
@@ -153,7 +153,7 @@ ${shareUrl}`;
 
           {/* Earned Title Card */}
           <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-transparent">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6">
               <div className="text-center space-y-3">
                 <div className="flex items-center justify-center gap-2">
                   <Badge variant="outline" className="text-xs">
@@ -200,13 +200,13 @@ ${shareUrl}`;
                 return (
                   <div
                     key={question.id}
-                    className={`p-4 rounded-lg border ${
+                    className={`p-3 sm:p-4 rounded-lg border ${
                       isCorrect
                         ? "border-green-500 bg-green-50 dark:bg-green-950/20"
                         : "border-red-500 bg-red-50 dark:bg-red-950/20"
                     }`}
                   >
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start justify-between mb-2 sm:mb-3">
                       <div className="flex items-start space-x-3 flex-1">
                         {isCorrect ? (
                           <CheckCircle2 className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />

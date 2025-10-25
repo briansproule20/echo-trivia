@@ -137,14 +137,14 @@ function PracticeContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-3 py-6 sm:px-4 sm:py-12">
         <div className="max-w-3xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-12 space-y-4">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent leading-tight pb-1">
+          <div className="text-center mb-6 sm:mb-12 space-y-2 sm:space-y-4">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent leading-tight pb-1">
               Practice Mode
             </h1>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-sm sm:text-base lg:text-xl text-muted-foreground">
               Customize and play instantly
             </p>
           </div>

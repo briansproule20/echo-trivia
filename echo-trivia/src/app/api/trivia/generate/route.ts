@@ -207,6 +207,9 @@ export async function POST(req: Request) {
     });
 
     // Use the specified category as primary category
+    if (!categoryEnum) {
+      throw new Error('Category enum is required for established categories');
+    }
     const primaryCategory = categoryEnumToString(categoryEnum);
 
     // Get categories to include in the quiz (only the specified category)

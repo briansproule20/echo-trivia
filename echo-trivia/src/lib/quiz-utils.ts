@@ -76,6 +76,16 @@ export function getTodayString(): string {
   return `${year}-${month}-${day}`;
 }
 
+// Get current date in human-readable format: "25 October 2025"
+export function getTodayFormatted(): string {
+  const now = new Date();
+  const estDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const day = estDate.getDate();
+  const month = estDate.toLocaleString('en-US', { month: 'long' });
+  const year = estDate.getFullYear();
+  return `${day} ${month} ${year}`;
+}
+
 // Calculate quiz score
 export function calculateScore(quiz: Quiz, submissions: Array<{ correct: boolean }>): number {
   if (submissions.length === 0) return 0;

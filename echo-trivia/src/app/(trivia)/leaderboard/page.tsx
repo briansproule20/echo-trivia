@@ -129,10 +129,15 @@ export default function LeaderboardPage() {
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                            <div className="flex flex-col items-end gap-0.5 shrink-0">
                               <Badge variant="secondary" className="text-sm sm:text-lg font-bold">
                                 {entry.score.toFixed(1)}%
                               </Badge>
+                              {entry.total_correct !== undefined && (
+                                <span className="text-xs text-muted-foreground font-normal">
+                                  {entry.total_correct.toLocaleString()} correct
+                                </span>
+                              )}
                             </div>
                           </div>
                         );
@@ -170,10 +175,15 @@ export default function LeaderboardPage() {
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                            <div className="flex flex-col items-end gap-0.5 shrink-0">
                               <Badge variant="secondary" className="text-sm sm:text-lg font-bold">
                                 {userPosition.score.toFixed(1)}%
                               </Badge>
+                              {userPosition.total_correct !== undefined && (
+                                <span className="text-xs text-muted-foreground font-normal">
+                                  {userPosition.total_correct.toLocaleString()} correct
+                                </span>
+                              )}
                             </div>
                           </div>
                         </>

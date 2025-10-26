@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     // Build query
     let query = supabase
       .from('quiz_sessions')
-      .select('echo_user_id, score_percentage, completed_at, category')
+      .select('echo_user_id, score_percentage, correct_answers, completed_at, category')
 
     // Filter by category if specified
     if (category) {
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     // Group by user and calculate average score
     const userScores: Record<
       string,
-      { totalScore: number; count: number; sessions: any[] }
+      { totalScore: number; count: number; totalCorrect: number; sessions: any[] }
     > = {}
 
     sessions.forEach((session) => {
@@ -55,11 +55,13 @@ export async function GET(request: NextRequest) {
         userScores[session.echo_user_id] = {
           totalScore: 0,
           count: 0,
+          totalCorrect: 0,
           sessions: [],
         }
       }
       userScores[session.echo_user_id].totalScore += session.score_percentage
       userScores[session.echo_user_id].count += 1
+      userScores[session.echo_user_id].totalCorrect += session.correct_answers || 0
       userScores[session.echo_user_id].sessions.push(session)
     })
 
@@ -69,6 +71,7 @@ export async function GET(request: NextRequest) {
         echo_user_id: echoUserId,
         score: data.totalScore / data.count,
         total_quizzes: data.count,
+        total_correct: data.totalCorrect,
       })
     )
 
@@ -108,6 +111,7 @@ export async function GET(request: NextRequest) {
         score: Math.round(entry.score * 100) / 100,
         rank: entry.rank,
         total_quizzes: entry.total_quizzes,
+        total_correct: entry.total_correct,
       }
     })
 
@@ -130,6 +134,7 @@ export async function GET(request: NextRequest) {
           score: Math.round(userEntry.score * 100) / 100,
           rank: userRank,
           total_quizzes: userEntry.total_quizzes,
+          total_correct: userEntry.total_correct,
         }
       }
     }

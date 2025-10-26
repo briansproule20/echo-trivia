@@ -80,12 +80,14 @@ export interface LeaderboardEntry {
   score: number
   rank: number
   total_quizzes?: number
+  total_correct?: number
   accuracy_rate?: number
 }
 
 // API request/response types
 export interface SaveQuizSessionRequest {
   echo_user_id: string
+  echo_user_name?: string | null
   category: string
   num_questions: number
   correct_answers: number

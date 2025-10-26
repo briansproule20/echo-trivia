@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
 
     const {
       echo_user_id,
+      echo_user_name,
       category,
       num_questions,
       correct_answers,
@@ -48,12 +49,12 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
 
-    // 1. Ensure user exists
+    // 1. Ensure user exists (pass Echo name as default username)
     const { data: userId, error: userError } = await supabase.rpc(
       'get_or_create_user',
       {
         p_echo_user_id: echo_user_id,
-        p_username: null,
+        p_username: echo_user_name || null,
       }
     )
 

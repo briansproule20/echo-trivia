@@ -7,7 +7,8 @@ import type { SaveQuizSessionRequest } from './supabase-types'
  */
 export async function submitQuizToSupabase(
   session: Session,
-  echoUserId: string
+  echoUserId: string,
+  echoUserName?: string | null
 ): Promise<{
   success: boolean
   newAchievements?: any[]
@@ -43,6 +44,7 @@ export async function submitQuizToSupabase(
 
     const payload: SaveQuizSessionRequest = {
       echo_user_id: echoUserId,
+      echo_user_name: echoUserName,
       category: session.quiz.category,
       num_questions: total,
       correct_answers: correct,

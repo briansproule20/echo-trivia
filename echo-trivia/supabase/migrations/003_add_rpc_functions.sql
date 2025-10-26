@@ -187,3 +187,32 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Enable RLS on all tables
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.quiz_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.achievements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_achievements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.daily_streaks ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for users table
+CREATE POLICY "Users can view all users" ON public.users FOR SELECT USING (true);
+CREATE POLICY "Users can insert themselves" ON public.users FOR INSERT WITH CHECK (true);
+CREATE POLICY "Users can update themselves" ON public.users FOR UPDATE USING (true);
+
+-- RLS Policies for quiz_sessions table
+CREATE POLICY "Anyone can view quiz sessions" ON public.quiz_sessions FOR SELECT USING (true);
+CREATE POLICY "Anyone can insert quiz sessions" ON public.quiz_sessions FOR INSERT WITH CHECK (true);
+CREATE POLICY "Users can update their own sessions" ON public.quiz_sessions FOR UPDATE USING (true);
+
+-- RLS Policies for achievements table
+CREATE POLICY "Anyone can view achievements" ON public.achievements FOR SELECT USING (true);
+CREATE POLICY "Only admins can modify achievements" ON public.achievements FOR ALL USING (false);
+
+-- RLS Policies for user_achievements table
+CREATE POLICY "Anyone can view user achievements" ON public.user_achievements FOR SELECT USING (true);
+CREATE POLICY "Anyone can insert user achievements" ON public.user_achievements FOR INSERT WITH CHECK (true);
+
+-- RLS Policies for daily_streaks table
+CREATE POLICY "Anyone can view streaks" ON public.daily_streaks FOR SELECT USING (true);
+CREATE POLICY "Anyone can insert streaks" ON public.daily_streaks FOR INSERT WITH CHECK (true);
+CREATE POLICY "Anyone can update streaks" ON public.daily_streaks FOR UPDATE USING (true);

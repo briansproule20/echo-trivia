@@ -147,9 +147,11 @@ export default function DashboardPage() {
   };
 
   // Prepare chart data
-  const categoryData = stats?.categories_played.map((cat) => ({
-    name: cat.length > 15 ? cat.substring(0, 15) + '...' : cat,
-    value: 1, // Would need to calculate actual counts from sessions
+  const categoryData = stats?.categories_played.slice(0, 8).map((cat, index) => ({
+    name: cat.length > 12 ? cat.substring(0, 12) + '...' : cat,
+    fullName: cat,
+    count: 1, // Would need to calculate actual counts from sessions
+    fill: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#6366f1', '#f97316'][index % 8],
   })) || [];
 
   const performanceData = [
@@ -157,7 +159,12 @@ export default function DashboardPage() {
     { name: 'Incorrect', value: (stats?.total_questions || 0) - (stats?.correct_answers || 0), fill: '#ef4444' },
   ];
 
-  const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#6366f1'];
+  // Journey stats for radial chart
+  const journeyData = [
+    { name: 'Quizzes', value: stats?.total_quizzes || 0, fill: '#3b82f6' },
+    { name: 'Categories', value: stats?.categories_played.length || 0, fill: '#8b5cf6' },
+    { name: 'Perfect Scores', value: stats?.perfect_scores || 0, fill: '#22c55e' },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -271,68 +278,122 @@ export default function DashboardPage() {
           </div>
 
           {/* Charts Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {/* Correct vs Incorrect */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            {/* Answer Accuracy - Donut Chart */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">Answer Accuracy</CardTitle>
-                <CardDescription className="text-sm">
-                  {stats?.correct_answers} correct out of {stats?.total_questions} total
+                <CardTitle className="text-base sm:text-lg">Answer Accuracy</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  {stats?.correct_answers} of {stats?.total_questions} questions
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
+              <CardContent className="pb-2">
+                <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
                     <Pie
                       data={performanceData}
                       cx="50%"
                       cy="50%"
-                      labelLine={false}
-                      label={({ name, value, percent }: any) =>
-                        `${name}: ${value} (${(percent * 100).toFixed(0)}%)`
-                      }
-                      outerRadius={80}
+                      innerRadius={50}
+                      outerRadius={70}
                       fill="#8884d8"
                       dataKey="value"
+                      paddingAngle={2}
                     >
                       {performanceData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.fill} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip
+                      formatter={(value: any) => value}
+                      contentStyle={{ fontSize: '12px' }}
+                    />
                   </PieChart>
+                </ResponsiveContainer>
+                <div className="flex justify-center gap-4 mt-2">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-green-500" />
+                    <span className="text-xs sm:text-sm">Correct</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-red-500" />
+                    <span className="text-xs sm:text-sm">Incorrect</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Journey Overview - Radial Bar */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base sm:text-lg">Journey Overview</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  Your trivia milestones
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pb-2">
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={journeyData} layout="vertical" margin={{ left: -20, right: 10 }}>
+                    <XAxis type="number" hide />
+                    <YAxis type="category" dataKey="name" width={80} fontSize={11} />
+                    <Tooltip
+                      cursor={false}
+                      contentStyle={{ fontSize: '12px' }}
+                    />
+                    <Bar dataKey="value" radius={[0, 8, 8, 0]}>
+                      {journeyData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Bar>
+                  </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
-            {/* Categories Distribution */}
+            {/* Top Categories - Simple Pie */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">Categories Explored</CardTitle>
-                <CardDescription className="text-sm">
-                  {stats?.categories_played.length || 0} unique categories
+                <CardTitle className="text-base sm:text-lg">Top Categories</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  {categoryData.length > 0 ? `${categoryData.length} categories played` : 'No categories yet'}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pb-2">
                 {categoryData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={categoryData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="name"
-                        angle={-45}
-                        textAnchor="end"
-                        height={80}
-                        fontSize={12}
-                      />
-                      <YAxis fontSize={12} />
-                      <Tooltip />
-                      <Bar dataKey="value" fill="#8b5cf6" />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <PieChart>
+                        <Pie
+                          data={categoryData}
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={70}
+                          fill="#8884d8"
+                          dataKey="count"
+                          label={false}
+                        >
+                          {categoryData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          formatter={(value: any, name: any, props: any) => [value, props.payload.fullName]}
+                          contentStyle={{ fontSize: '11px' }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="flex flex-wrap justify-center gap-2 mt-2">
+                      {categoryData.slice(0, 4).map((cat, index) => (
+                        <div key={index} className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.fill }} />
+                          <span className="text-xs">{cat.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 ) : (
-                  <div className="h-[250px] flex items-center justify-center text-muted-foreground text-sm">
-                    No category data yet
+                  <div className="h-[200px] flex items-center justify-center text-muted-foreground text-xs">
+                    Start playing to see your categories
                   </div>
                 )}
               </CardContent>
@@ -404,26 +465,28 @@ export default function DashboardPage() {
                     return (
                       <div
                         key={achievement.id}
-                        className={`flex items-center gap-3 p-3 rounded-lg border ${tierColors[achievement.tier as keyof typeof tierColors]} ${!isUnlocked && 'opacity-50'}`}
+                        className={`flex items-start gap-3 p-3 sm:p-4 rounded-lg border ${tierColors[achievement.tier as keyof typeof tierColors]} ${!isUnlocked && 'opacity-50'}`}
                       >
-                        <div className={`text-xl sm:text-2xl ${!isUnlocked && 'grayscale'}`}>
+                        <div className={`text-2xl sm:text-3xl flex-shrink-0 ${!isUnlocked && 'grayscale'}`}>
                           {achievement.icon}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-semibold text-sm truncate">
+                          <div className="flex items-start sm:items-center gap-2 flex-wrap mb-1">
+                            <h4 className="font-semibold text-sm sm:text-base leading-tight">
                               {achievement.name}
                             </h4>
-                            <Badge variant="outline" className="text-xs">
-                              {achievement.tier}
-                            </Badge>
-                            {!isUnlocked && (
-                              <Badge variant="secondary" className="text-xs">
-                                🔒 Locked
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                              <Badge variant="outline" className="text-xs leading-none">
+                                {achievement.tier}
                               </Badge>
-                            )}
+                              {!isUnlocked && (
+                                <Badge variant="secondary" className="text-xs leading-none">
+                                  🔒
+                                </Badge>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-xs text-muted-foreground line-clamp-2 sm:line-clamp-1">
+                          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                             {achievement.description}
                           </p>
                         </div>

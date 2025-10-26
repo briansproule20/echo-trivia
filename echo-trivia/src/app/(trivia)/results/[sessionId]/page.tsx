@@ -78,29 +78,22 @@ export default function ResultsPage() {
   };
 
   const handleShare = async () => {
-    // Generate emoji grid showing correct/incorrect answers
-    const emojiGrid = session.quiz.questions
-      .map((q, idx) => {
-        const submission = session.submissions.find(s => s.questionId === q.id);
-        return submission?.correct ? "🟢" : "🔴";
+    // Generate difficulty symbols (row 1) and correct/incorrect (row 2)
+    const difficultyRow = session.quiz.questions
+      .map((q) => {
+        if (q.difficulty === 'easy') return '🟢';
+        if (q.difficulty === 'medium') return '🟦';
+        if (q.difficulty === 'hard') return '⬛';
+        return '🟦'; // default to medium
       })
-      .join("");
+      .join('');
 
-    // Extract date from quiz description if available (format: "YYYY-MM-DD - A new challenge...")
-    const dateMatch = session.quiz.description?.match(/^(\d{4}-\d{2}-\d{2})/);
-    let dateString = "";
-
-    if (dateMatch) {
-      const [year, month, day] = dateMatch[1].split('-');
-      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-      const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-      dateString = date.toLocaleDateString('en-US', options);
-    } else {
-      // Fallback to current date if no date in description
-      const date = new Date();
-      const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-      dateString = date.toLocaleDateString('en-US', options);
-    }
+    const resultRow = session.quiz.questions
+      .map((q) => {
+        const submission = session.submissions.find(s => s.questionId === q.id);
+        return submission?.correct ? '✅' : '❌';
+      })
+      .join('');
 
     // Get user's referral code and add to URL
     let shareUrl = "https://trivia-wizard-omega.vercel.app";
@@ -115,7 +108,8 @@ export default function ResultsPage() {
     const text = `I received the rank of "${earnedTitle}" on Trivia Wizard! 🧙‍♂️
 
 Category: ${session.quiz.category}
-${emojiGrid}
+${difficultyRow}
+${resultRow}
 Score: ${score}/${session.quiz.questions.length} (${percentage}%)
 
 ${shareUrl}`;

@@ -207,7 +207,7 @@ export async function POST(req: Request) {
     });
 
     // Use the specified category as primary category
-    if (!categoryEnum) {
+    if (categoryEnum === undefined) {
       throw new Error('Category enum is required for established categories');
     }
     const primaryCategory = categoryEnumToString(categoryEnum);

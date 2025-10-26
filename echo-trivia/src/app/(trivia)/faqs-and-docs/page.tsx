@@ -127,10 +127,23 @@ export default function FaqsAndDocsPage() {
                 <span className="font-semibold">How is my data stored?</span>
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground pb-4">
-                Your quiz history and progress are stored locally in your browser using IndexedDB, a secure client-side storage system.
-                This means your quiz data stays on your device and is not sent to any external servers. IndexedDB provides fast,
-                efficient storage that works offline and gives you complete control over your data. You can clear your quiz history
-                at any time through your browser settings.
+                <div className="space-y-3">
+                  <p>
+                    Trivia Wizard uses a hybrid storage approach to give you the best experience while protecting your privacy:
+                  </p>
+                  <p>
+                    <strong>Local Storage (IndexedDB):</strong> Your quiz history and detailed session data are stored locally in your browser
+                    using IndexedDB, a secure client-side storage system. This means your quiz data stays on your device and is not sent to
+                    external servers. You have complete control and can clear your data at any time through your browser settings.
+                  </p>
+                  <p>
+                    <strong>Cloud Database (Supabase):</strong> For features like leaderboards, achievements, daily streaks, and cross-device
+                    profile syncing, we securely store your user profile, quiz session metadata, achievement progress, and streak data in
+                    Supabase (a PostgreSQL database). This allows you to compete on leaderboards, track your achievements, and maintain
+                    streaks across devices. All cloud data is protected with Row Level Security (RLS) policies and encrypted in transit
+                    and at rest.
+                  </p>
+                </div>
               </AccordionContent>
             </AccordionItem>
 

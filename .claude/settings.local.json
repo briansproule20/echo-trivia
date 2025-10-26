@@ -18,7 +18,10 @@
       "Bash(git add:*)",
       "Bash(lsof:*)",
       "Bash(kill:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(cat:*)",
+      "Bash(vercel logs --output=raw --limit=50)",
+      "Bash(node -e \"\nconst CATEGORIES = [\n  ''History'',\n  ''Science'',\n  ''Literature'',\n  ''Film & TV'',\n  ''Sports'',\n  ''Geography'',\n  ''Arts'',\n  ''Technology'',\n  ''General Knowledge'',\n  ''Music'',\n  ''Food & Drink'',\n  ''Nature & Animals'',\n  ''Mythology'',\n  ''Space & Astronomy'',\n  ''Video Games'',\n  ''Politics & Government'',\n  ''Business & Economics'',\n  ''Health & Medicine'',\n  ''Architecture'',\n  ''Fashion'',\n];\n\n// Check what today''s category would be\nconst date = new Date().toLocaleDateString(''en-US'', { timeZone: ''America/New_York'' });\nconst hash = date.split('''').reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0);\nconst seed = Math.abs(hash);\nconst categoryIndex = seed % CATEGORIES.length;\nconsole.log(''Today category index:'', categoryIndex);\nconsole.log(''Today category:'', CATEGORIES[categoryIndex]);\nconsole.log('''');\nconsole.log(''All categories:'');\nCATEGORIES.forEach((cat, i) => console.log(i + '':'', cat));\n\")"
     ],
     "deny": [],
     "ask": []

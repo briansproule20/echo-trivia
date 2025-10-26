@@ -6,9 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScoreBanner } from "@/components/trivia/ScoreBanner";
+import { StatsDialog } from "@/components/trivia/StatsDialog";
 import { storage } from "@/lib/storage";
 import { getRandomTitle } from "@/lib/quiz-utils";
-import { CheckCircle2, XCircle, RotateCcw, Home, Share2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { CheckCircle2, XCircle, RotateCcw, Home, Share2, BarChart3, Check, X, User } from "lucide-react";
 import type { Session } from "@/lib/types";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 
@@ -19,18 +21,54 @@ export default function ResultsPage() {
   const echo = useEcho();
 
   const [session, setSession] = useState<Session | null>(null);
+  const [currentUsername, setCurrentUsername] = useState("");
+  const [editingUsername, setEditingUsername] = useState("");
+  const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [isSavingUsername, setIsSavingUsername] = useState(false);
+  const [quizResults, setQuizResults] = useState<any>(null);
+  const [isLoadingUsername, setIsLoadingUsername] = useState(true);
+  const [showStatsDialog, setShowStatsDialog] = useState(false);
 
   useEffect(() => {
     const loadSession = async () => {
       const loadedSession = await storage.getSession(sessionId);
       if (loadedSession) {
         setSession(loadedSession);
+
+        // Load quiz results if available (from submission response)
+        const resultsKey = `quiz_results_${sessionId}`;
+        const savedResults = localStorage.getItem(resultsKey);
+        if (savedResults) {
+          setQuizResults(JSON.parse(savedResults));
+        }
+
+        // Fetch current username
+        if (echo.user?.id) {
+          try {
+            const response = await fetch(`/api/user/profile?echo_user_id=${echo.user.id}`);
+            if (response.ok) {
+              const data = await response.json();
+              const fetchedUsername = data.user?.username || echo.user.name || "Anonymous";
+              setCurrentUsername(fetchedUsername);
+              setEditingUsername(fetchedUsername);
+            }
+          } catch (error) {
+            console.error("Failed to fetch username:", error);
+            const fallbackUsername = echo.user.name || "Anonymous";
+            setCurrentUsername(fallbackUsername);
+            setEditingUsername(fallbackUsername);
+          } finally {
+            setIsLoadingUsername(false);
+          }
+        } else {
+          setIsLoadingUsername(false);
+        }
       } else {
         router.push("/");
       }
     };
     loadSession();
-  }, [sessionId]);
+  }, [sessionId, echo.user?.id]);
 
   if (!session) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -39,9 +77,16 @@ export default function ResultsPage() {
   const score = session.submissions.filter((s) => s.correct).length;
   const percentage = Math.round((score / session.quiz.questions.length) * 100);
 
-  // Use saved title if available, otherwise generate one (for backwards compatibility)
-  const earnedTitle = session.earnedTitle || getRandomTitle(percentage).title;
-  const earnedTier = session.earnedTier || getRandomTitle(percentage).tier;
+  // Use saved title from session (should always exist from handleFinish)
+  // Only generate as fallback for old sessions without saved title
+  const earnedTitle = session.earnedTitle || (() => {
+    const generated = getRandomTitle(percentage);
+    return generated.title;
+  })();
+  const earnedTier = session.earnedTier || (() => {
+    const generated = getRandomTitle(percentage);
+    return generated.tier;
+  })();
   const totalTime = session.endedAt && session.startedAt
     ? new Date(session.endedAt).getTime() - new Date(session.startedAt).getTime()
     : undefined;
@@ -75,6 +120,54 @@ export default function ResultsPage() {
     });
 
     router.push(`/practice?${params.toString()}`);
+  };
+
+  const handleSaveUsername = async () => {
+    if (!echo.user?.id || !editingUsername.trim() || editingUsername === currentUsername) {
+      setIsEditingUsername(false);
+      setEditingUsername(currentUsername);
+      return;
+    }
+
+    setIsSavingUsername(true);
+    try {
+      const response = await fetch("/api/user/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          echo_user_id: echo.user.id,
+          username: editingUsername.trim(),
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const savedUsername = data.user?.username || editingUsername.trim();
+        setCurrentUsername(savedUsername);
+        setEditingUsername(savedUsername);
+        setIsEditingUsername(false);
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to save username:", errorData);
+        throw new Error(errorData.error || "Failed to save username");
+      }
+    } catch (error) {
+      console.error("Error saving username:", error);
+      setEditingUsername(currentUsername);
+      alert("Failed to save username. Please try again.");
+    } finally {
+      setIsSavingUsername(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingUsername(currentUsername);
+    setIsEditingUsername(false);
+  };
+
+  const handleStartEdit = () => {
+    setEditingUsername(currentUsername);
+    setIsEditingUsername(true);
   };
 
   const handleShare = async () => {
@@ -239,7 +332,7 @@ ${shareUrl}`;
           </Card>
 
           {/* Actions */}
-          <div className={`grid grid-cols-1 ${session.quiz.seeded ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-4`}>
+          <div className={`grid grid-cols-2 ${session.quiz.seeded ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}>
             <Button onClick={handleRetry} size="lg" variant="outline">
               <RotateCcw className="mr-2 h-4 w-4" />
               Practice Similar
@@ -250,13 +343,89 @@ ${shareUrl}`;
                 Share Score
               </Button>
             )}
+            {quizResults && (
+              <Button onClick={() => setShowStatsDialog(true)} size="lg" variant="outline">
+                <BarChart3 className="mr-2 h-4 w-4" />
+                View Stats
+              </Button>
+            )}
             <Button onClick={() => router.push("/")} size="lg">
               <Home className="mr-2 h-4 w-4" />
               Home
             </Button>
           </div>
+
+          {/* Username Display - Simple inline edit at bottom */}
+          {echo.user?.id && !isLoadingUsername && (
+            <Card className="border-muted">
+              <CardContent className="pt-4 sm:pt-6">
+                <div className="flex items-center gap-3">
+                  <User className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  {isEditingUsername ? (
+                    <div className="flex-1 flex items-center gap-2">
+                      <Input
+                        value={editingUsername}
+                        onChange={(e) => setEditingUsername(e.target.value)}
+                        placeholder="Enter your username"
+                        maxLength={30}
+                        className="flex-1 h-9"
+                        autoFocus
+                        disabled={isSavingUsername}
+                      />
+                      <Button
+                        size="sm"
+                        onClick={handleSaveUsername}
+                        disabled={isSavingUsername || !editingUsername.trim()}
+                        className="h-9 px-3"
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleCancelEdit}
+                        disabled={isSavingUsername}
+                        className="h-9 px-3"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex items-center justify-between gap-2">
+                      <span className="text-base font-medium truncate">{currentUsername}</span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleStartEdit}
+                        className="h-8 text-xs whitespace-nowrap"
+                      >
+                        Change Username
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
+
+      {/* Stats Dialog */}
+      {quizResults && (
+        <StatsDialog
+          open={showStatsDialog}
+          onOpenChange={setShowStatsDialog}
+          quizStats={{
+            score,
+            totalQuestions: session.quiz.questions.length,
+            percentage,
+            earnedTitle,
+            earnedTier,
+            newAchievements: quizResults.newAchievements,
+            streak: quizResults.streak,
+          }}
+        />
+      )}
     </div>
   );
 }

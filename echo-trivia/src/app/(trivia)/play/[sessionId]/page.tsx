@@ -140,7 +140,7 @@ export default function PlayPage() {
 
     // Submit to Supabase if user is signed in
     if (echo.user?.id) {
-      const result = await submitQuizToSupabase(finalSession, echo.user.id);
+      const result = await submitQuizToSupabase(finalSession, echo.user.id, echo.user.name);
       if (result.success) {
         console.log('Quiz submitted to Supabase successfully');
         if (result.newAchievements && result.newAchievements.length > 0) {
@@ -149,6 +149,16 @@ export default function PlayPage() {
         if (result.streak) {
           console.log('Streak updated:', result.streak);
         }
+
+        // Save quiz results to localStorage for the username prompt
+        const resultsKey = `quiz_results_${sessionId}`;
+        localStorage.setItem(
+          resultsKey,
+          JSON.stringify({
+            newAchievements: result.newAchievements,
+            streak: result.streak,
+          })
+        );
       } else {
         console.error('Failed to submit quiz to Supabase:', result.error);
       }

@@ -205,6 +205,8 @@ export async function POST(req: Request) {
     const recipe = buildRecipeFromSeed(seedHex, {
       fixedNumQuestions: settings.numQuestions === 5 ? 5 : 10,
     });
+    console.log('Generated recipe:', JSON.stringify(recipe, null, 2));
+    console.log('Using seed:', seedHex.slice(0, 16) + '...');
 
     // Use the specified category as primary category
     if (categoryEnum === undefined) {

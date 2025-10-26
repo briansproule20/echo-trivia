@@ -6,12 +6,15 @@ import type { SaveQuizSessionRequest } from '@/lib/supabase-types'
 // POST /api/quiz/submit - Save a completed quiz session
 export async function POST(request: NextRequest) {
   try {
+    console.log('=== Quiz Submit API Called ===')
     const signedIn = await isSignedIn()
+    console.log('User signed in:', signedIn)
     if (!signedIn) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body: SaveQuizSessionRequest = await request.json()
+    console.log('Request body:', JSON.stringify(body, null, 2))
 
     const {
       echo_user_id,
@@ -137,8 +140,13 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error submitting quiz:', error)
+    console.error('Error details:', error instanceof Error ? error.message : error)
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
     return NextResponse.json(
-      { error: 'Failed to submit quiz' },
+      { 
+        error: 'Failed to submit quiz',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }

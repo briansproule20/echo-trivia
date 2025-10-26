@@ -8,6 +8,8 @@ import { Timer } from "@/components/trivia/Timer";
 import { usePlayStore } from "@/lib/store";
 import { storage } from "@/lib/storage";
 import { getRandomTitle, calculateScore } from "@/lib/quiz-utils";
+import { submitQuizToSupabase } from "@/lib/supabase-helpers";
+import { useEcho } from "@merit-systems/echo-react-sdk";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Submission } from "@/lib/types";
 
@@ -15,9 +17,10 @@ export default function PlayPage() {
   const params = useParams();
   const router = useRouter();
   const sessionId = params.sessionId as string;
-  
+  const echo = useEcho();
+
   const { currentSession, currentQuestionIndex, isPaused, setSession, setQuestionIndex, addSubmission, togglePause, endSession } = usePlayStore();
-  
+
   const [currentSubmission, setCurrentSubmission] = useState<Submission | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [startTime, setStartTime] = useState<number>(Date.now());
@@ -132,8 +135,24 @@ export default function PlayPage() {
     };
     await storage.saveSession(finalSession);
 
-    // Track category performance
+    // Track category performance locally
     await storage.trackCategoryPerformance(finalSession.quiz.category, correct, finalSession.quiz.questions.length);
+
+    // Submit to Supabase if user is signed in
+    if (echo.user?.id) {
+      const result = await submitQuizToSupabase(finalSession, echo.user.id);
+      if (result.success) {
+        console.log('Quiz submitted to Supabase successfully');
+        if (result.newAchievements && result.newAchievements.length > 0) {
+          console.log('New achievements earned:', result.newAchievements);
+        }
+        if (result.streak) {
+          console.log('Streak updated:', result.streak);
+        }
+      } else {
+        console.error('Failed to submit quiz to Supabase:', result.error);
+      }
+    }
 
     router.push(`/results/${sessionId}`);
   };

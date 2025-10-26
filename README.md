@@ -291,15 +291,12 @@ Try it yourself: [link] (ref: user_abc123)
 ## Roadmap
 
 Future enhancements being considered:
-- [ ] Leaderboards (local & global)
 - [ ] Image-based questions
 - [ ] Audio/video question support
 - [ ] Timed speedrun mode
 - [ ] Quiz templates & presets
 - [ ] Export/Import quiz JSON
 - [ ] Multiplayer competitive mode
-- [ ] Achievement badges
-- [ ] Streak tracking
 
 ## License
 

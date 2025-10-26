@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, BookOpen, FileQuestion } from "lucide-react";
+import { Menu, BookOpen, FileQuestion, BarChart3, Trophy, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { EchoAccount } from "@/components/echo-account-next";
@@ -16,6 +16,12 @@ const NAV_ITEMS = [
   { href: "/daily", label: "Daily Quiz" },
   { href: "/practice", label: "Practice" },
   { href: "/history", label: "History" },
+];
+
+const EXTRA_NAV_ITEMS = [
+  { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
+  { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
+  { href: "/profile", label: "Profile", icon: User },
 ];
 
 export function Navbar() {
@@ -95,6 +101,30 @@ export function Navbar() {
                         {item.label}
                       </Link>
                     ))}
+
+                    {/* Extra Nav Items - Only show if authenticated */}
+                    {isAuthenticated && (
+                      <>
+                        {/* Divider */}
+                        <div className="border-t my-2" />
+
+                        {/* Extra Nav Items with Icons */}
+                        {EXTRA_NAV_ITEMS.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className={`flex items-center gap-2 text-lg font-medium transition-colors hover:text-primary px-3 py-2 rounded-md ${
+                              pathname === item.href
+                                ? "text-primary bg-primary/10"
+                                : "text-muted-foreground hover:bg-accent"
+                            }`}
+                          >
+                            <item.icon className="h-4 w-4" />
+                            {item.label}
+                          </Link>
+                        ))}
+                      </>
+                    )}
                   </nav>
 
                   {/* Auth & Balance */}

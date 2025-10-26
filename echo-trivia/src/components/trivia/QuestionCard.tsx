@@ -57,7 +57,6 @@ export function QuestionCard({
           <Badge variant="outline">
             Question {questionNumber} of {totalQuestions}
           </Badge>
-          <Badge variant="secondary">{question.difficulty}</Badge>
         </div>
         <CardTitle className="text-xl">{question.prompt}</CardTitle>
         <CardDescription>{question.category}</CardDescription>

@@ -122,7 +122,8 @@ const TITLE_TIERS: Record<number, { tier: string; titles: string[] }> = {
       "One Star Yelp Reviewer of Facts",
       "Lucky Accident Specialist",
       "Participation Trophy Enthusiast",
-      "Error 404: Knowledge Not Found"
+      "Error 404: Knowledge Not Found",
+      "Highly Regarded"
     ]
   },
   20: {
@@ -252,7 +253,8 @@ const TITLE_TIERS: Record<number, { tier: string; titles: string[] }> = {
       "Touch Grass (After This Victory Lap)",
       "Big Brain Energy Incarnate",
       "Cloaked in Correctness",
-      "Error-Free Excellence"
+      "Error-Free Excellence",
+      "Highly Regarded"
     ]
   }
 };

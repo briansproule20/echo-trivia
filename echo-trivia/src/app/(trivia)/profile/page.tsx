@@ -236,8 +236,10 @@ export default function ProfilePage() {
 
           {/* Tabs */}
           <Tabs defaultValue="stats" className="space-y-4 sm:space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="stats" className="text-sm sm:text-base">Statistics</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 h-auto">
+              <TabsTrigger value="stats" className="text-sm sm:text-base">
+                Statistics
+              </TabsTrigger>
               <TabsTrigger value="achievements" className="text-sm sm:text-base">
                 Achievements ({achievements.length})
               </TabsTrigger>

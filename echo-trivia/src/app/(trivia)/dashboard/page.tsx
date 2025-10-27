@@ -333,7 +333,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="pb-2">
                 <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={journeyData} layout="vertical" margin={{ left: -20, right: 10 }}>
+                  <BarChart data={journeyData} layout="vertical" margin={{ left: 10, right: 10 }}>
                     <XAxis type="number" hide />
                     <YAxis type="category" dataKey="name" width={80} fontSize={11} />
                     <Tooltip

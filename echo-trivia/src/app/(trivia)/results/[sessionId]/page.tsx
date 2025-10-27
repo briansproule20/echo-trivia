@@ -189,7 +189,7 @@ export default function ResultsPage() {
       .join('');
 
     // Get user's referral code and add to URL
-    let shareUrl = "https://trivia-wizard-omega.vercel.app";
+    let shareUrl = "https://trivwiz.com";
     try {
       if (echo.user?.id) {
         shareUrl += `?referral_code=${echo.user.id}`;

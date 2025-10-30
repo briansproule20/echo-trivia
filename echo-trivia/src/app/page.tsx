@@ -11,6 +11,7 @@ import type { Session } from "@/lib/types";
 import { motion } from "framer-motion";
 import { DotBackground } from "@/components/ui/dot-background";
 import { MiniLeaderboard } from "@/components/trivia/MiniLeaderboard";
+import { Footer } from "@/components/Footer";
 
 export default function HomePage() {
   const router = useRouter();
@@ -182,6 +183,7 @@ export default function HomePage() {
           </div>
         )}
       </div>
+      <Footer />
     </DotBackground>
   );
 }

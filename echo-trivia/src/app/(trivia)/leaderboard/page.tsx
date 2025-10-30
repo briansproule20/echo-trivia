@@ -11,19 +11,20 @@ import type { LeaderboardEntry } from "@/lib/supabase-types";
 export default function LeaderboardPage() {
   const echo = useEcho();
   const [period, setPeriod] = useState<'all' | 'daily' | 'weekly' | 'monthly'>('all');
+  const [rankBy, setRankBy] = useState<'avg_score' | 'total_correct'>('avg_score');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [userPosition, setUserPosition] = useState<LeaderboardEntry | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchLeaderboard();
-  }, [period, echo.user?.id]);
+  }, [period, rankBy, echo.user?.id]);
 
   const fetchLeaderboard = async () => {
     setLoading(true);
     try {
       const echoUserIdParam = echo.user?.id ? `&echo_user_id=${echo.user.id}` : '';
-      const response = await fetch(`/api/leaderboard?period=${period}&limit=25${echoUserIdParam}`);
+      const response = await fetch(`/api/leaderboard?period=${period}&rank_by=${rankBy}&limit=25${echoUserIdParam}`);
       if (!response.ok) throw new Error('Failed to fetch leaderboard');
 
       const data = await response.json();
@@ -61,8 +62,30 @@ export default function LeaderboardPage() {
               <h1 className="text-3xl sm:text-4xl font-bold">Leaderboard</h1>
             </div>
             <p className="text-sm sm:text-base text-muted-foreground">
-              Ranked by average quiz score
+              {rankBy === 'avg_score' ? 'Ranked by average quiz score' : 'Ranked by total correct answers'}
             </p>
+          </div>
+
+          {/* Ranking Mode Toggle */}
+          <div className="flex items-center justify-center gap-2">
+            <span className={`text-sm font-medium transition-colors ${rankBy === 'avg_score' ? 'text-foreground' : 'text-muted-foreground'}`}>
+              Avg Score
+            </span>
+            <button
+              onClick={() => setRankBy(rankBy === 'avg_score' ? 'total_correct' : 'avg_score')}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                rankBy === 'total_correct' ? 'bg-primary' : 'bg-muted'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-background shadow-lg transition-transform ${
+                  rankBy === 'total_correct' ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+            <span className={`text-sm font-medium transition-colors ${rankBy === 'total_correct' ? 'text-foreground' : 'text-muted-foreground'}`}>
+              Total Correct
+            </span>
           </div>
 
           {/* Period Tabs */}
@@ -131,11 +154,19 @@ export default function LeaderboardPage() {
 
                             <div className="flex flex-col items-end gap-0.5 shrink-0">
                               <Badge variant="secondary" className="text-sm sm:text-lg font-bold">
-                                {entry.score.toFixed(1)}%
+                                {rankBy === 'avg_score'
+                                  ? `${entry.score.toFixed(1)}%`
+                                  : entry.total_correct?.toLocaleString() || '0'
+                                }
                               </Badge>
-                              {entry.total_correct !== undefined && (
+                              {rankBy === 'avg_score' && entry.total_correct !== undefined && (
                                 <span className="text-xs text-muted-foreground font-normal">
                                   {entry.total_correct.toLocaleString()} correct
+                                </span>
+                              )}
+                              {rankBy === 'total_correct' && (
+                                <span className="text-xs text-muted-foreground font-normal">
+                                  {entry.score.toFixed(1)}% avg
                                 </span>
                               )}
                             </div>
@@ -177,11 +208,19 @@ export default function LeaderboardPage() {
 
                             <div className="flex flex-col items-end gap-0.5 shrink-0">
                               <Badge variant="secondary" className="text-sm sm:text-lg font-bold">
-                                {userPosition.score.toFixed(1)}%
+                                {rankBy === 'avg_score'
+                                  ? `${userPosition.score.toFixed(1)}%`
+                                  : userPosition.total_correct?.toLocaleString() || '0'
+                                }
                               </Badge>
-                              {userPosition.total_correct !== undefined && (
+                              {rankBy === 'avg_score' && userPosition.total_correct !== undefined && (
                                 <span className="text-xs text-muted-foreground font-normal">
                                   {userPosition.total_correct.toLocaleString()} correct
+                                </span>
+                              )}
+                              {rankBy === 'total_correct' && (
+                                <span className="text-xs text-muted-foreground font-normal">
+                                  {userPosition.score.toFixed(1)}% avg
                                 </span>
                               )}
                             </div>

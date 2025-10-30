@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import type { LeaderboardEntry } from '@/lib/supabase-types'
 
-// GET /api/leaderboard?period=all&category=Science&limit=25&echo_user_id=xxx
+// GET /api/leaderboard?period=all&category=Science&limit=25&echo_user_id=xxx&rank_by=avg_score
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category')
     const limit = parseInt(searchParams.get('limit') || '25')
     const echoUserId = searchParams.get('echo_user_id')
+    const rankBy = searchParams.get('rank_by') || 'avg_score' // 'avg_score' or 'total_correct'
 
     const supabase = await createClient()
 
@@ -75,8 +76,13 @@ export async function GET(request: NextRequest) {
       })
     )
 
-    // Sort by score descending
-    leaderboardData.sort((a, b) => b.score - a.score)
+    // Sort by the selected ranking method
+    if (rankBy === 'total_correct') {
+      leaderboardData.sort((a, b) => b.total_correct - a.total_correct)
+    } else {
+      // Default: sort by average score
+      leaderboardData.sort((a, b) => b.score - a.score)
+    }
 
     // Take top N and add ranks
     const topN = leaderboardData.slice(0, limit).map((entry, index) => ({

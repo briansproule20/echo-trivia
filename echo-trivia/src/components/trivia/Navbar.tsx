@@ -58,8 +58,12 @@ export function Navbar() {
             </div>
           )}
 
-          {/* Right Side - Echo Account & Menu Button */}
+          {/* Right Side - Theme Toggle, Echo Account & Menu Button */}
           <div className="flex items-center gap-2">
+            {/* Desktop Theme Toggle - Hidden on mobile */}
+            <div className="hidden md:block">
+              <ThemeToggle />
+            </div>
             <EchoAccount />
             <Sheet>
               <SheetTrigger asChild>

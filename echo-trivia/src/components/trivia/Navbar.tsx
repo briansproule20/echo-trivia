@@ -61,7 +61,7 @@ export function Navbar() {
           {/* Right Side - Theme Toggle, Echo Account & Menu Button */}
           <div className="flex items-center gap-2">
             {/* Desktop Theme Toggle - Hidden on mobile */}
-            <div className="hidden md:block">
+            <div className="hidden md:block" suppressHydrationWarning>
               <ThemeToggle />
             </div>
             <EchoAccount />
@@ -85,7 +85,7 @@ export function Navbar() {
                 </SheetHeader>
                 <div className="flex flex-col space-y-6 mt-8 overflow-y-auto flex-1 pr-2">
                   {/* Theme Toggle */}
-                  <div className="flex items-center justify-between px-3 py-2 border-b">
+                  <div className="flex items-center justify-between px-3 py-2 border-b" suppressHydrationWarning>
                     <span className="text-sm font-medium">Theme</span>
                     <ThemeToggle />
                   </div>

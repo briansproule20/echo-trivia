@@ -332,17 +332,15 @@ ${shareUrl}`;
           </Card>
 
           {/* Actions */}
-          <div className={`grid grid-cols-2 ${session.quiz.seeded ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}>
+          <div className={`grid grid-cols-2 ${quizResults ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}>
             <Button onClick={handleRetry} size="lg" variant="outline">
               <RotateCcw className="mr-2 h-4 w-4" />
               Practice Similar
             </Button>
-            {session.quiz.seeded && (
-              <Button onClick={handleShare} size="lg" variant="outline">
-                <Share2 className="mr-2 h-4 w-4" />
-                Share Score
-              </Button>
-            )}
+            <Button onClick={handleShare} size="lg" variant="outline">
+              <Share2 className="mr-2 h-4 w-4" />
+              Share Score
+            </Button>
             {quizResults && (
               <Button onClick={() => setShowStatsDialog(true)} size="lg" variant="outline">
                 <BarChart3 className="mr-2 h-4 w-4" />

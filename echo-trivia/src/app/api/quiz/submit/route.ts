@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
       daily_date,
       title,
       time_taken,
+      session_id,
     } = body
 
     // Validate required fields
@@ -49,7 +50,51 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
 
-    // 1. Ensure user exists (pass Echo name as default username)
+    // 1. Check for duplicate submission (if session_id is provided)
+    if (session_id) {
+      const thirtySecondsAgo = new Date(Date.now() - 30000).toISOString()
+      const { data: recentSubmissions, error: checkError } = await supabase
+        .from('quiz_sessions')
+        .select('id, completed_at, score_percentage, correct_answers')
+        .eq('echo_user_id', echo_user_id)
+        .eq('category', category)
+        .eq('num_questions', num_questions)
+        .eq('score_percentage', score_percentage)
+        .eq('correct_answers', correct_answers)
+        .gte('completed_at', thirtySecondsAgo)
+        .limit(1)
+
+      if (checkError) {
+        console.error('Error checking for duplicates:', checkError)
+        // Continue with submission even if check fails
+      } else if (recentSubmissions && recentSubmissions.length > 0) {
+        console.log('Duplicate submission detected, returning existing session')
+        // Return the existing submission data
+        const existingSession = recentSubmissions[0]
+
+        // Still fetch achievements and streak data
+        const { data: newAchievements } = await supabase
+          .from('user_achievements')
+          .select(`*, achievement:achievements (*)`)
+          .eq('echo_user_id', echo_user_id)
+          .gte('earned_at', new Date(Date.now() - 5000).toISOString())
+
+        const { data: streak } = await supabase
+          .from('daily_streaks')
+          .select('*')
+          .eq('echo_user_id', echo_user_id)
+          .single()
+
+        return NextResponse.json({
+          session: existingSession,
+          newAchievements: newAchievements || [],
+          streak: streak || null,
+          duplicate: true,
+        })
+      }
+    }
+
+    // 2. Ensure user exists (pass Echo name as default username)
     const { data: userId, error: userError } = await supabase.rpc(
       'get_or_create_user',
       {
@@ -63,7 +108,7 @@ export async function POST(request: NextRequest) {
       throw userError
     }
 
-    // 2. Save quiz session
+    // 3. Save quiz session
     const { data: session, error: sessionError } = await supabase
       .from('quiz_sessions')
       .insert({
@@ -89,7 +134,7 @@ export async function POST(request: NextRequest) {
       throw sessionError
     }
 
-    // 3. Update daily streak if this was a daily quiz
+    // 4. Update daily streak if this was a daily quiz
     if (is_daily && daily_date) {
       const { error: streakError } = await supabase.rpc('update_daily_streak', {
         p_echo_user_id: echo_user_id,
@@ -102,7 +147,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 4. Check and award achievements
+    // 5. Check and award achievements
     const { error: achievementError } = await supabase.rpc(
       'check_and_award_achievements',
       {
@@ -115,7 +160,7 @@ export async function POST(request: NextRequest) {
       // Don't fail the whole request if achievement check fails
     }
 
-    // 5. Fetch newly earned achievements
+    // 6. Fetch newly earned achievements
     const { data: newAchievements } = await supabase
       .from('user_achievements')
       .select(
@@ -127,7 +172,7 @@ export async function POST(request: NextRequest) {
       .eq('echo_user_id', echo_user_id)
       .gte('earned_at', new Date(Date.now() - 5000).toISOString()) // Earned in last 5 seconds
 
-    // 6. Fetch updated streak
+    // 7. Fetch updated streak
     const { data: streak } = await supabase
       .from('daily_streaks')
       .select('*')

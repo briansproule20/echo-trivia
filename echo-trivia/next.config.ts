@@ -5,6 +5,16 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: '.',
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'echo.merit.systems',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

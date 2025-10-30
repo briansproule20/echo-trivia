@@ -10,6 +10,7 @@ import { storage } from "@/lib/storage";
 import type { Session } from "@/lib/types";
 import { motion } from "framer-motion";
 import { DotBackground } from "@/components/ui/dot-background";
+import { MiniLeaderboard } from "@/components/trivia/MiniLeaderboard";
 
 export default function HomePage() {
   const router = useRouter();
@@ -75,6 +76,11 @@ export default function HomePage() {
               </Button>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Mini Leaderboard */}
+        <div className="max-w-3xl mx-auto mb-12">
+          <MiniLeaderboard />
         </div>
 
         {/* Recent Sessions */}

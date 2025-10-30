@@ -23,6 +23,7 @@ export default function PlayPage() {
 
   const [currentSubmission, setCurrentSubmission] = useState<Submission | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
+  const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false);
   const [startTime, setStartTime] = useState<number>(Date.now());
 
   useEffect(() => {
@@ -119,52 +120,63 @@ export default function PlayPage() {
   };
 
   const handleFinish = async () => {
-    endSession();
-
-    // Calculate score and generate title
-    const correct = currentSession.submissions.filter((s) => s.correct).length;
-    const percentage = calculateScore(currentSession.quiz, currentSession.submissions);
-    const { title, tier } = getRandomTitle(percentage);
-
-    const finalSession = {
-      ...currentSession,
-      endedAt: new Date().toISOString(),
-      score: correct,
-      earnedTitle: title,
-      earnedTier: tier,
-    };
-    await storage.saveSession(finalSession);
-
-    // Track category performance locally
-    await storage.trackCategoryPerformance(finalSession.quiz.category, correct, finalSession.quiz.questions.length);
-
-    // Submit to Supabase if user is signed in
-    if (echo.user?.id) {
-      const result = await submitQuizToSupabase(finalSession, echo.user.id, echo.user.name);
-      if (result.success) {
-        console.log('Quiz submitted to Supabase successfully');
-        if (result.newAchievements && result.newAchievements.length > 0) {
-          console.log('New achievements earned:', result.newAchievements);
-        }
-        if (result.streak) {
-          console.log('Streak updated:', result.streak);
-        }
-
-        // Save quiz results to localStorage for the username prompt
-        const resultsKey = `quiz_results_${sessionId}`;
-        localStorage.setItem(
-          resultsKey,
-          JSON.stringify({
-            newAchievements: result.newAchievements,
-            streak: result.streak,
-          })
-        );
-      } else {
-        console.error('Failed to submit quiz to Supabase:', result.error);
-      }
+    // Prevent double submission
+    if (isSubmittingQuiz) {
+      console.log('Quiz submission already in progress, ignoring duplicate request');
+      return;
     }
 
-    router.push(`/results/${sessionId}`);
+    setIsSubmittingQuiz(true);
+    endSession();
+
+    try {
+      // Calculate score and generate title
+      const correct = currentSession.submissions.filter((s) => s.correct).length;
+      const percentage = calculateScore(currentSession.quiz, currentSession.submissions);
+      const { title, tier } = getRandomTitle(percentage);
+
+      const finalSession = {
+        ...currentSession,
+        endedAt: new Date().toISOString(),
+        score: correct,
+        earnedTitle: title,
+        earnedTier: tier,
+      };
+      await storage.saveSession(finalSession);
+
+      // Track category performance locally
+      await storage.trackCategoryPerformance(finalSession.quiz.category, correct, finalSession.quiz.questions.length);
+
+      // Submit to Supabase if user is signed in
+      if (echo.user?.id) {
+        const result = await submitQuizToSupabase(finalSession, echo.user.id, echo.user.name, sessionId);
+        if (result.success) {
+          console.log('Quiz submitted to Supabase successfully');
+          if (result.newAchievements && result.newAchievements.length > 0) {
+            console.log('New achievements earned:', result.newAchievements);
+          }
+          if (result.streak) {
+            console.log('Streak updated:', result.streak);
+          }
+
+          // Save quiz results to localStorage for the username prompt
+          const resultsKey = `quiz_results_${sessionId}`;
+          localStorage.setItem(
+            resultsKey,
+            JSON.stringify({
+              newAchievements: result.newAchievements,
+              streak: result.streak,
+            })
+          );
+        } else {
+          console.error('Failed to submit quiz to Supabase:', result.error);
+        }
+      }
+
+      router.push(`/results/${sessionId}`);
+    } finally {
+      setIsSubmittingQuiz(false);
+    }
   };
 
   const handleTimeExpire = () => {
@@ -225,8 +237,8 @@ export default function PlayPage() {
                 Previous
               </Button>
 
-              <Button onClick={handleNext} size="lg">
-                {isLastQuestion ? "Finish Quiz" : "Next Question"}
+              <Button onClick={handleNext} size="lg" disabled={isSubmittingQuiz}>
+                {isLastQuestion ? (isSubmittingQuiz ? "Submitting..." : "Finish Quiz") : "Next Question"}
                 {!isLastQuestion && <ChevronRight className="ml-2 h-4 w-4" />}
               </Button>
             </div>

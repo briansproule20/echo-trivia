@@ -99,6 +99,7 @@ export interface SaveQuizSessionRequest {
   daily_date?: string
   title?: string
   time_taken?: number
+  session_id?: string
 }
 
 export interface LeaderboardQuery {

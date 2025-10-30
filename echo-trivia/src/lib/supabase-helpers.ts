@@ -8,7 +8,8 @@ import type { SaveQuizSessionRequest } from './supabase-types'
 export async function submitQuizToSupabase(
   session: Session,
   echoUserId: string,
-  echoUserName?: string | null
+  echoUserName?: string | null,
+  sessionId?: string
 ): Promise<{
   success: boolean
   newAchievements?: any[]
@@ -56,6 +57,7 @@ export async function submitQuizToSupabase(
       daily_date: dailyDate,
       title: session.earnedTitle,
       time_taken: timeTaken,
+      session_id: sessionId,
     }
 
     const response = await fetch('/api/quiz/submit', {

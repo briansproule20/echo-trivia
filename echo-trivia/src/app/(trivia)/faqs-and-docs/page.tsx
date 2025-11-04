@@ -152,11 +152,7 @@ export default function FaqsAndDocsPage() {
                 <span className="font-semibold">Where does my money go?</span>
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground pb-4">
-                Your payments support an independent developer (
-                <Link href="https://briansproule.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  a real human!
-                </Link>
-                ), not a large corporation. The revenue covers
+                Your payments support an independent developer (a real human!), not a large corporation. The revenue covers
                 AI usage costs and supports ongoing development of Trivia Wizard. This open-source project is built to provide
                 a service people actually want to use, with fair and transparent pricing.
               </AccordionContent>
@@ -312,11 +308,8 @@ export default function FaqsAndDocsPage() {
               want with no subscription fees.
             </p>
             <p>
-              The money you spend on Trivia Wizard goes to the independent developer of the app (
-              <Link href="https://briansproule.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                me, a real human
-              </Link>
-              ), not a large corporation. This allows me to maintain fair pricing and keep improving the service based
+              The money you spend on Trivia Wizard goes to the independent developer of the app (me, a real human),
+              not a large corporation. This allows me to maintain fair pricing and keep improving the service based
               on what users want and need.
             </p>
             <p>

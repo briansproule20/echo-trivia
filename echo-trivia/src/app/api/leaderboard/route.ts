@@ -24,17 +24,24 @@ export async function GET(request: NextRequest) {
       query = query.eq('category', category)
     }
 
-    // Filter by time period
+    // Filter by time period (using America/New_York timezone to match daily challenge reset)
     const now = new Date()
     if (period === 'daily') {
-      const startOfDay = new Date(now.setHours(0, 0, 0, 0)).toISOString()
+      // Get start of day in EST/EDT, then convert to ISO for database query
+      const estDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }))
+      estDate.setHours(0, 0, 0, 0)
+      const startOfDay = estDate.toISOString()
       query = query.gte('completed_at', startOfDay)
     } else if (period === 'weekly') {
-      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
-      query = query.gte('completed_at', weekAgo)
+      // Get date 7 days ago in EST/EDT, then convert to ISO
+      const estDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }))
+      const weekAgo = new Date(estDate.getTime() - 7 * 24 * 60 * 60 * 1000)
+      query = query.gte('completed_at', weekAgo.toISOString())
     } else if (period === 'monthly') {
-      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
-      query = query.gte('completed_at', monthAgo)
+      // Get date 30 days ago in EST/EDT, then convert to ISO
+      const estDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }))
+      const monthAgo = new Date(estDate.getTime() - 30 * 24 * 60 * 60 * 1000)
+      query = query.gte('completed_at', monthAgo.toISOString())
     }
 
     const { data: sessions, error: sessionsError } = await query

@@ -101,7 +101,7 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
       model: anthropic("claude-sonnet-4-20250514"),
       system: GENERATION_SYSTEM_PROMPT,
       prompt,
-      temperature: 1.0, // Higher temperature for more variety in custom quizzes
+      temperature: 1.2, // Higher temperature for more variety in custom quizzes
     });
 
     // Parse and validate response
@@ -281,12 +281,12 @@ ${SCHEMA_TEMPLATE}
 
 Make the quiz engaging and educational. Ensure all questions are factually accurate.`;
 
-    // Generate with Echo LLM (keep existing temperature)
+    // Generate with Echo LLM with higher temperature for variety
     const result = await generateText({
       model: anthropic("claude-sonnet-4-20250514"),
       system: GENERATION_SYSTEM_PROMPT,
       prompt,
-      temperature: 0.8,
+      temperature: 1.2, // Higher temperature for more variety in practice quizzes
     });
 
     // Parse and validate response

@@ -36,9 +36,17 @@ export function ReferralDetector() {
     try {
       hasRegistered.current = true;
       console.log("Referral code detected:", referralCode);
+      console.log("Echo context state:", {
+        hasUser: !!echo.user,
+        userId: echo.user?.id,
+        isLoggedIn: echo.isLoggedIn,
+        hasGetToken: typeof echo.getToken === 'function',
+      });
 
       // Get authentication token from Echo
       const token = await echo.getToken();
+      console.log("Token retrieved:", { hasToken: !!token, tokenLength: token?.length });
+
       if (!token) {
         console.error("Failed to get authentication token");
         hasRegistered.current = false;

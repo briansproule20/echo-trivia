@@ -101,7 +101,7 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
       model: anthropic("claude-sonnet-4-20250514"),
       system: GENERATION_SYSTEM_PROMPT,
       prompt,
-      temperature: 1.2, // Higher temperature for more variety in custom quizzes
+      temperature: 1.0, // Higher temperature for more variety in custom quizzes
     });
 
     // Parse and validate response
@@ -286,7 +286,7 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
       model: anthropic("claude-sonnet-4-20250514"),
       system: GENERATION_SYSTEM_PROMPT,
       prompt,
-      temperature: 1.2, // Higher temperature for more variety in practice quizzes
+      temperature: 1.0, // Higher temperature for more variety in practice quizzes
     });
 
     // Parse and validate response

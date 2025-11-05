@@ -39,10 +39,10 @@ export default function HomePage() {
             <div className="h-px w-24 mx-auto bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
           </div>
           <p className="text-base sm:text-lg lg:text-xl text-foreground/80 max-w-4xl mx-auto leading-relaxed">
-            Infinite trivia on any topic you can imagine
+            Summon Your Inner Genius
           </p>
           <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">
-            Fully customized to match your preferences
+            Daily trivia challenges, infinite customizable practice
           </p>
         </div>
 

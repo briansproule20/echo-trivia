@@ -22,7 +22,7 @@ export function Footer() {
               <h3 className="text-lg font-semibold">Trivia Wizard</h3>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Infinite trivia on any topic you can imagine
+              Summon Your Inner Genius
             </p>
           </div>
 

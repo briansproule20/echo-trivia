@@ -37,11 +37,20 @@ export function ReferralDetector() {
       hasRegistered.current = true;
       console.log("Referral code detected:", referralCode);
 
+      // Get authentication token from Echo
+      const token = await echo.getToken();
+      if (!token) {
+        console.error("Failed to get authentication token");
+        hasRegistered.current = false;
+        return;
+      }
+
       // Make POST request to Echo API to register the referral
       const response = await fetch("https://echo.merit.systems/api/v1/user/referral", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({
           echoAppId: process.env.NEXT_PUBLIC_ECHO_APP_ID,

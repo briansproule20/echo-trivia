@@ -58,8 +58,17 @@ export function ReferralDetector() {
         }),
       });
 
+      console.log("Referral API response:", {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+      });
+
+      const responseData = await response.text();
+      console.log("Referral API response body:", responseData);
+
       if (!response.ok) {
-        throw new Error(`Failed to register referral: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to register referral: ${response.status} ${response.statusText} - ${responseData}`);
       }
 
       console.log("✅ Referral code successfully registered");

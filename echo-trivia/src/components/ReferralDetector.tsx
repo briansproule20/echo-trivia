@@ -36,47 +36,23 @@ export function ReferralDetector() {
     try {
       hasRegistered.current = true;
       console.log("Referral code detected:", referralCode);
-      console.log("Echo context state:", {
-        hasUser: !!echo.user,
-        userId: echo.user?.id,
-        isLoggedIn: echo.isLoggedIn,
-        hasGetToken: typeof echo.getToken === 'function',
-      });
 
-      // Get authentication token from Echo
-      const token = await echo.getToken();
-      console.log("Token retrieved:", { hasToken: !!token, tokenLength: token?.length });
-
-      if (!token) {
-        console.error("Failed to get authentication token");
-        hasRegistered.current = false;
-        return;
-      }
-
-      // Make POST request to Echo API to register the referral
-      const response = await fetch("https://echo.merit.systems/api/v1/user/referral", {
+      // Call our API route which handles authentication server-side
+      const response = await fetch("/api/referral/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({
-          echoAppId: process.env.NEXT_PUBLIC_ECHO_APP_ID,
           code: referralCode,
         }),
       });
 
-      console.log("Referral API response:", {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok,
-      });
-
-      const responseData = await response.text();
-      console.log("Referral API response body:", responseData);
+      const data = await response.json();
+      console.log("Referral registration response:", data);
 
       if (!response.ok) {
-        throw new Error(`Failed to register referral: ${response.status} ${response.statusText} - ${responseData}`);
+        throw new Error(data.error || `Failed to register referral: ${response.status}`);
       }
 
       console.log("✅ Referral code successfully registered");

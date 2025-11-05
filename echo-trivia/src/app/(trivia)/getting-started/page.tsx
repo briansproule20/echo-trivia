@@ -57,7 +57,7 @@ export default function GettingStartedPage() {
                   <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                   <div>
                     <p className="font-medium">Add credits to your account</p>
-                    <p className="text-sm text-muted-foreground">Start with any amount - as little as $1</p>
+                    <p className="text-sm text-muted-foreground">Get $1 free when you sign up! Then add more as you need it</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -80,7 +80,7 @@ export default function GettingStartedPage() {
                 </div>
                 <div>
                   <CardTitle>Incredible Value</CardTitle>
-                  <CardDescription>$1 generates 50+ quizzes</CardDescription>
+                  <CardDescription>$1 generates 25 quizzes</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -96,8 +96,7 @@ export default function GettingStartedPage() {
                   </div>
                   <ArrowRight className="h-5 w-5 text-muted-foreground" />
                   <div className="text-right">
-                    <p className="font-semibold text-primary">50+ Quizzes</p>
-                    <p className="text-xs text-muted-foreground">10 questions each</p>
+                    <p className="font-semibold text-primary">25 Quizzes</p>
                   </div>
                 </div>
               </div>
@@ -105,15 +104,15 @@ export default function GettingStartedPage() {
               <div className="grid sm:grid-cols-3 gap-4 pt-2">
                 <div className="text-center p-4 rounded-lg bg-background">
                   <p className="text-2xl font-bold text-primary">$5</p>
-                  <p className="text-sm text-muted-foreground mt-1">250+ quizzes</p>
+                  <p className="text-sm text-muted-foreground mt-1">125 quizzes</p>
                 </div>
                 <div className="text-center p-4 rounded-lg bg-background">
                   <p className="text-2xl font-bold text-primary">$10</p>
-                  <p className="text-sm text-muted-foreground mt-1">500+ quizzes</p>
+                  <p className="text-sm text-muted-foreground mt-1">250 quizzes</p>
                 </div>
                 <div className="text-center p-4 rounded-lg bg-background">
                   <p className="text-2xl font-bold text-primary">$20</p>
-                  <p className="text-sm text-muted-foreground mt-1">1000+ quizzes</p>
+                  <p className="text-sm text-muted-foreground mt-1">500 quizzes</p>
                 </div>
               </div>
             </CardContent>
@@ -171,6 +170,16 @@ export default function GettingStartedPage() {
                     Add credits whenever you want. Use them at your own pace. No expiration dates or pressure to use them quickly.
                     Your balance stays with you until you're ready to create more quizzes.
                   </p>
+                  <p className="text-xs text-muted-foreground/80 pl-8 pt-2">
+                    Want to know more about our billing process and where your money is going?{" "}
+                    <Button
+                      variant="link"
+                      className="h-auto p-0 text-xs text-muted-foreground/80 hover:text-primary underline"
+                      onClick={() => router.push("/faqs-and-docs")}
+                    >
+                      Check out our FAQs and docs
+                    </Button>
+                  </p>
                 </div>
               </div>
 
@@ -180,7 +189,7 @@ export default function GettingStartedPage() {
                   <div className="space-y-1">
                     <p className="font-semibold text-sm">Example Cost</p>
                     <p className="text-sm text-muted-foreground">
-                      A typical 5-question quiz costs about $0.02 USD (2 cents). That's 50 quizzes per dollar!
+                      A typical daily quiz costs about $0.04 USD (4 cents). That's 25 quizzes per dollar!
                     </p>
                   </div>
                 </div>

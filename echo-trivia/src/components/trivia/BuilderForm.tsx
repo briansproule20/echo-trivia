@@ -44,7 +44,7 @@ export function BuilderForm({
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent>
-              {CATEGORIES.map((cat) => (
+              {[...CATEGORIES].sort().map((cat) => (
                 <SelectItem key={cat} value={cat}>
                   {cat}
                 </SelectItem>

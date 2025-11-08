@@ -217,7 +217,7 @@ function PracticeContent() {
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent className="max-h-[300px]">
-                        {CATEGORIES.map((cat) => (
+                        {[...CATEGORIES].sort().map((cat) => (
                           <SelectItem key={cat} value={cat}>
                             {cat}
                           </SelectItem>

@@ -212,7 +212,6 @@ const TITLE_TIERS: Record<number, { tier: string; titles: string[] }> = {
       "Trivia Royalty",
       "Certified Smarty-Pants",
       "Answer Whisperer Deluxe",
-      "The Trivia Wizard",
       "Walking Encyclopedia",
       "Elite Scholar",
       "Knowledge Virtuoso",
@@ -229,6 +228,7 @@ const TITLE_TIERS: Record<number, { tier: string; titles: string[] }> = {
   100: {
     tier: "Absolute Perfection",
     titles: [
+      "The Trivia Wizard",
       "Flawless Victory",
       "Perfect Score Prodigy",
       "Untouchable Genius",

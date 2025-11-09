@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Sparkles, Loader2, Lock } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Sparkles, Loader2, Lock, ChevronDown, Calendar } from "lucide-react";
 import { storage } from "@/lib/storage";
-import { getTodayString, getTodayFormatted, generateId } from "@/lib/quiz-utils";
+import { getTodayString, getTodayFormatted, generateId, hashString } from "@/lib/quiz-utils";
 import { usePlayStore } from "@/lib/store";
 import type { Quiz, Session } from "@/lib/types";
 import { useEcho } from "@merit-systems/echo-react-sdk";
+import { CATEGORIES } from "@/lib/types";
 
 interface DailyChallenge {
   date: string;
@@ -29,8 +31,43 @@ export default function DailyQuizPage() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const { setSession } = usePlayStore();
   const { user, signIn, isLoading: echoLoading } = useEcho();
+
+  // Generate last 7 daily challenges
+  const getPastChallenges = () => {
+    const challenges: Array<{ date: string; displayDate: string; category: string }> = [];
+    const today = new Date();
+    const estToday = new Date(today.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+
+    for (let i = 1; i <= 7; i++) {
+      const date = new Date(estToday);
+      date.setDate(date.getDate() - i);
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const dateString = `${year}-${month}-${day}`;
+
+      // Format display date
+      const displayDate = date.toLocaleDateString('en-US', {
+        timeZone: 'America/New_York',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+
+      // Calculate category using same algorithm as API
+      const seed = hashString(`daily-quiz-${dateString}`);
+      const categoryIndex = seed % CATEGORIES.length;
+      const category = CATEGORIES[categoryIndex];
+
+      challenges.push({ date: dateString, displayDate, category });
+    }
+
+    return challenges;
+  };
 
   const loadDailyChallenge = async () => {
     setLoading(true);
@@ -273,6 +310,49 @@ export default function DailyQuizPage() {
                 </Button>
               </CardContent>
             </Card>
+          )}
+
+          {/* Past Challenges Dropdown */}
+          {challenge && !loading && (
+            <Collapsible open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+              <Card className="overflow-hidden">
+                <CollapsibleTrigger asChild>
+                  <button className="w-full p-4 sm:p-6 hover:bg-muted/50 transition-colors flex items-center justify-between group">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                      <span className="text-sm sm:text-base font-medium">Past 7 Days</span>
+                    </div>
+                    <ChevronDown
+                      className={`h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground transition-transform duration-200 ${
+                        isHistoryOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="px-4 pb-4 sm:px-6 sm:pb-6 pt-0">
+                    <div className="space-y-2">
+                      {getPastChallenges().map((pastChallenge, index) => (
+                        <div
+                          key={pastChallenge.date}
+                          className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 flex-1 min-w-0">
+                            <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                              {pastChallenge.displayDate}
+                            </span>
+                            <span className="hidden sm:inline text-muted-foreground">•</span>
+                            <span className="text-sm sm:text-base font-medium truncate">
+                              {pastChallenge.category}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           )}
         </div>
       </div>

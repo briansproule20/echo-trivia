@@ -8,11 +8,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Sparkles, Loader2, Lock, ChevronDown, Calendar } from "lucide-react";
 import { storage } from "@/lib/storage";
-import { getTodayString, getTodayFormatted, generateId, hashString } from "@/lib/quiz-utils";
+import { getTodayString, getTodayFormatted, generateId } from "@/lib/quiz-utils";
 import { usePlayStore } from "@/lib/store";
 import type { Quiz, Session } from "@/lib/types";
 import { useEcho } from "@merit-systems/echo-react-sdk";
-import { CATEGORIES } from "@/lib/types";
 
 interface DailyChallenge {
   date: string;
@@ -32,12 +31,14 @@ export default function DailyQuizPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [dailyStats, setDailyStats] = useState<Record<string, { avg: number; category: string } | null>>({});
+  const [statsLoading, setStatsLoading] = useState(false);
   const { setSession } = usePlayStore();
   const { user, signIn, isLoading: echoLoading } = useEcho();
 
-  // Generate last 7 daily challenges
-  const getPastChallenges = () => {
-    const challenges: Array<{ date: string; displayDate: string; category: string }> = [];
+  // Generate last 7 daily challenge dates
+  const getPastChallengeDates = () => {
+    const dates: Array<{ date: string; displayDate: string }> = [];
     const today = new Date();
     const estToday = new Date(today.toLocaleString('en-US', { timeZone: 'America/New_York' }));
 
@@ -58,15 +59,32 @@ export default function DailyQuizPage() {
         year: 'numeric'
       });
 
-      // Calculate category using same algorithm as API
-      const seed = hashString(`daily-quiz-${dateString}`);
-      const categoryIndex = seed % CATEGORIES.length;
-      const category = CATEGORIES[categoryIndex];
-
-      challenges.push({ date: dateString, displayDate, category });
+      dates.push({ date: dateString, displayDate });
     }
 
-    return challenges;
+    return dates;
+  };
+
+  // Fetch average scores and categories for past daily challenges from DB
+  const loadDailyStats = async () => {
+    setStatsLoading(true);
+    try {
+      const pastDates = getPastChallengeDates();
+      const dates = pastDates.map((d) => d.date).join(",");
+
+      const response = await fetch(`/api/daily-stats?dates=${dates}`);
+      if (!response.ok) {
+        console.error("Failed to load daily stats");
+        return;
+      }
+
+      const stats = await response.json();
+      setDailyStats(stats);
+    } catch (err) {
+      console.error("Error loading daily stats:", err);
+    } finally {
+      setStatsLoading(false);
+    }
   };
 
   const loadDailyChallenge = async () => {
@@ -91,6 +109,7 @@ export default function DailyQuizPage() {
 
   useEffect(() => {
     loadDailyChallenge();
+    loadDailyStats();
   }, []);
 
   const handleStartQuiz = async () => {
@@ -332,22 +351,45 @@ export default function DailyQuizPage() {
                 <CollapsibleContent>
                   <div className="px-4 pb-4 sm:px-6 sm:pb-6 pt-0">
                     <div className="space-y-2">
-                      {getPastChallenges().map((pastChallenge, index) => (
-                        <div
-                          key={pastChallenge.date}
-                          className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                        >
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 flex-1 min-w-0">
-                            <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-                              {pastChallenge.displayDate}
-                            </span>
-                            <span className="hidden sm:inline text-muted-foreground">•</span>
-                            <span className="text-sm sm:text-base font-medium truncate">
-                              {pastChallenge.category}
-                            </span>
+                      {getPastChallengeDates().map((pastDate) => {
+                        const stats = dailyStats[pastDate.date];
+                        const hasData = stats !== null && stats !== undefined;
+
+                        return (
+                          <div
+                            key={pastDate.date}
+                            className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 flex-1 min-w-0">
+                              <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                                {pastDate.displayDate}
+                              </span>
+                              <span className="hidden sm:inline text-muted-foreground">•</span>
+                              <span className="text-sm sm:text-base font-medium truncate">
+                                {hasData ? stats.category : "Loading..."}
+                              </span>
+                            </div>
+                            <div className="ml-3 flex-shrink-0">
+                              {statsLoading ? (
+                                <Skeleton className="h-6 w-12" />
+                              ) : hasData ? (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-sm sm:text-base font-semibold text-primary">
+                                    {stats.avg}%
+                                  </span>
+                                  <span className="text-xs text-muted-foreground hidden sm:inline">
+                                    avg
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-xs sm:text-sm text-muted-foreground">
+                                  No data
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 </CollapsibleContent>

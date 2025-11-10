@@ -52,7 +52,26 @@ export function ReferralDetector() {
       console.log("Referral registration response:", data);
 
       if (!response.ok) {
-        throw new Error(data.error || `Failed to register referral: ${response.status}`);
+        // Parse the details if available
+        let detailMessage = data.error;
+        if (data.details) {
+          try {
+            const details = JSON.parse(data.details);
+            detailMessage = details.message || data.error;
+          } catch {
+            detailMessage = data.error;
+          }
+        }
+
+        console.warn("Referral registration failed:", detailMessage);
+
+        // Don't retry if it's a business logic error (already has referrer, invalid code, etc)
+        if (response.status === 400) {
+          hasRegistered.current = true; // Don't retry 400 errors
+        } else {
+          hasRegistered.current = false; // Allow retry for other errors
+        }
+        return;
       }
 
       console.log("✅ Referral code successfully registered");

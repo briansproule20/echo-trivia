@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category')
     const limit = parseInt(searchParams.get('limit') || '25')
     const echoUserId = searchParams.get('echo_user_id')
-    const rankBy = searchParams.get('rank_by') || 'avg_score' // 'avg_score' or 'total_correct'
+    const rankBy = searchParams.get('rank_by') || 'avg_score' // 'avg_score', 'total_correct', or 'total_quizzes'
 
     const supabase = await createClient()
 
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Calculate average scores and create leaderboard entries
-    const leaderboardData = Object.entries(userScores).map(
+    let leaderboardData = Object.entries(userScores).map(
       ([echoUserId, data]) => ({
         echo_user_id: echoUserId,
         score: data.totalScore / data.count,
@@ -83,9 +83,16 @@ export async function GET(request: NextRequest) {
       })
     )
 
+    // Apply 5-quiz minimum filter for non-daily leaderboards
+    if (period !== 'daily') {
+      leaderboardData = leaderboardData.filter(entry => entry.total_quizzes >= 5)
+    }
+
     // Sort by the selected ranking method
     if (rankBy === 'total_correct') {
       leaderboardData.sort((a, b) => b.total_correct - a.total_correct)
+    } else if (rankBy === 'total_quizzes') {
+      leaderboardData.sort((a, b) => b.total_quizzes - a.total_quizzes)
     } else {
       // Default: sort by average score
       leaderboardData.sort((a, b) => b.score - a.score)

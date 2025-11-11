@@ -5,13 +5,14 @@ import { useEcho } from "@merit-systems/echo-react-sdk";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trophy, Medal, Award, User } from "lucide-react";
 import type { LeaderboardEntry } from "@/lib/supabase-types";
 
 export default function LeaderboardPage() {
   const echo = useEcho();
   const [period, setPeriod] = useState<'all' | 'daily' | 'weekly' | 'monthly'>('all');
-  const [rankBy, setRankBy] = useState<'avg_score' | 'total_correct'>('avg_score');
+  const [rankBy, setRankBy] = useState<'avg_score' | 'total_correct' | 'total_quizzes'>('avg_score');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [userPosition, setUserPosition] = useState<LeaderboardEntry | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,31 +62,26 @@ export default function LeaderboardPage() {
               <Trophy className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
               <h1 className="text-3xl sm:text-4xl font-bold">Leaderboard</h1>
             </div>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              {rankBy === 'avg_score' ? 'Ranked by average quiz score' : 'Ranked by total correct answers'}
-            </p>
+            {period !== 'daily' && (
+              <p className="text-xs sm:text-sm text-muted-foreground/80">
+                Not seeing yourself? Ensure you have played 5 quizzes to appear on the global leaderboards.
+              </p>
+            )}
           </div>
 
-          {/* Ranking Mode Toggle */}
-          <div className="flex items-center justify-center gap-2">
-            <span className={`text-sm font-medium transition-colors ${rankBy === 'avg_score' ? 'text-foreground' : 'text-muted-foreground'}`}>
-              Avg Score
-            </span>
-            <button
-              onClick={() => setRankBy(rankBy === 'avg_score' ? 'total_correct' : 'avg_score')}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                rankBy === 'total_correct' ? 'bg-primary' : 'bg-muted'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-background shadow-lg transition-transform ${
-                  rankBy === 'total_correct' ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-            <span className={`text-sm font-medium transition-colors ${rankBy === 'total_correct' ? 'text-foreground' : 'text-muted-foreground'}`}>
-              Total Correct
-            </span>
+          {/* Ranking Method Selector */}
+          <div className="flex items-center justify-center gap-3">
+            <span className="text-sm font-medium text-muted-foreground">Rank by:</span>
+            <Select value={rankBy} onValueChange={(value) => setRankBy(value as typeof rankBy)}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="avg_score">Average Score</SelectItem>
+                <SelectItem value="total_correct">Total Correct</SelectItem>
+                <SelectItem value="total_quizzes">Total Quizzes</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Period Tabs */}
@@ -156,7 +152,9 @@ export default function LeaderboardPage() {
                               <Badge variant="secondary" className="text-sm sm:text-lg font-bold">
                                 {rankBy === 'avg_score'
                                   ? `${entry.score.toFixed(1)}%`
-                                  : entry.total_correct?.toLocaleString() || '0'
+                                  : rankBy === 'total_correct'
+                                  ? entry.total_correct?.toLocaleString() || '0'
+                                  : `${entry.total_quizzes} ${entry.total_quizzes === 1 ? 'quiz' : 'quizzes'}`
                                 }
                               </Badge>
                               {rankBy === 'avg_score' && entry.total_correct !== undefined && (
@@ -165,6 +163,11 @@ export default function LeaderboardPage() {
                                 </span>
                               )}
                               {rankBy === 'total_correct' && (
+                                <span className="text-xs text-muted-foreground font-normal">
+                                  {entry.score.toFixed(1)}% avg
+                                </span>
+                              )}
+                              {rankBy === 'total_quizzes' && (
                                 <span className="text-xs text-muted-foreground font-normal">
                                   {entry.score.toFixed(1)}% avg
                                 </span>
@@ -210,7 +213,9 @@ export default function LeaderboardPage() {
                               <Badge variant="secondary" className="text-sm sm:text-lg font-bold">
                                 {rankBy === 'avg_score'
                                   ? `${userPosition.score.toFixed(1)}%`
-                                  : userPosition.total_correct?.toLocaleString() || '0'
+                                  : rankBy === 'total_correct'
+                                  ? userPosition.total_correct?.toLocaleString() || '0'
+                                  : `${userPosition.total_quizzes} ${userPosition.total_quizzes === 1 ? 'quiz' : 'quizzes'}`
                                 }
                               </Badge>
                               {rankBy === 'avg_score' && userPosition.total_correct !== undefined && (
@@ -219,6 +224,11 @@ export default function LeaderboardPage() {
                                 </span>
                               )}
                               {rankBy === 'total_correct' && (
+                                <span className="text-xs text-muted-foreground font-normal">
+                                  {userPosition.score.toFixed(1)}% avg
+                                </span>
+                              )}
+                              {rankBy === 'total_quizzes' && (
                                 <span className="text-xs text-muted-foreground font-normal">
                                   {userPosition.score.toFixed(1)}% avg
                                 </span>

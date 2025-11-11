@@ -27,6 +27,14 @@ Rules:
 - For true/false, the "answer" field should be "true" or "false".
 - For short answer, the "answer" field should be the expected text answer.
 
+CRITICAL - Fair and Clear Questions:
+- NEVER create trick questions or questions designed to deceive the user.
+- Avoid confusingly similar dates or numbers in multiple choice options (e.g., don't use 1492, 1493, 1494, 1495 as options).
+- Wrong answers should be plausible but distinctly different from the correct answer.
+- Focus on testing knowledge, NOT testing the user's ability to spot subtle differences.
+- Make wrong answers clearly wrong to someone who knows the topic, but reasonable to someone who doesn't.
+- Prioritize clarity and educational value over difficulty through confusion.
+
 CRITICAL - Variety & Freshness:
 - EASY questions: Should be accessible but NOT obvious or trivial. Avoid the most famous/clichéd facts everyone knows (e.g., "What is the capital of France?"). Instead, use interesting-but-approachable facts that are educational and make people think. Easy should mean "solvable with basic knowledge" not "everyone already knows this."
 - MEDIUM questions: Should explore more specific topics. Avoid the most overused facts. Use interesting angles.
@@ -249,7 +257,6 @@ export async function POST(req: Request) {
 RECIPE CONSTRAINTS:
 - tone: ${Labels.Tone[recipe.tone]}
 - era: ${Labels.Era[recipe.era]}
-- distractor_styles: ${toLabel(recipe.distractors as unknown as number[], Labels.DistractorStyle).join(", ")}
 - explanation_style: ${Labels.ExplanationStyle[recipe.explanation]}
 
 ${typeInstruction}.
@@ -265,7 +272,7 @@ INSTRUCTIONS:
 - Create ${recipe.numQuestions} questions matching the recipe
 - CRITICAL: Set the "difficulty" field for each question EXACTLY as specified above (question 1 = "${difficultyLabels[0]}", question 2 = "${difficultyLabels[1]}", etc.)
 - For multiple_choice, include exactly 4 options with exactly 1 correct
-- Use distractor styles: ${toLabel(recipe.distractors as unknown as number[], Labels.DistractorStyle).join(", ")}
+- For wrong answer choices: make them plausible but clearly distinct from the correct answer (avoid trick questions and confusingly similar options)
 - Write explanations in the "${Labels.ExplanationStyle[recipe.explanation]}" style
 - Apply the "${Labels.Tone[recipe.tone]}" tone throughout
 - Focus on the "${Labels.Era[recipe.era]}" era when relevant

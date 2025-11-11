@@ -68,14 +68,6 @@ export enum Era {
 }
 const ERAS = Object.values(Era).filter(v => typeof v === "number") as Era[];
 
-export enum DistractorStyle {
-  CLOSE_SHAVES = 0,
-  SAME_CATEGORY = 1,
-  TEMPORAL_CONFUSION = 2,
-  NUMERICAL_NEARBY = 3,
-}
-const DS = Object.values(DistractorStyle).filter(v => typeof v === "number") as DistractorStyle[];
-
 export enum ExplanationStyle {
   ONE_LINE_FACT = 0,
   COMPARE_CONTRAST = 1,
@@ -98,7 +90,6 @@ export interface Recipe {
   questionTypes: QuestionType[];
   tone: Tone;
   era: Era;
-  distractors: DistractorStyle[];
   explanation: ExplanationStyle;
 }
 
@@ -111,7 +102,6 @@ export function buildRecipeFromSeed(seedHex: string, opts?: { fixedNumQuestions?
   const era = rollFrom(seedHex, "era", ERAS);
   const categoryMix = rollSample(seedHex, "categories", CATEGORIES, kCats);
   const questionTypes = rollSample(seedHex, "qtypes", QT, kQTypes);
-  const distractors = rollSample(seedHex, "distractors", DS, 2);
   const explanation = rollFrom(seedHex, "explanation", EXPL);
   const difficultyCurveId = rollIndex(seedHex, "curve", 3) as 0 | 1 | 2;
 
@@ -123,7 +113,6 @@ export function buildRecipeFromSeed(seedHex: string, opts?: { fixedNumQuestions?
     questionTypes,
     tone,
     era,
-    distractors,
     explanation,
   };
 }
@@ -134,6 +123,5 @@ export const Labels = {
   QuestionType: ["multiple_choice", "true_false", "fill_blank", "ordering"],
   Tone: ["scholarly", "playful", "cinematic", "pub_quiz", "deadpan", "sports_banter"],
   Era: ["ancient", "medieval", "early_modern", "modern", "contemporary", "mixed"],
-  DistractorStyle: ["close_shaves", "same_category", "temporal_confusion", "numerical_nearby"],
   ExplanationStyle: ["one_line_fact", "compare_contrast", "mini_story", "why_wrong"],
 } as const;

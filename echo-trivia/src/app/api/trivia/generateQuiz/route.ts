@@ -73,7 +73,6 @@ RECIPE:
 - question_types: ${toLabel(recipe.questionTypes as unknown as number[], Labels.QuestionType).join(", ")}
 - tone: ${Labels.Tone[recipe.tone]}
 - era: ${Labels.Era[recipe.era]}
-- distractor_styles: ${toLabel(recipe.distractors as unknown as number[], Labels.DistractorStyle).join(", ")}
 - explanation_style: ${Labels.ExplanationStyle[recipe.explanation]}
 
 INSTRUCTIONS:
@@ -82,7 +81,7 @@ INSTRUCTIONS:
 - Avoid asking the same category twice in a row if possible
 - Match each question's difficulty to the corresponding difficulty_label
 - For multiple_choice, include exactly 4 options with exactly 1 correct
-- Use distractor styles: ${toLabel(recipe.distractors as unknown as number[], Labels.DistractorStyle).join(", ")}
+- Wrong answers must be plausible but clearly distinct from the correct answer (avoid trick questions or tiny numeric/date differences)
 - Write explanations in the "${Labels.ExplanationStyle[recipe.explanation]}" style
 - Apply the "${Labels.Tone[recipe.tone]}" tone throughout
 - Focus on the "${Labels.Era[recipe.era]}" era when relevant

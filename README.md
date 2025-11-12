@@ -11,7 +11,7 @@ An AI-powered trivia platform built with Next.js, Echo billing integration, and 
 - **Answer Review** - Detailed explanations for every question with correct answer display
 - **Recipe System** - Deterministic quiz generation for preset categories (infinite variety via seed-based recipes)
 - **Custom Categories** - Ask about any topic with simplified AI generation
-- **Performance Tracking** - Category-based statistics stored locally
+- **Performance Tracking** - Category-bazsed statistics stored locally
 - **Share Feature** - Native share with emoji grids and referral codes
 
 ## Tech Stack
@@ -21,7 +21,7 @@ An AI-powered trivia platform built with Next.js, Echo billing integration, and 
 - **AI**: Vercel AI SDK + Echo LLM Provider
 - **Billing**: Echo metered LLM usage
 - **Storage**: IndexedDB (local quiz history)
-- **Database**: Account Info, Stats, Achievements
+- **Database**: Account Info, Stats, Achievements stored on Supabase
 - **Hosting**: Vercel
 
 ## Getting Started
@@ -296,6 +296,25 @@ Future enhancements being considered:
 - [ ] Quiz templates & presets
 - [ ] Export/Import quiz JSON
 - [ ] Multiplayer competitive mode
+- [ ] Leveling Sytem
+
+Adaptive Difficulty Engine
+- Quizzes learn from player performance and dynamically adjust question difficulty.
+
+Category Mastery Paths
+- Mini “skill trees” where players unlock harder tiers in topics as they excel.
+
+“Boss Questions”
+- End-of-quiz ultra-hard question that gives bonus XP or a special badge.
+
+Streak Mode
+- Endless mode where you answer until you miss one, with streak tracking.
+  
+Progressive Hints
+- Tiered hint system: word reveal → elimination → full explanation.
+
+Challenge Mode
+- User-generated challenges with fixed settings you can send to friends.
 
 ## License
 

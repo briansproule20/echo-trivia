@@ -316,6 +316,77 @@ Progressive Hints
 Challenge Mode
 - User-generated challenges with fixed settings you can send to friends.
 
+Rivalries & “Beat My Score” Links
+- A one-click “beat my score” deep link that auto-loads the same quiz seed.
+
+Profile Badges
+- Achievement-based icons (e.g., “History Master”, “Perfectionist 10×”).
+
+Community Packs/Pacts
+- Curated pacts made by influencers/experts (e.g., “Physicist Pack”).
+  
+LLM Cross-Verification
+- A second pass to verify answer accuracy using another model or endpoint.
+
+Explain-Like-I’m-5 Mode
+- Auto-generate simpler explanations for accessibility.
+
+“Continue the Lesson” Mode
+- After a quiz, users get a short mini-lesson expanding on the questions.
+
+Trivia Tutor
+- Chat mode where the AI can drill you on weak areas or generate follow-ups.
+
+Model Swapping
+- Allow users to pick “Fast (cheap)” vs. “Deep (expensive)” LLM generation modes.
+
+Full Player Profile System
+- XP, levels, ranks, badges, and category mastery metrics.
+
+Insights Dashboard Enhancement
+Visualizations:
+- heatmap of accuracy by category
+- “knowledge gaps” chart
+- accuracy over time
+- best/worst topics
+- streaks + milestones
+
+Skill Index Leaderboard
+- A global ELO-like score based on quiz difficulty + performance.
+
+Pack Store (Free)
+- Add thematic quiz packs:
+- 90s Nostalgia
+- World Mythologies
+- NBA Legends
+- Startups & Tech
+- US History AP Level
+
+Expert Packs (Paid or Referral Unlocks)
+- Unlock premium or special packs with referrals or Echo credits.
+
+Curriculum Mode:
+- AP/IB-style structured practice sets (English, History, Bio)
+
+UI/UX & App Polish
+Offline Mode
+- Caches recipes and quizzes for offline play in PWA mode.
+PWA Installable App
+- Fully badge-able, themed, and with push notifications.
+Animated Quiz Flow
+- Micro-animations for correct/incorrect, titles, progress bars, sharing.
+Accessibility Improvements
+- Large text mode
+- Dyslexia-friendly font
+- Colorblind palette switch
+- Keyboard-only mode
+
+Authentication & Account Enhancements
+Supabase Profile Sync
+- Sync history, favorites, stats, and settings across devices. This will require a rework of the current hybrid storage model...
+Referral Dashboard
+- View total referrals, credit earned, and revenue stats (This can be seen on Echo, direct there)
+
 ## License
 
 MIT

@@ -20,7 +20,8 @@ An AI-powered trivia platform built with Next.js, Echo billing integration, and 
 - **Styling**: Tailwind CSS + shadcn/ui
 - **AI**: Vercel AI SDK + Echo LLM Provider
 - **Billing**: Echo metered LLM usage
-- **Storage**: IndexedDB (for sessions, quizzes, stats)
+- **Storage**: IndexedDB (local quiz history)
+- **Database**: Account Info, Stats, Achievements
 - **Hosting**: Vercel
 
 ## Getting Started
@@ -92,7 +93,7 @@ Trivia Wizard uses **two generation modes**:
 
 ### 1. Recipe System (Preset Categories Only)
 
-For the 20 preset categories (History, Science, etc.), quizzes are generated deterministically:
+For the 154 preset categories (History, Science, etc.), quizzes are generated deterministically:
 
 **Seed Generation:**
 - **Daily Quizzes**: `SHA256(date + category)` → Same recipe every time for that day/category
@@ -101,11 +102,9 @@ For the 20 preset categories (History, Science, etc.), quizzes are generated det
 **Recipe Building:**
 A recipe is deterministically generated from the seed and includes:
 - **Tone** (6 options): scholarly, playful, cinematic, pub_quiz, deadpan, sports_banter
-- **Era** (6 options): ancient, medieval, early_modern, modern, contemporary, mixed
 - **Category Mix**: 4-6 related categories selected from preset
 - **Question Types** (2-3 types): multiple_choice, true_false, fill_blank, ordering
 - **Difficulty Curve** (3 patterns): ramp (gradual), wave (alternating), valley (easy middle)
-- **Distractor Styles** (2 styles): close_shaves, same_category, temporal_confusion, numerical_nearby
 - **Explanation Style**: one_line_fact, compare_contrast, mini_story, why_wrong
 
 **LLM Generation:**

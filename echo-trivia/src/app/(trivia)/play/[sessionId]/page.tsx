@@ -173,7 +173,10 @@ export default function PlayPage() {
         }
       }
 
+      // Navigate immediately to results page
       router.push(`/results/${sessionId}`);
+    } catch (error) {
+      console.error('Error finishing quiz:', error);
     } finally {
       setIsSubmittingQuiz(false);
     }
@@ -200,8 +203,8 @@ export default function PlayPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-4xl mx-auto space-y-6">
           {/* Top Bar - Timer for speedrun mode only */}
           {currentSession.quiz.questions.some(() => false) && !currentSubmission && (
             <div className="flex items-center justify-end">

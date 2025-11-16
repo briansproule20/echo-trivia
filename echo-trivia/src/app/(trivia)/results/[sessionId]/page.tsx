@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScoreBanner } from "@/components/trivia/ScoreBanner";
 import { StatsDialog } from "@/components/trivia/StatsDialog";
+import { FinishQuizFlurp } from "@/components/trivia/FinishQuizFlurp";
 import { storage } from "@/lib/storage";
 import { getRandomTitle } from "@/lib/quiz-utils";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ export default function ResultsPage() {
   const [quizResults, setQuizResults] = useState<any>(null);
   const [isLoadingUsername, setIsLoadingUsername] = useState(true);
   const [showStatsDialog, setShowStatsDialog] = useState(false);
+  const [showFlurp, setShowFlurp] = useState(true);
 
   useEffect(() => {
     const loadSession = async () => {
@@ -228,7 +230,9 @@ ${shareUrl}`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <>
+      <FinishQuizFlurp isVisible={showFlurp} onAnimationComplete={() => setShowFlurp(false)} />
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto px-3 py-6 sm:px-4 sm:py-12">
         <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
           {/* Score Banner */}
@@ -425,6 +429,7 @@ ${shareUrl}`;
         />
       )}
     </div>
+    </>
   );
 }
 

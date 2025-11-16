@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import type { Question } from "@/lib/types";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CorrectAnswerFlurp } from "./CorrectAnswerFlurp";
 
 interface QuestionCardProps {
   question: Question;
@@ -32,12 +33,24 @@ export function QuestionCard({
 }: QuestionCardProps) {
   const [selectedChoice, setSelectedChoice] = useState<string>("");
   const [shortAnswer, setShortAnswer] = useState("");
+  const [showFlurp, setShowFlurp] = useState(false);
 
   // Reset state when question changes
   useEffect(() => {
     setSelectedChoice("");
     setShortAnswer("");
+    setShowFlurp(false);
   }, [question.id]);
+
+  // Trigger flurp animation when answer is correct
+  useEffect(() => {
+    if (submitted && isCorrect) {
+      setShowFlurp(true);
+      // Hide after animation completes
+      const timer = setTimeout(() => setShowFlurp(false), 1300);
+      return () => clearTimeout(timer);
+    }
+  }, [submitted, isCorrect]);
 
   const handleSubmit = () => {
     if (question.type === "short_answer") {
@@ -51,7 +64,9 @@ export function QuestionCard({
     question.type === "short_answer" ? shortAnswer.trim() !== "" : selectedChoice !== "";
 
   return (
-    <Card className="w-full max-w-3xl mx-auto">
+    <>
+      <CorrectAnswerFlurp isVisible={showFlurp} />
+      <Card className="w-full max-w-3xl mx-auto">
       <CardHeader>
         <div className="flex items-center justify-between mb-2">
           <Badge variant="outline">
@@ -188,6 +203,7 @@ export function QuestionCard({
         </CardFooter>
       )}
     </Card>
+    </>
   );
 }
 

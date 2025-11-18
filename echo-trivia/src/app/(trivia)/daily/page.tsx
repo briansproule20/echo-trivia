@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Sparkles, Loader2, Lock, ChevronDown, Calendar } from "lucide-react";
+import { Sparkles, Loader2, Lock, ChevronDown, Calendar, CalendarDays, Clock } from "lucide-react";
 import { storage } from "@/lib/storage";
 import { getTodayString, getTodayFormatted, generateId } from "@/lib/quiz-utils";
 import { usePlayStore } from "@/lib/store";
@@ -33,6 +33,7 @@ export default function DailyQuizPage() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [dailyStats, setDailyStats] = useState<Record<string, { avg: number; category: string } | null>>({});
   const [statsLoading, setStatsLoading] = useState(false);
+  const [tomorrowChallenge, setTomorrowChallenge] = useState<DailyChallenge | null>(null);
   const { setSession } = usePlayStore();
   const { user, signIn, isLoading: echoLoading } = useEcho();
 
@@ -107,9 +108,36 @@ export default function DailyQuizPage() {
     }
   };
 
+  const loadTomorrowChallenge = async () => {
+    try {
+      // Calculate tomorrow's date
+      const now = new Date();
+      const estNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+      const tomorrow = new Date(estNow);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const year = tomorrow.getFullYear();
+      const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+      const day = String(tomorrow.getDate()).padStart(2, '0');
+      const tomorrowDate = `${year}-${month}-${day}`;
+
+      const response = await fetch(`/api/trivia/daily?date=${tomorrowDate}`);
+      if (!response.ok) {
+        console.error("Failed to load tomorrow's challenge");
+        return;
+      }
+
+      const tomorrowData = await response.json();
+      setTomorrowChallenge(tomorrowData);
+    } catch (err) {
+      console.error("Error loading tomorrow's challenge:", err);
+    }
+  };
+
   useEffect(() => {
     loadDailyChallenge();
     loadDailyStats();
+    loadTomorrowChallenge();
   }, []);
 
   const handleStartQuiz = async () => {
@@ -187,6 +215,18 @@ export default function DailyQuizPage() {
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     return `${hours}h ${minutes}m`;
+  };
+
+  const getTomorrowFormatted = () => {
+    const now = new Date();
+    const estNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    const tomorrow = new Date(estNow);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const day = tomorrow.getDate();
+    const month = tomorrow.toLocaleString('en-US', { month: 'long' });
+    const year = tomorrow.getFullYear();
+    return `${day} ${month} ${year}`;
   };
 
   return (
@@ -327,6 +367,42 @@ export default function DailyQuizPage() {
                     "Start Challenge"
                   )}
                 </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Upcoming Challenge Card */}
+          {challenge && !loading && tomorrowChallenge && (
+            <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+              <CardHeader className="pb-3 sm:pb-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <CalendarDays className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                  <CardTitle className="text-base sm:text-lg">Upcoming Challenge</CardTitle>
+                </div>
+                <CardDescription className="text-xs sm:text-sm">
+                  {getTomorrowFormatted()}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 sm:space-y-4">
+                <div className="p-3 sm:p-4 rounded-lg bg-background/50 border border-primary/10">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs sm:text-sm text-muted-foreground mb-1">Category</div>
+                      <div className="text-base sm:text-lg font-semibold text-foreground truncate">
+                        {tomorrowChallenge.category}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                      <span>{tomorrowChallenge.numQuestions} questions</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-center gap-2 p-2 sm:p-3 rounded-lg bg-primary/10 border border-primary/20">
+                  <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                  <span className="text-xs sm:text-sm font-medium text-primary">
+                    Unlocks in {getTimeUntilTomorrow()}
+                  </span>
+                </div>
               </CardContent>
             </Card>
           )}

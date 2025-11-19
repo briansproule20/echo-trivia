@@ -35,8 +35,17 @@ import {
   Scatter,
   ZAxis,
 } from "recharts";
-import { Trophy, Target, Flame, Clock, Award, Edit2, Check, X } from "lucide-react";
+import { Trophy, Target, Flame, Clock, Award, Edit2, Check, X, HelpCircle } from "lucide-react";
 import type { UserStats, UserAchievement, DailyStreak, QuizSession, Achievement } from "@/lib/supabase-types";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { motion } from "framer-motion";
 
 export default function DashboardPage() {
   const echo = useEcho();
@@ -520,10 +529,80 @@ export default function DashboardPage() {
             {/* Category Mastery Heatmap */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base sm:text-lg">Category Mastery</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
-                  Your skill level across {categoryMastery.length} categories
-                </CardDescription>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-base sm:text-lg">Category Mastery</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">
+                      Your skill level across {categoryMastery.length} categories
+                    </CardDescription>
+                  </div>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="rounded-full p-1.5 hover:bg-accent transition-colors"
+                      >
+                        <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                      </motion.button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Category Mastery Levels</DialogTitle>
+                        <DialogDescription>
+                          Your mastery level is determined by quiz count and average score
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="flex items-start gap-3">
+                          <div className="text-2xl">👑</div>
+                          <div>
+                            <h4 className="font-semibold text-sm mb-1">Master</h4>
+                            <p className="text-xs text-muted-foreground">
+                              5+ quizzes with 90%+ average score. You've mastered this category!
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="text-2xl">⭐</div>
+                          <div>
+                            <h4 className="font-semibold text-sm mb-1">Advanced</h4>
+                            <p className="text-xs text-muted-foreground">
+                              3+ quizzes with 75%+ average score. Strong performance in this area.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="text-2xl">📈</div>
+                          <div>
+                            <h4 className="font-semibold text-sm mb-1">Intermediate</h4>
+                            <p className="text-xs text-muted-foreground">
+                              2+ quizzes with 60%+ average score. You're improving!
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="text-2xl">🌱</div>
+                          <div>
+                            <h4 className="font-semibold text-sm mb-1">Beginner</h4>
+                            <p className="text-xs text-muted-foreground">
+                              50%+ average score. Keep practicing to level up!
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="text-2xl">⚠️</div>
+                          <div>
+                            <h4 className="font-semibold text-sm mb-1">Struggling</h4>
+                            <p className="text-xs text-muted-foreground">
+                              Below 50% average score. This category needs more practice.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </CardHeader>
               <CardContent className="pb-2">
                 {categoryMastery.length > 0 ? (

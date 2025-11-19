@@ -397,7 +397,9 @@ export default function DashboardPage() {
                       stroke="#fff"
                       fill="#8884d8"
                       content={({ x, y, width, height, name, fill }) => {
-                        if (width < 40 || height < 30) return null;
+                        if (width < 40 || height < 30) {
+                          return <g />;
+                        }
 
                         const fontSize = Math.min(width / 8, height / 4, 12);
                         const displayName = name.length > 15 ? name.substring(0, 12) + '...' : name;

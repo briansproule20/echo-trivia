@@ -488,10 +488,7 @@ export default function DashboardPage() {
                       endAngle={-270}
                     >
                       <RadialBar
-                        background
-                        clockWise
                         dataKey="score"
-                        cornerRadius={10}
                       />
                       <Tooltip
                         content={({ payload }) => {

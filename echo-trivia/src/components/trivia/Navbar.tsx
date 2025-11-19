@@ -19,9 +19,9 @@ const NAV_ITEMS = [
 ];
 
 const EXTRA_NAV_ITEMS = [
+  { href: "/profile", label: "Profile", icon: User },
   { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
-  { href: "/profile", label: "Profile", icon: User },
 ];
 
 export function Navbar() {

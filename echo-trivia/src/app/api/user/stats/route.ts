@@ -94,6 +94,93 @@ export async function GET(request: NextRequest) {
       categoryAverages.sort((a, b) => b.average - a.average)[0]?.category ||
       null
 
+    // Prepare data for charts
+    // Category performance (for radial bar chart)
+    const categoryPerformance = categoryAverages.slice(0, 8).map(cat => ({
+      category: cat.category,
+      score: Math.round(cat.average * 100) / 100,
+      count: categoryCount[cat.category] || 0
+    }))
+
+    // Category mastery heatmap data
+    const categoryMastery = Object.entries(categoryScores).map(([cat, scores]) => {
+      const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length
+      const count = categoryCount[cat] || 0
+      let mastery = 'struggling'
+      if (count >= 5 && avgScore >= 90) mastery = 'master'
+      else if (count >= 3 && avgScore >= 75) mastery = 'advanced'
+      else if (count >= 2 && avgScore >= 60) mastery = 'intermediate'
+      else if (avgScore >= 50) mastery = 'beginner'
+
+      return {
+        category: cat,
+        avgScore: Math.round(avgScore * 100) / 100,
+        count: count,
+        mastery: mastery,
+        lastPlayed: sessions.filter(s => s.category === cat).sort((a, b) =>
+          new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime()
+        )[0]?.completed_at || null
+      }
+    }).sort((a, b) => b.avgScore - a.avgScore)
+
+    // Activity by day of week (for heatmap)
+    const dayOfWeekActivity: Record<number, { count: number; avgScore: number; totalScore: number }> = {}
+    sessions.forEach(s => {
+      const dayOfWeek = new Date(s.completed_at).getDay()
+      if (!dayOfWeekActivity[dayOfWeek]) {
+        dayOfWeekActivity[dayOfWeek] = { count: 0, avgScore: 0, totalScore: 0 }
+      }
+      dayOfWeekActivity[dayOfWeek].count++
+      dayOfWeekActivity[dayOfWeek].totalScore += s.score_percentage
+    })
+    Object.keys(dayOfWeekActivity).forEach(day => {
+      const dayNum = parseInt(day)
+      dayOfWeekActivity[dayNum].avgScore =
+        dayOfWeekActivity[dayNum].totalScore / dayOfWeekActivity[dayNum].count
+    })
+
+    // Radar chart data - multi-dimensional performance metrics
+    const avgTimePerQuiz = sessions.length > 0 ? sessions.reduce((sum, s) => sum + (s.time_taken || 0), 0) / sessions.length : 0
+    // Invert speed score - faster is better, so lower time = higher score
+    const speedScore = avgTimePerQuiz > 0 ? Math.max(0, 100 - Math.min((avgTimePerQuiz / 60) * 10, 100)) : 0
+
+    // Consistency based on score variance - lower variance = more consistent
+    const scoreVariance = sessions.length > 1
+      ? Math.sqrt(sessions.reduce((sum, s) => sum + Math.pow(s.score_percentage - averageScore, 2), 0) / sessions.length)
+      : 0
+    const consistencyScore = scoreVariance > 0 ? Math.max(0, 100 - scoreVariance) : averageScore
+
+    // Diversity: ratio of unique categories to total quizzes (100 = all unique, 0 = all same)
+    const diversityScore = sessions.length > 0
+      ? (categoriesPlayed.length / sessions.length) * 100
+      : 0
+
+    const radarData = [
+      { metric: 'Speed', value: speedScore },
+      { metric: 'Accuracy', value: accuracyRate },
+      { metric: 'Consistency', value: consistencyScore },
+      { metric: 'Diversity', value: diversityScore },
+      { metric: 'Avg Score', value: averageScore },
+    ]
+
+    // Score trend over time (last 20 sessions for area chart)
+    const scoreTrend = sessions
+      .slice(-20)
+      .map((s, index) => ({
+        session: index + 1,
+        score: s.score_percentage,
+        date: s.completed_at,
+        category: s.category
+      }))
+
+    // Difficulty vs performance scatter plot
+    const difficultyPerformance = sessions.map(s => ({
+      difficulty: s.difficulty || 'medium',
+      score: s.score_percentage,
+      category: s.category,
+      timeTaken: s.time_taken || 0
+    }))
+
     const stats: UserStats = {
       echo_user_id: echoUserId,
       total_quizzes: totalQuizzes,
@@ -108,7 +195,16 @@ export async function GET(request: NextRequest) {
       best_category: bestCategory,
     }
 
-    return NextResponse.json({ stats })
+    return NextResponse.json({
+      stats,
+      categoryCount,
+      categoryPerformance,
+      categoryMastery,
+      dayOfWeekActivity,
+      radarData,
+      scoreTrend,
+      difficultyPerformance
+    })
   } catch (error) {
     console.error('Error fetching user stats:', error)
     return NextResponse.json(

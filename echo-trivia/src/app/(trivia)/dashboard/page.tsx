@@ -21,6 +21,19 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Treemap,
+  RadialBarChart,
+  RadialBar,
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  AreaChart,
+  Area,
+  ScatterChart,
+  Scatter,
+  ZAxis,
 } from "recharts";
 import { Trophy, Target, Flame, Clock, Award, Edit2, Check, X } from "lucide-react";
 import type { UserStats, UserAchievement, DailyStreak, QuizSession, Achievement } from "@/lib/supabase-types";
@@ -32,6 +45,13 @@ export default function DashboardPage() {
   const [allAchievements, setAllAchievements] = useState<Achievement[]>([]);
   const [streak, setStreak] = useState<DailyStreak | null>(null);
   const [recentSessions, setRecentSessions] = useState<QuizSession[]>([]);
+  const [categoryCount, setCategoryCount] = useState<Record<string, number>>({});
+  const [categoryPerformance, setCategoryPerformance] = useState<Array<{ category: string; score: number; count: number }>>([]);
+  const [categoryMastery, setCategoryMastery] = useState<Array<{ category: string; avgScore: number; count: number; mastery: string; lastPlayed: string | null }>>([]);
+  const [dayOfWeekActivity, setDayOfWeekActivity] = useState<Record<number, { count: number; avgScore: number; totalScore: number }>>({});
+  const [radarData, setRadarData] = useState<Array<{ metric: string; value: number }>>([]);
+  const [scoreTrend, setScoreTrend] = useState<Array<{ session: number; score: number; date: string; category: string }>>([]);
+  const [difficultyPerformance, setDifficultyPerformance] = useState<Array<{ difficulty: string; score: number; category: string; timeTaken: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [editingUsername, setEditingUsername] = useState(false);
   const [newUsername, setNewUsername] = useState("");
@@ -63,6 +83,13 @@ export default function DashboardPage() {
       if (statsRes.ok) {
         const data = await statsRes.json();
         setStats(data.stats);
+        setCategoryCount(data.categoryCount || {});
+        setCategoryPerformance(data.categoryPerformance || []);
+        setCategoryMastery(data.categoryMastery || []);
+        setDayOfWeekActivity(data.dayOfWeekActivity || {});
+        setRadarData(data.radarData || []);
+        setScoreTrend(data.scoreTrend || []);
+        setDifficultyPerformance(data.difficultyPerformance || []);
       }
 
       // Fetch all achievements
@@ -146,13 +173,15 @@ export default function DashboardPage() {
     return `${seconds}s`;
   };
 
-  // Prepare chart data
-  const categoryData = stats?.categories_played.slice(0, 8).map((cat, index) => ({
-    name: cat.length > 12 ? cat.substring(0, 12) + '...' : cat,
-    fullName: cat,
-    count: 1, // Would need to calculate actual counts from sessions
-    fill: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#6366f1', '#f97316'][index % 8],
-  })) || [];
+  // Prepare chart data - sort by count and take top 8
+  const categoryData = Object.entries(categoryCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([cat, count], index) => ({
+      name: cat,
+      size: count,
+      fill: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#6366f1', '#f97316'][index % 8],
+    }));
 
   const performanceData = [
     { name: 'Correct', value: stats?.correct_answers || 0, fill: '#22c55e' },
@@ -350,50 +379,479 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Top Categories - Simple Pie */}
+            {/* Top Categories - Treemap */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-base sm:text-lg">Top Categories</CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
-                  {categoryData.length > 0 ? `${categoryData.length} categories played` : 'No categories yet'}
+                  {stats?.categories_played.length ? `${stats.categories_played.length} categories played` : 'No categories yet'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="pb-2">
                 {categoryData.length > 0 ? (
-                  <>
-                    <ResponsiveContainer width="100%" height={200}>
-                      <PieChart>
-                        <Pie
-                          data={categoryData}
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={70}
-                          fill="#8884d8"
-                          dataKey="count"
-                          label={false}
-                        >
-                          {categoryData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          formatter={(value: any, name: any, props: any) => [value, props.payload.fullName]}
-                          contentStyle={{ fontSize: '11px' }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="flex flex-wrap justify-center gap-2 mt-2">
-                      {categoryData.slice(0, 4).map((cat, index) => (
-                        <div key={index} className="flex items-center gap-1">
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.fill }} />
-                          <span className="text-xs">{cat.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </>
+                  <ResponsiveContainer width="100%" height={240}>
+                    <Treemap
+                      data={categoryData}
+                      dataKey="size"
+                      aspectRatio={4 / 3}
+                      stroke="#fff"
+                      fill="#8884d8"
+                      content={({ x, y, width, height, name, fill }) => {
+                        if (width < 40 || height < 30) return null;
+
+                        const fontSize = Math.min(width / 8, height / 4, 12);
+                        const displayName = name.length > 15 ? name.substring(0, 12) + '...' : name;
+
+                        return (
+                          <g>
+                            <rect
+                              x={x}
+                              y={y}
+                              width={width}
+                              height={height}
+                              style={{
+                                fill,
+                                stroke: '#fff',
+                                strokeWidth: 2,
+                                opacity: 0.9,
+                                cursor: 'pointer',
+                              }}
+                            />
+                            <text
+                              x={x + width / 2}
+                              y={y + height / 2}
+                              textAnchor="middle"
+                              dominantBaseline="central"
+                              style={{
+                                fill: '#fff',
+                                fontSize: `${fontSize}px`,
+                                fontWeight: 600,
+                                pointerEvents: 'none',
+                              }}
+                            >
+                              {displayName}
+                            </text>
+                          </g>
+                        );
+                      }}
+                    >
+                      <Tooltip
+                        content={({ payload }) => {
+                          if (!payload || !payload[0]) return null;
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-background border border-border rounded-lg shadow-lg p-3">
+                              <p className="font-semibold text-sm">{data.name}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Played {data.size} times
+                              </p>
+                            </div>
+                          );
+                        }}
+                      />
+                    </Treemap>
+                  </ResponsiveContainer>
                 ) : (
-                  <div className="h-[200px] flex items-center justify-center text-muted-foreground text-xs">
+                  <div className="h-[240px] flex items-center justify-center text-muted-foreground text-xs">
                     Start playing to see your categories
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* New Charts Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            {/* Radial Bar Chart - Category Performance */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base sm:text-lg">Category Performance</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  Average scores by category
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pb-2">
+                {categoryPerformance.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={240}>
+                    <RadialBarChart
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="20%"
+                      outerRadius="90%"
+                      data={categoryPerformance.slice(0, 5).map((cat, index) => ({
+                        ...cat,
+                        fill: ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'][index % 5],
+                      }))}
+                      startAngle={90}
+                      endAngle={-270}
+                    >
+                      <RadialBar
+                        minAngle={15}
+                        background
+                        clockWise
+                        dataKey="score"
+                        cornerRadius={10}
+                      />
+                      <Tooltip
+                        content={({ payload }) => {
+                          if (!payload || !payload[0]) return null;
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-background border border-border rounded-lg shadow-lg p-3">
+                              <p className="font-semibold text-sm">{data.category}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Avg Score: {data.score.toFixed(1)}%
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Played {data.count} times
+                              </p>
+                            </div>
+                          );
+                        }}
+                      />
+                    </RadialBarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[240px] flex items-center justify-center text-muted-foreground text-xs">
+                    Play more quizzes to see performance
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Category Mastery Heatmap */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base sm:text-lg">Category Mastery</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  Your skill level across {categoryMastery.length} categories
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pb-2">
+                {categoryMastery.length > 0 ? (
+                  <div className="h-[240px] overflow-y-auto pr-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      {categoryMastery.map((cat, index) => {
+                        const masteryColors = {
+                          master: 'bg-purple-500/90 border-purple-600',
+                          advanced: 'bg-blue-500/90 border-blue-600',
+                          intermediate: 'bg-green-500/90 border-green-600',
+                          beginner: 'bg-yellow-500/90 border-yellow-600',
+                          struggling: 'bg-red-500/90 border-red-600'
+                        };
+                        const masteryIcons = {
+                          master: '👑',
+                          advanced: '⭐',
+                          intermediate: '📈',
+                          beginner: '🌱',
+                          struggling: '⚠️'
+                        };
+
+                        return (
+                          <div
+                            key={index}
+                            className={`${masteryColors[cat.mastery as keyof typeof masteryColors]} border-2 rounded-lg p-2 cursor-pointer hover:scale-105 transition-transform`}
+                            title={`${cat.category}: ${cat.avgScore.toFixed(1)}% avg (${cat.count} quizzes)`}
+                          >
+                            <div className="flex items-start justify-between gap-1">
+                              <span className="text-white font-semibold text-xs leading-tight line-clamp-2">
+                                {cat.category.length > 18 ? cat.category.substring(0, 18) + '...' : cat.category}
+                              </span>
+                              <span className="text-sm flex-shrink-0">
+                                {masteryIcons[cat.mastery as keyof typeof masteryIcons]}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between mt-1">
+                              <span className="text-white text-xs font-bold">
+                                {cat.avgScore.toFixed(0)}%
+                              </span>
+                              <span className="text-white/80 text-xs">
+                                x{cat.count}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-border/50">
+                      <div className="flex flex-wrap gap-2 justify-center text-xs">
+                        <div className="flex items-center gap-1">
+                          <span>👑</span>
+                          <span className="text-muted-foreground">Master</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span>⭐</span>
+                          <span className="text-muted-foreground">Advanced</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span>📈</span>
+                          <span className="text-muted-foreground">Intermediate</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span>🌱</span>
+                          <span className="text-muted-foreground">Beginner</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span>⚠️</span>
+                          <span className="text-muted-foreground">Struggling</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="h-[240px] flex items-center justify-center text-muted-foreground text-xs">
+                    Complete quizzes to see category mastery
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Heatmap - Activity by Day of Week */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base sm:text-lg">Weekly Activity</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  Performance by day of week
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pb-2">
+                {Object.keys(dayOfWeekActivity).length > 0 ? (
+                  <ResponsiveContainer width="100%" height={240}>
+                    <BarChart
+                      data={[0, 1, 2, 3, 4, 5, 6].map(day => ({
+                        day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][day],
+                        count: dayOfWeekActivity[day]?.count || 0,
+                        avgScore: dayOfWeekActivity[day]?.avgScore || 0,
+                        fill: dayOfWeekActivity[day]?.count
+                          ? `hsl(${Math.min(dayOfWeekActivity[day].avgScore * 1.2, 120)}, 70%, 50%)`
+                          : '#e5e7eb'
+                      }))}
+                      margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                      <XAxis dataKey="day" fontSize={11} />
+                      <YAxis fontSize={10} label={{ value: 'Quizzes', angle: -90, position: 'insideLeft', fontSize: 10 }} />
+                      <Tooltip
+                        content={({ payload }) => {
+                          if (!payload || !payload[0]) return null;
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-background border border-border rounded-lg shadow-lg p-3">
+                              <p className="font-semibold text-sm">{data.day}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Quizzes: {data.count}
+                              </p>
+                              {data.count > 0 && (
+                                <p className="text-xs text-muted-foreground">
+                                  Avg Score: {data.avgScore.toFixed(1)}%
+                                </p>
+                              )}
+                            </div>
+                          );
+                        }}
+                      />
+                      <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+                        {[0, 1, 2, 3, 4, 5, 6].map((day, index) => (
+                          <Cell key={`cell-${index}`} fill={
+                            dayOfWeekActivity[day]?.count
+                              ? `hsl(${Math.min(dayOfWeekActivity[day].avgScore * 1.2, 120)}, 70%, 50%)`
+                              : '#e5e7eb'
+                          } />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[240px] flex items-center justify-center text-muted-foreground text-xs">
+                    Play quizzes to see weekly activity
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Advanced Visualizations Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            {/* Radar Chart - Multi-dimensional Performance */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base sm:text-lg">Performance Metrics</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  Your trivia skills across dimensions
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pb-2">
+                {radarData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={240}>
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                      <PolarGrid stroke="#94a3b8" strokeDasharray="3 3" />
+                      <PolarAngleAxis
+                        dataKey="metric"
+                        tick={{ fill: '#64748b', fontSize: 11 }}
+                      />
+                      <PolarRadiusAxis
+                        angle={90}
+                        domain={[0, 100]}
+                        tick={{ fill: '#94a3b8', fontSize: 9 }}
+                        tickCount={3}
+                      />
+                      <Radar
+                        name="Your Performance"
+                        dataKey="value"
+                        stroke="#3b82f6"
+                        fill="#3b82f6"
+                        fillOpacity={0.5}
+                        strokeWidth={2}
+                      />
+                      <Tooltip
+                        content={({ payload }) => {
+                          if (!payload || !payload[0]) return null;
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-background border border-border rounded-lg shadow-lg p-3">
+                              <p className="font-semibold text-sm">{data.metric}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Score: {data.value.toFixed(1)}/100
+                              </p>
+                            </div>
+                          );
+                        }}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[240px] flex items-center justify-center text-muted-foreground text-xs">
+                    Play quizzes to see metrics
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Area Chart - Score Trend */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base sm:text-lg">Score Progression</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  Last {scoreTrend.length} quiz scores over time
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pb-2">
+                {scoreTrend.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={240}>
+                    <AreaChart data={scoreTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                      <XAxis dataKey="session" fontSize={10} />
+                      <YAxis domain={[0, 100]} fontSize={10} />
+                      <Tooltip
+                        content={({ payload }) => {
+                          if (!payload || !payload[0]) return null;
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-background border border-border rounded-lg shadow-lg p-3">
+                              <p className="font-semibold text-sm">Quiz #{data.session}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Score: {data.score.toFixed(1)}%
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {data.category}
+                              </p>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="score"
+                        stroke="#8b5cf6"
+                        strokeWidth={2}
+                        fill="url(#colorScore)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[240px] flex items-center justify-center text-muted-foreground text-xs">
+                    Complete quizzes to see progression
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Bar Chart - Difficulty Performance */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base sm:text-lg">Performance by Difficulty</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  Average score for each difficulty level
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pb-2">
+                {difficultyPerformance.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={240}>
+                    <BarChart
+                      data={(() => {
+                        const difficulties = ['easy', 'medium', 'hard'];
+                        return difficulties.map(diff => {
+                          const filtered = difficultyPerformance.filter(d => d.difficulty === diff);
+                          const avgScore = filtered.length > 0
+                            ? filtered.reduce((sum, d) => sum + d.score, 0) / filtered.length
+                            : 0;
+                          const count = filtered.length;
+                          return {
+                            difficulty: diff.charAt(0).toUpperCase() + diff.slice(1),
+                            score: avgScore,
+                            count: count,
+                            fill: diff === 'easy' ? '#22c55e' : diff === 'medium' ? '#f59e0b' : '#ef4444'
+                          };
+                        }).filter(d => d.count > 0);
+                      })()}
+                      margin={{ top: 20, right: 10, left: 0, bottom: 10 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                      <XAxis dataKey="difficulty" fontSize={11} />
+                      <YAxis domain={[0, 100]} fontSize={10} label={{ value: 'Avg Score %', angle: -90, position: 'insideLeft', fontSize: 10 }} />
+                      <Tooltip
+                        content={({ payload }) => {
+                          if (!payload || !payload[0]) return null;
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-background border border-border rounded-lg shadow-lg p-3">
+                              <p className="font-semibold text-sm">{data.difficulty}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Avg Score: {data.score.toFixed(1)}%
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Quizzes: {data.count}
+                              </p>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Bar dataKey="score" radius={[8, 8, 0, 0]}>
+                        {(() => {
+                          const difficulties = ['easy', 'medium', 'hard'];
+                          return difficulties.map(diff => {
+                            const filtered = difficultyPerformance.filter(d => d.difficulty === diff);
+                            if (filtered.length === 0) return null;
+                            return (
+                              <Cell
+                                key={diff}
+                                fill={diff === 'easy' ? '#22c55e' : diff === 'medium' ? '#f59e0b' : '#ef4444'}
+                              />
+                            );
+                          }).filter(Boolean);
+                        })()}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[240px] flex items-center justify-center text-muted-foreground text-xs">
+                    Play quizzes to see difficulty analysis
                   </div>
                 )}
               </CardContent>

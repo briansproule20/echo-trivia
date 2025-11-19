@@ -488,7 +488,6 @@ export default function DashboardPage() {
                       endAngle={-270}
                     >
                       <RadialBar
-                        minAngle={15}
                         background
                         clockWise
                         dataKey="score"

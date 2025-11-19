@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Target, Flame, Clock, Award, Edit2, Check, X } from "lucide-react";
+import { Trophy, Target, Flame, Clock, Award, Edit2, Check, X, BarChart3, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import type { UserStats, UserAchievement, DailyStreak } from "@/lib/supabase-types";
 
 export default function ProfilePage() {
@@ -233,6 +234,21 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Dashboard CTA */}
+          <Link href="/dashboard" className="block">
+            <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg border bg-card hover:bg-accent transition-colors cursor-pointer">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs sm:text-sm text-primary">
+                  View detailed analytics and visualizations
+                </span>
+              </div>
+              <Button variant="outline" size="sm" className="pointer-events-none">
+                Dashboard
+              </Button>
+            </div>
+          </Link>
 
           {/* Tabs */}
           <Tabs defaultValue="stats" className="space-y-4 sm:space-y-6">

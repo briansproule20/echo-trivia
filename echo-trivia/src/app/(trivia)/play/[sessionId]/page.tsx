@@ -8,7 +8,7 @@ import { Timer } from "@/components/trivia/Timer";
 import { usePlayStore } from "@/lib/store";
 import { storage } from "@/lib/storage";
 import { getRandomTitle, calculateScore } from "@/lib/quiz-utils";
-import { submitQuizToSupabase } from "@/lib/supabase-helpers";
+import { submitWithRetry } from "@/lib/sync-queue";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Submission } from "@/lib/types";
@@ -32,6 +32,12 @@ export default function PlayPage() {
       if (!currentSession || currentSession.id !== sessionId) {
         const session = await storage.getSession(sessionId);
         if (session) {
+          // Check if quiz is already complete (all questions answered)
+          if (session.submissions.length >= session.quiz.questions.length) {
+            // Quiz is complete, redirect to results
+            router.push(`/results/${sessionId}`);
+            return;
+          }
           setSession(session);
         } else {
           router.push("/");
@@ -147,34 +153,14 @@ export default function PlayPage() {
       // Track category performance locally
       await storage.trackCategoryPerformance(finalSession.quiz.category, correct, finalSession.quiz.questions.length);
 
-      // Submit to Supabase if user is signed in
-      if (echo.user?.id) {
-        const result = await submitQuizToSupabase(finalSession, echo.user.id, echo.user.name, sessionId);
-        if (result.success) {
-          console.log('Quiz submitted to Supabase successfully');
-          if (result.newAchievements && result.newAchievements.length > 0) {
-            console.log('New achievements earned:', result.newAchievements);
-          }
-          if (result.streak) {
-            console.log('Streak updated:', result.streak);
-          }
-
-          // Save quiz results to localStorage for the username prompt
-          const resultsKey = `quiz_results_${sessionId}`;
-          localStorage.setItem(
-            resultsKey,
-            JSON.stringify({
-              newAchievements: result.newAchievements,
-              streak: result.streak,
-            })
-          );
-        } else {
-          console.error('Failed to submit quiz to Supabase:', result.error);
-        }
-      }
-
-      // Navigate immediately to results page
+      // Navigate immediately to results page (don't wait for submission)
       router.push(`/results/${sessionId}`);
+
+      // Submit to Supabase in background with retry logic
+      // This happens asynchronously - user doesn't wait for it
+      if (echo.user?.id) {
+        submitWithRetry(finalSession, echo.user.id, echo.user.name || null, sessionId);
+      }
     } catch (error) {
       console.error('Error finishing quiz:', error);
     } finally {

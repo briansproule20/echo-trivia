@@ -58,7 +58,11 @@ export const usePlayStore = create<PlayState>((set) => ({
   currentSession: null,
   currentQuestionIndex: 0,
   isPaused: false,
-  setSession: (session) => set({ currentSession: session, currentQuestionIndex: 0 }),
+  setSession: (session) => set({
+    currentSession: session,
+    // Restore to the question after the last submission, or 0 if none
+    currentQuestionIndex: session.submissions.length
+  }),
   setQuestionIndex: (index) => set({ currentQuestionIndex: index }),
   addSubmission: (submission) =>
     set((state) => ({

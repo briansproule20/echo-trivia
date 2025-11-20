@@ -43,6 +43,18 @@ export async function submitQuizToSupabase(
     const uniqueTypes = [...new Set(types)]
     const type = uniqueTypes.length > 1 ? 'mixed' : types[0]
 
+    // Build submissions array with question answers for server validation
+    const submissions = session.submissions.map((sub) => {
+      const question = session.quiz.questions.find((q) => q.id === sub.questionId)
+      return {
+        question_id: sub.questionId,
+        user_response: sub.response,
+        correct_answer: question?.answer || '',
+        is_correct: sub.correct,
+        time_ms: sub.timeMs,
+      }
+    })
+
     const payload: SaveQuizSessionRequest = {
       echo_user_id: echoUserId,
       echo_user_name: echoUserName,
@@ -58,6 +70,7 @@ export async function submitQuizToSupabase(
       title: session.earnedTitle,
       time_taken: timeTaken,
       session_id: sessionId,
+      submissions, // Include individual submissions for validation
     }
 
     const response = await fetch('/api/quiz/submit', {

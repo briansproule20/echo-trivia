@@ -1,6 +1,7 @@
 import { Navbar } from '@/components/trivia/Navbar';
 import { Providers } from '@/providers';
 import { ReferralDetector } from '@/components/ReferralDetector';
+import { SyncQueueProcessor } from '@/components/SyncQueueProcessor';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Suspense } from 'react';
@@ -39,6 +40,7 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <ReferralDetector />
           </Suspense>
+          <SyncQueueProcessor />
           <Navbar />
           {children}
         </Providers>

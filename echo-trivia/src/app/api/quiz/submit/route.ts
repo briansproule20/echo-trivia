@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
       title,
       time_taken,
       session_id,
+      submissions,
     } = body
 
     // Validate required fields
@@ -108,7 +109,56 @@ export async function POST(request: NextRequest) {
       throw userError
     }
 
-    // 3. Save quiz session
+    // 3. Validate submissions if provided - RE-VALIDATE ON SERVER
+    let validatedCorrectAnswers = correct_answers
+    let validatedScorePercentage = score_percentage
+    let validatedSubmissions = submissions
+
+    if (submissions && submissions.length > 0) {
+      // CRITICAL: Re-validate each answer on the server by comparing responses
+      // Do NOT trust the is_correct flag from the client!
+      validatedSubmissions = submissions.map((sub) => {
+        // Normalize both answers for comparison (trim, lowercase)
+        const userAnswer = sub.user_response.trim().toLowerCase()
+        const correctAnswer = sub.correct_answer.trim().toLowerCase()
+
+        // Re-evaluate if the answer is correct
+        const actuallyCorrect = userAnswer === correctAnswer
+
+        // Log if client lied about correctness
+        if (actuallyCorrect !== sub.is_correct) {
+          console.warn(
+            `Answer validation mismatch for question ${sub.question_id}:`,
+            `Client said ${sub.is_correct}, but actual is ${actuallyCorrect}`,
+            `User: "${userAnswer}" vs Correct: "${correctAnswer}"`
+          )
+        }
+
+        return {
+          ...sub,
+          is_correct: actuallyCorrect // Override with server validation
+        }
+      })
+
+      // Recalculate score from SERVER-VALIDATED submissions
+      const actualCorrectCount = validatedSubmissions.filter((s) => s.is_correct).length
+      const actualScorePercentage = Math.round(
+        (actualCorrectCount / total_questions) * 100
+      )
+
+      // Log discrepancies
+      if (actualCorrectCount !== correct_answers) {
+        console.warn(
+          `Score mismatch detected! Client reported ${correct_answers} correct, but server validation shows ${actualCorrectCount} correct`
+        )
+      }
+
+      // Use server-validated values
+      validatedCorrectAnswers = actualCorrectCount
+      validatedScorePercentage = actualScorePercentage
+    }
+
+    // 4. Save quiz session
     const { data: session, error: sessionError } = await supabase
       .from('quiz_sessions')
       .insert({
@@ -116,9 +166,9 @@ export async function POST(request: NextRequest) {
         echo_user_id,
         category,
         num_questions,
-        correct_answers,
+        correct_answers: validatedCorrectAnswers,
         total_questions,
-        score_percentage,
+        score_percentage: validatedScorePercentage,
         difficulty: difficulty || null,
         quiz_type: quiz_type || null,
         is_daily,
@@ -134,7 +184,29 @@ export async function POST(request: NextRequest) {
       throw sessionError
     }
 
-    // 4. Update daily streak if this was a daily quiz
+    // 5. Save individual submissions to database (use VALIDATED submissions)
+    if (validatedSubmissions && validatedSubmissions.length > 0 && session?.id) {
+      const submissionRecords = validatedSubmissions.map((sub) => ({
+        session_id: session.id,
+        question_id: sub.question_id,
+        user_response: sub.user_response,
+        correct_answer: sub.correct_answer,
+        is_correct: sub.is_correct, // This is now server-validated
+        time_ms: sub.time_ms || null,
+      }))
+
+      const { error: submissionsError } = await supabase
+        .from('quiz_submissions')
+        .insert(submissionRecords)
+
+      if (submissionsError) {
+        console.error('Error saving quiz submissions:', submissionsError)
+        // Don't fail the whole request, but log the error
+        // The session is already saved at this point
+      }
+    }
+
+    // 6. Update daily streak if this was a daily quiz
     if (is_daily && daily_date) {
       const { error: streakError } = await supabase.rpc('update_daily_streak', {
         p_echo_user_id: echo_user_id,
@@ -147,7 +219,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 5. Check and award achievements
+    // 7. Check and award achievements
     const { error: achievementError } = await supabase.rpc(
       'check_and_award_achievements',
       {
@@ -160,7 +232,7 @@ export async function POST(request: NextRequest) {
       // Don't fail the whole request if achievement check fails
     }
 
-    // 6. Fetch newly earned achievements
+    // 8. Fetch newly earned achievements
     const { data: newAchievements } = await supabase
       .from('user_achievements')
       .select(
@@ -172,7 +244,7 @@ export async function POST(request: NextRequest) {
       .eq('echo_user_id', echo_user_id)
       .gte('earned_at', new Date(Date.now() - 5000).toISOString()) // Earned in last 5 seconds
 
-    // 7. Fetch updated streak
+    // 9. Fetch updated streak
     const { data: streak } = await supabase
       .from('daily_streaks')
       .select('*')

@@ -57,6 +57,17 @@ export interface DailyStreak {
   updated_at: string
 }
 
+export interface QuizSubmission {
+  id: string
+  session_id: string
+  question_id: string
+  user_response: string
+  correct_answer: string
+  is_correct: boolean
+  time_ms: number | null
+  created_at: string
+}
+
 // Stats computed from quiz sessions
 export interface UserStats {
   echo_user_id: string
@@ -100,6 +111,14 @@ export interface SaveQuizSessionRequest {
   title?: string
   time_taken?: number
   session_id?: string
+  // Individual submissions for validation
+  submissions?: Array<{
+    question_id: string
+    user_response: string
+    correct_answer: string
+    is_correct: boolean
+    time_ms?: number
+  }>
 }
 
 export interface LeaderboardQuery {

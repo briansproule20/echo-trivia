@@ -95,10 +95,10 @@ export async function GET(request: NextRequest) {
       null
 
     // Prepare data for charts
-    // Category performance (for radial bar chart)
-    const categoryPerformance = categoryAverages.slice(0, 8).map(cat => ({
+    // Category performance (for radial bar chart) - INCLUDE ALL CATEGORIES
+    const categoryPerformance = categoryAverages.map(cat => ({
       category: cat.category,
-      score: Math.round(cat.average * 100) / 100,
+      score: cat.average, // NO ROUNDING - keep exact score
       count: categoryCount[cat.category] || 0
     }))
 

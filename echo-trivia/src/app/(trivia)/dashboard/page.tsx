@@ -35,7 +35,7 @@ import {
   Scatter,
   ZAxis,
 } from "recharts";
-import { Trophy, Target, Flame, Clock, Award, Edit2, Check, X, HelpCircle } from "lucide-react";
+import { Trophy, Target, Flame, Clock, Award, Edit2, Check, X, HelpCircle, Shuffle } from "lucide-react";
 import type { UserStats, UserAchievement, DailyStreak, QuizSession, Achievement } from "@/lib/supabase-types";
 import {
   Dialog,
@@ -65,6 +65,7 @@ export default function DashboardPage() {
   const [editingUsername, setEditingUsername] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [currentUsername, setCurrentUsername] = useState("");
+  const [showRandomCategories, setShowRandomCategories] = useState(false);
 
   useEffect(() => {
     if (echo.user?.id) {
@@ -476,48 +477,87 @@ export default function DashboardPage() {
             {/* Radial Bar Chart - Category Performance */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base sm:text-lg">Category Performance</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
-                  Average scores by category
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-base sm:text-lg">Category Performance</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">
+                      {showRandomCategories ? 'Random 5 categories' : 'Top 5 categories by score'}
+                    </CardDescription>
+                  </div>
+                  {categoryPerformance.length > 5 && (
+                    <motion.button
+                      whileHover={{ scale: 1.1, rotate: 180 }}
+                      whileTap={{ scale: 0.9 }}
+                      transition={{ duration: 0.3 }}
+                      onClick={() => setShowRandomCategories(!showRandomCategories)}
+                      className="rounded-full p-2 hover:bg-accent transition-colors"
+                      aria-label="Shuffle categories"
+                    >
+                      <Shuffle className="h-4 w-4 text-muted-foreground" />
+                    </motion.button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="pb-2">
                 {categoryPerformance.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <RadialBarChart
-                      cx="50%"
-                      cy="50%"
-                      innerRadius="20%"
-                      outerRadius="90%"
-                      data={categoryPerformance.slice(0, 5).map((cat, index) => ({
-                        ...cat,
-                        fill: ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'][index % 5],
-                      }))}
-                      startAngle={90}
-                      endAngle={-270}
-                    >
-                      <RadialBar
-                        dataKey="score"
-                      />
-                      <Tooltip
-                        content={({ payload }) => {
-                          if (!payload || !payload[0]) return null;
-                          const data = payload[0].payload;
-                          return (
-                            <div className="bg-background border border-border rounded-lg shadow-lg p-3">
-                              <p className="font-semibold text-sm">{data.category}</p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Avg Score: {data.score.toFixed(1)}%
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Played {data.count} times
-                              </p>
-                            </div>
-                          );
-                        }}
-                      />
-                    </RadialBarChart>
-                  </ResponsiveContainer>
+                  <motion.div
+                    key={showRandomCategories ? 'random' : 'top'}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ResponsiveContainer width="100%" height={240}>
+                      <RadialBarChart
+                        cx="50%"
+                        cy="50%"
+                        innerRadius="20%"
+                        outerRadius="90%"
+                        data={(() => {
+                          let categories = [...categoryPerformance];
+                          if (showRandomCategories) {
+                            // Shuffle and take 5 random
+                            categories = categories
+                              .sort(() => Math.random() - 0.5)
+                              .slice(0, 5);
+                          } else {
+                            // Take top 5 by score
+                            categories = categories.slice(0, 5);
+                          }
+                          return categories.map((cat, index) => ({
+                            category: cat.category,
+                            score: cat.score,
+                            count: cat.count,
+                            fill: ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'][index % 5],
+                          }));
+                        })()}
+                        startAngle={90}
+                        endAngle={-270}
+                      >
+                        <RadialBar
+                          dataKey="score"
+                          cornerRadius={10}
+                          domain={[0, 100]}
+                        />
+                        <Tooltip
+                          content={({ payload }) => {
+                            if (!payload || !payload[0]) return null;
+                            const data = payload[0].payload;
+                            return (
+                              <div className="bg-background border border-border rounded-lg shadow-lg p-3">
+                                <p className="font-semibold text-sm">{data.category}</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Avg Score: {data.score.toFixed(1)}%
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  Played {data.count} times
+                                </p>
+                              </div>
+                            );
+                          }}
+                        />
+                      </RadialBarChart>
+                    </ResponsiveContainer>
+                  </motion.div>
                 ) : (
                   <div className="h-[240px] flex items-center justify-center text-muted-foreground text-xs">
                     Play more quizzes to see performance

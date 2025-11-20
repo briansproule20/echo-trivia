@@ -11,7 +11,7 @@ import { getRandomTitle, calculateScore } from "@/lib/quiz-utils";
 import { submitWithRetry } from "@/lib/sync-queue";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import type { Submission } from "@/lib/types";
+import type { Submission, Session } from "@/lib/types";
 
 export default function PlayPage() {
   const params = useParams();

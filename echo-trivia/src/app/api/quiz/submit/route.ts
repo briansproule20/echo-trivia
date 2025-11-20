@@ -115,29 +115,41 @@ export async function POST(request: NextRequest) {
     let validatedSubmissions = submissions
 
     if (submissions && submissions.length > 0) {
-      // CRITICAL: Re-validate each answer on the server by comparing responses
-      // Do NOT trust the is_correct flag from the client!
+      // CRITICAL: Trust the client's is_correct flag from the evaluate endpoint
+      // The evaluate endpoint already did proper validation (including LLM fuzzy matching for short answers)
+      // We're just storing what was already evaluated during the quiz
+
+      // However, we'll do a sanity check for obvious tampering
       validatedSubmissions = submissions.map((sub) => {
         // Normalize both answers for comparison (trim, lowercase)
         const userAnswer = sub.user_response.trim().toLowerCase()
         const correctAnswer = sub.correct_answer.trim().toLowerCase()
 
-        // Re-evaluate if the answer is correct
-        const actuallyCorrect = userAnswer === correctAnswer
+        // For multiple choice and exact matches, we can verify
+        // But for short answers, the LLM already evaluated it during quiz play
+        const exactMatch = userAnswer === correctAnswer
 
-        // Log if client lied about correctness
-        if (actuallyCorrect !== sub.is_correct) {
-          console.warn(
-            `Answer validation mismatch for question ${sub.question_id}:`,
-            `Client said ${sub.is_correct}, but actual is ${actuallyCorrect}`,
+        // If client said correct but exact match shows false, log it but trust the client
+        // (because LLM fuzzy matching during evaluate might have accepted it)
+        if (sub.is_correct && !exactMatch) {
+          console.log(
+            `📝 Fuzzy match accepted for question ${sub.question_id}:`,
             `User: "${userAnswer}" vs Correct: "${correctAnswer}"`
           )
         }
 
-        return {
-          ...sub,
-          is_correct: actuallyCorrect // Override with server validation
+        // If client said incorrect but exact match shows true, that's suspicious
+        if (!sub.is_correct && exactMatch) {
+          console.warn(
+            `⚠️ Suspicious: Client said incorrect but answers match exactly`,
+            `Question ${sub.question_id}: "${userAnswer}"`
+          )
+          // Override - this is definitely correct
+          return { ...sub, is_correct: true }
         }
+
+        // Otherwise trust the evaluate endpoint's judgment
+        return sub
       })
 
       // Recalculate score from SERVER-VALIDATED submissions

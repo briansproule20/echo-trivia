@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Submit Missing Quiz</title>
+</head>
+<body>
+  <h1>Submit Missing Quiz to Database</h1>
+  <button id="submitBtn" style="padding: 20px; font-size: 16px;">Click to Submit Otters Quiz</button>
+  <pre id="output" style="margin-top: 20px; background: #f0f0f0; padding: 10px;"></pre>
+
+  <script>
+    document.getElementById('submitBtn').addEventListener('click', async () => {
+      const output = document.getElementById('output');
+      output.textContent = 'Searching for otters quiz...\n';
+
+      try {
+        // Open IndexedDB
+        const dbReq = indexedDB.open('trivia-wizard-db', 1);
+
+        dbReq.onsuccess = async () => {
+          const db = dbReq.result;
+          const tx = db.transaction(['sessions'], 'readonly');
+          const store = tx.objectStore('sessions');
+          const getAll = store.getAll();
+
+          getAll.onsuccess = async () => {
+            const sessions = getAll.result;
+            output.textContent += `Found ${sessions.length} total sessions\n`;
+
+            const otters = sessions.filter(s =>
+              s.endedAt &&
+              s.quiz.category.toLowerCase().includes('otter')
+            );
+
+            output.textContent += `Found ${otters.length} completed otters quiz(es)\n\n`;
+
+            if (otters.length === 0) {
+              output.textContent += '❌ No otters quiz found\n';
+              return;
+            }
+
+            // Submit the first one
+            const s = otters[0];
+            output.textContent += `Submitting: ${s.quiz.category}\n`;
+            output.textContent += `Score: ${s.score}/${s.quiz.questions.length} (${Math.round((s.score / s.quiz.questions.length) * 100)}%)\n\n`;
+
+            const subs = s.submissions.map(sub => ({
+              question_id: sub.questionId,
+              user_response: sub.response,
+              correct_answer: s.quiz.questions.find(q => q.id === sub.questionId)?.answer || '',
+              is_correct: sub.correct,
+              time_ms: sub.timeMs
+            }));
+
+            const payload = {
+              echo_user_id: window.Echo?.user?.id,
+              echo_user_name: window.Echo?.user?.name,
+              category: s.quiz.category,
+              num_questions: s.quiz.questions.length,
+              correct_answers: s.score,
+              total_questions: s.quiz.questions.length,
+              score_percentage: Math.round((s.score / s.quiz.questions.length) * 100),
+              difficulty: 'mixed',
+              quiz_type: 'mixed',
+              is_daily: false,
+              title: s.earnedTitle,
+              session_id: s.id,
+              submissions: subs
+            };
+
+            output.textContent += 'Sending to API...\n';
+
+            const res = await fetch('/api/quiz/submit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+              output.textContent += '✅ SUCCESS!\n';
+              const data = await res.json();
+              output.textContent += JSON.stringify(data, null, 2);
+            } else {
+              output.textContent += `❌ FAILED: ${res.status} ${res.statusText}\n`;
+              const error = await res.text();
+              output.textContent += error;
+            }
+          };
+
+          getAll.onerror = () => {
+            output.textContent += '❌ Error reading sessions\n';
+          };
+        };
+
+        dbReq.onerror = () => {
+          output.textContent += '❌ Error opening database\n';
+        };
+      } catch (error) {
+        output.textContent += `❌ Error: ${error.message}\n`;
+      }
+    });
+  </script>
+</body>
+</html>

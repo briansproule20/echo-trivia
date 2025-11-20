@@ -34,6 +34,11 @@ export default function PlayPage() {
         if (session) {
           // Check if quiz is already complete (all questions answered)
           if (session.submissions.length >= session.quiz.questions.length) {
+            // If quiz is complete but not finalized (no endedAt), finalize it now
+            if (!session.endedAt) {
+              console.log('Quiz complete but not finalized, finalizing now...');
+              await finalizeSession(session);
+            }
             // Quiz is complete, redirect to results
             router.push(`/results/${sessionId}`);
             return;
@@ -125,6 +130,36 @@ export default function PlayPage() {
     }
   };
 
+  // Helper function to finalize a session (calculate score, save, submit)
+  const finalizeSession = async (session: Session) => {
+    try {
+      // Calculate score and generate title
+      const correct = session.submissions.filter((s) => s.correct).length;
+      const percentage = calculateScore(session.quiz, session.submissions);
+      const { title, tier } = getRandomTitle(percentage);
+
+      const finalSession = {
+        ...session,
+        endedAt: new Date().toISOString(),
+        score: correct,
+        earnedTitle: title,
+        earnedTier: tier,
+      };
+      await storage.saveSession(finalSession);
+
+      // Track category performance locally
+      await storage.trackCategoryPerformance(finalSession.quiz.category, correct, finalSession.quiz.questions.length);
+
+      // Submit to Supabase in background with retry logic
+      // This happens asynchronously - user doesn't wait for it
+      if (echo.user?.id) {
+        submitWithRetry(finalSession, echo.user.id, echo.user.name || null, sessionId);
+      }
+    } catch (error) {
+      console.error('Error finalizing quiz:', error);
+    }
+  };
+
   const handleFinish = async () => {
     // Prevent double submission
     if (isSubmittingQuiz) {
@@ -136,31 +171,10 @@ export default function PlayPage() {
     endSession();
 
     try {
-      // Calculate score and generate title
-      const correct = currentSession.submissions.filter((s) => s.correct).length;
-      const percentage = calculateScore(currentSession.quiz, currentSession.submissions);
-      const { title, tier } = getRandomTitle(percentage);
-
-      const finalSession = {
-        ...currentSession,
-        endedAt: new Date().toISOString(),
-        score: correct,
-        earnedTitle: title,
-        earnedTier: tier,
-      };
-      await storage.saveSession(finalSession);
-
-      // Track category performance locally
-      await storage.trackCategoryPerformance(finalSession.quiz.category, correct, finalSession.quiz.questions.length);
+      await finalizeSession(currentSession);
 
       // Navigate immediately to results page (don't wait for submission)
       router.push(`/results/${sessionId}`);
-
-      // Submit to Supabase in background with retry logic
-      // This happens asynchronously - user doesn't wait for it
-      if (echo.user?.id) {
-        submitWithRetry(finalSession, echo.user.id, echo.user.name || null, sessionId);
-      }
     } catch (error) {
       console.error('Error finishing quiz:', error);
     } finally {

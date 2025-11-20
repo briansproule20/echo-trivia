@@ -66,6 +66,9 @@ export default function DashboardPage() {
   const [newUsername, setNewUsername] = useState("");
   const [currentUsername, setCurrentUsername] = useState("");
   const [showRandomCategories, setShowRandomCategories] = useState(false);
+  const [shuffledCategories, setShuffledCategories] = useState<typeof categoryPerformance>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [categoryQuizzes, setCategoryQuizzes] = useState<QuizSession[]>([]);
 
   useEffect(() => {
     if (echo.user?.id) {
@@ -152,6 +155,22 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error updating username:', error);
       alert('Failed to update username');
+    }
+  };
+
+  const handleCategoryClick = async (category: string) => {
+    if (!echo.user?.id) return;
+
+    setSelectedCategory(category);
+
+    try {
+      const response = await fetch(`/api/user/category-history?echo_user_id=${echo.user.id}&category=${encodeURIComponent(category)}`);
+      if (response.ok) {
+        const data = await response.json();
+        setCategoryQuizzes(data.quizzes || []);
+      }
+    } catch (error) {
+      console.error('Error fetching category quizzes:', error);
     }
   };
 
@@ -489,7 +508,16 @@ export default function DashboardPage() {
                       whileHover={{ scale: 1.1, rotate: 180 }}
                       whileTap={{ scale: 0.9 }}
                       transition={{ duration: 0.3 }}
-                      onClick={() => setShowRandomCategories(!showRandomCategories)}
+                      onClick={() => {
+                        if (!showRandomCategories) {
+                          // Shuffle and store
+                          const shuffled = [...categoryPerformance]
+                            .sort(() => Math.random() - 0.5)
+                            .slice(0, 5);
+                          setShuffledCategories(shuffled);
+                        }
+                        setShowRandomCategories(!showRandomCategories);
+                      }}
                       className="rounded-full p-2 hover:bg-accent transition-colors"
                       aria-label="Shuffle categories"
                     >
@@ -514,41 +542,27 @@ export default function DashboardPage() {
                         outerRadius="80%"
                         barSize={10}
                         data={(() => {
-                          let categories = [...categoryPerformance];
-                          if (showRandomCategories) {
-                            // Shuffle and take 5 random
-                            categories = categories
-                              .sort(() => Math.random() - 0.5)
-                              .slice(0, 5);
-                          } else {
-                            // Take top 5 by score
-                            categories = categories.slice(0, 5);
-                          }
-                          // Map to chart format
-                          const chartData = categories.map((cat, index) => ({
+                          // Use stored shuffled categories or top 5
+                          const categories = showRandomCategories
+                            ? shuffledCategories
+                            : categoryPerformance.slice(0, 5);
+
+                          // Map to chart format - only return the 5 categories
+                          return categories.map((cat, index) => ({
                             name: cat.category,
                             value: cat.score,
                             category: cat.category,
                             count: cat.count,
                             fill: ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'][index % 5],
                           }));
-
-                          // CRITICAL: Add invisible 100% reference point to set proper scale
-                          chartData.push({
-                            name: '_reference',
-                            value: 100,
-                            category: '',
-                            count: 0,
-                            fill: 'transparent',
-                          });
-
-                          return chartData;
                         })()}
                         startAngle={90}
                         endAngle={-270}
                       >
+                        <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
                         <RadialBar
                           dataKey="value"
+                          angleAxisId={0}
                         />
                         <Tooltip
                           content={({ payload }) => {
@@ -679,8 +693,9 @@ export default function DashboardPage() {
                         return (
                           <div
                             key={index}
+                            onClick={() => handleCategoryClick(cat.category)}
                             className={`${masteryColors[cat.mastery as keyof typeof masteryColors]} border-2 rounded-lg p-2 cursor-pointer hover:scale-105 transition-transform`}
-                            title={`${cat.category}: ${cat.avgScore.toFixed(1)}% avg (${cat.count} quizzes)`}
+                            title={`Click to view quiz history`}
                           >
                             <div className="flex items-start justify-between gap-1">
                               <span className="text-white font-semibold text-xs leading-tight line-clamp-2">
@@ -1106,6 +1121,85 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Category Quiz History Modal */}
+        <Dialog open={!!selectedCategory} onOpenChange={(open) => !open && setSelectedCategory(null)}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold">{selectedCategory}</DialogTitle>
+              <DialogDescription className="text-sm">
+                Your quiz history for this category
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto pr-2">
+              {categoryQuizzes.length > 0 ? (
+                <div className="space-y-3">
+                  {categoryQuizzes.map((quiz, index) => (
+                    <motion.div
+                      key={quiz.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge
+                              variant={quiz.score_percentage === 100 ? "default" : quiz.score_percentage >= 70 ? "secondary" : "outline"}
+                              className="font-mono text-sm"
+                            >
+                              {quiz.score_percentage.toFixed(0)}%
+                            </Badge>
+                            <span className="text-sm text-muted-foreground">
+                              {quiz.correct_answers}/{quiz.total_questions} correct
+                            </span>
+                            {quiz.title && (
+                              <span className="text-xs text-muted-foreground">• {quiz.title}</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                            <span>
+                              {new Date(quiz.completed_at).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </span>
+                            <span>•</span>
+                            <span>{quiz.num_questions} questions</span>
+                            {quiz.time_taken && (
+                              <>
+                                <span>•</span>
+                                <span>{Math.floor(quiz.time_taken / 60)}:{(quiz.time_taken % 60).toString().padStart(2, '0')}</span>
+                              </>
+                            )}
+                            {quiz.difficulty && (
+                              <>
+                                <span>•</span>
+                                <span className="capitalize">{quiz.difficulty}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-2xl flex-shrink-0">
+                          {quiz.score_percentage === 100 ? '💯' :
+                           quiz.score_percentage >= 90 ? '🌟' :
+                           quiz.score_percentage >= 70 ? '👍' :
+                           quiz.score_percentage >= 50 ? '📈' : '💪'}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
+                  No quizzes found for this category
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

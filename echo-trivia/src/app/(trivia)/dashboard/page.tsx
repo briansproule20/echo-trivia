@@ -524,14 +524,25 @@ export default function DashboardPage() {
                             // Take top 5 by score
                             categories = categories.slice(0, 5);
                           }
-                          // CRITICAL: Add name and value properties for RadialBar
-                          return categories.map((cat, index) => ({
+                          // Map to chart format
+                          const chartData = categories.map((cat, index) => ({
                             name: cat.category,
-                            value: cat.score, // This must be called 'value' not 'score'
+                            value: cat.score,
                             category: cat.category,
                             count: cat.count,
                             fill: ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'][index % 5],
                           }));
+
+                          // CRITICAL: Add invisible 100% reference point to set proper scale
+                          chartData.push({
+                            name: '_reference',
+                            value: 100,
+                            category: '',
+                            count: 0,
+                            fill: 'transparent',
+                          });
+
+                          return chartData;
                         })()}
                         startAngle={90}
                         endAngle={-270}

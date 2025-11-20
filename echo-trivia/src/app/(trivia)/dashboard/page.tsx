@@ -510,8 +510,9 @@ export default function DashboardPage() {
                       <RadialBarChart
                         cx="50%"
                         cy="50%"
-                        innerRadius="20%"
-                        outerRadius="90%"
+                        innerRadius="10%"
+                        outerRadius="80%"
+                        barSize={10}
                         data={(() => {
                           let categories = [...categoryPerformance];
                           if (showRandomCategories) {
@@ -523,9 +524,11 @@ export default function DashboardPage() {
                             // Take top 5 by score
                             categories = categories.slice(0, 5);
                           }
+                          // CRITICAL: Add name and value properties for RadialBar
                           return categories.map((cat, index) => ({
+                            name: cat.category,
+                            value: cat.score, // This must be called 'value' not 'score'
                             category: cat.category,
-                            score: cat.score,
                             count: cat.count,
                             fill: ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'][index % 5],
                           }));
@@ -534,9 +537,7 @@ export default function DashboardPage() {
                         endAngle={-270}
                       >
                         <RadialBar
-                          dataKey="score"
-                          cornerRadius={10}
-                          domain={[0, 100]}
+                          dataKey="value"
                         />
                         <Tooltip
                           content={({ payload }) => {
@@ -546,7 +547,7 @@ export default function DashboardPage() {
                               <div className="bg-background border border-border rounded-lg shadow-lg p-3">
                                 <p className="font-semibold text-sm">{data.category}</p>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                  Avg Score: {data.score.toFixed(1)}%
+                                  Avg Score: {data.value.toFixed(1)}%
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                   Played {data.count} times

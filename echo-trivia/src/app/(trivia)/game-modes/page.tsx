@@ -57,7 +57,7 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, dela
         <div
           className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           style={{
-            background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, hsl(var(--chart-4-hsl, 84 76% 70%) / 0.25), transparent 40%)`,
+            background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 255, 255, 0.03), transparent 40%)`,
           }}
         />
       )}
@@ -77,7 +77,7 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, dela
         ))}
       </div>
 
-      <div className="relative p-8">
+      <div className="relative p-8 z-10">
         {/* Icon with glow */}
         <div className="mb-6 flex items-center justify-between">
           <div className="relative">
@@ -94,11 +94,9 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, dela
           )}
         </div>
 
-        {/* Title with vertical reveal animation */}
-        <h3 className="mb-3 overflow-hidden text-2xl font-bold">
-          <span className="inline-block" style={{ animation: "textRevealDown 0.8s ease-out forwards", animationDelay: `${delay + 200}ms`, opacity: 0 }}>
-            {title}
-          </span>
+        {/* Title */}
+        <h3 className="mb-3 text-2xl font-bold">
+          {title}
         </h3>
 
         {/* Description */}
@@ -106,17 +104,21 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, dela
           {description}
         </p>
 
-        {/* Button with border beam */}
+        {/* Button */}
+        <div>
         {!comingSoon && (
-          <button className="group/btn relative overflow-hidden rounded-full border border-border bg-background px-6 py-2.5 text-sm font-medium transition-all hover:scale-105">
+          <button className="group/btn relative overflow-hidden rounded-full border border-border bg-background px-6 py-2.5 text-sm font-medium transition-all duration-300 hover:scale-105">
             <span className="relative z-10">Start Playing</span>
             {/* Border beam on hover */}
-            <div className="absolute inset-0 -z-10 rounded-full opacity-0 transition-opacity duration-500 group-hover/btn:opacity-100">
-              <div className="absolute inset-[-1px] rounded-full bg-gradient-to-r from-primary via-primary/50 to-primary animate-[spin_3s_linear_infinite]" />
-              <div className="absolute inset-[1px] rounded-full bg-background" />
-            </div>
+            <span className="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-500 group-hover/btn:opacity-100">
+              <span className="absolute inset-[-1px] rounded-full blur-[0.5px] animate-[spin_4s_linear_infinite]" style={{
+                background: 'conic-gradient(from 0deg, transparent 0%, transparent 20%, var(--primary) 30%, transparent 40%, transparent 100%)'
+              }} />
+              <span className="absolute inset-[1px] rounded-full bg-background" />
+            </span>
           </button>
         )}
+        </div>
       </div>
     </div>
   );
@@ -155,7 +157,7 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
         <div
           className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           style={{
-            background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, hsl(var(--chart-4-hsl, 84 76% 70%) / 0.25), transparent 40%)`,
+            background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 255, 255, 0.03), transparent 40%)`,
           }}
         />
       )}
@@ -195,14 +197,14 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
               </div>
 
               {/* Title */}
-              <h3 className="overflow-hidden text-3xl md:text-4xl font-bold">
-                <span className="inline-block" style={{ animation: "textRevealDown 0.8s ease-out forwards", animationDelay: `${delay + 200}ms`, opacity: 0 }}>
-                  The Wizard's Tower
-                </span>
+              <h3 className="text-3xl md:text-4xl font-bold">
+                The Wizard's Tower
               </h3>
 
               {/* Subtitle */}
-              <p className="text-lg font-semibold text-primary/80">Single-Player Campaign</p>
+              <p className="text-lg font-semibold text-primary/80">
+                Single-Player Campaign
+              </p>
             </div>
 
             {/* Description */}
@@ -356,16 +358,20 @@ export default function GameModesPage() {
           }
         }
 
-        @keyframes textRevealDown {
+        @keyframes slideInFromLeft {
           from {
             opacity: 0;
-            clip-path: inset(0 0 100% 0);
-            transform: translateY(-10px);
+            transform: translateX(-20px);
           }
           to {
             opacity: 1;
-            clip-path: inset(0 0 0 0);
-            transform: translateY(0);
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes dash {
+          to {
+            stroke-dashoffset: -100;
           }
         }
 

@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { DotBackground } from "@/components/ui/dot-background";
 import { MiniLeaderboard } from "@/components/trivia/MiniLeaderboard";
 import { Footer } from "@/components/Footer";
+import { FlipText } from "@/components/ui/flip-text";
 
 export default function HomePage() {
   const router = useRouter();
@@ -39,7 +40,7 @@ export default function HomePage() {
             <div className="h-px w-24 mx-auto bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
           </div>
           <p className="text-base sm:text-lg lg:text-xl text-foreground/80 max-w-4xl mx-auto leading-relaxed">
-            Summon Your Inner Genius
+            Summon Your Inner <FlipText words={["Ken Jennings", "Quiz Whiz", "Mastermind", "Pub Champion", "Genius", "Alex Trebek", "Know-It-All", "Scholar", "Trivia Master", "Champion"]} duration={3000} className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent font-semibold" />
           </p>
           <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">
             Daily trivia challenges, infinite customizable practice

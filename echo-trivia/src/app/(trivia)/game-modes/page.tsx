@@ -181,7 +181,7 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
           <div className="space-y-6">
             {/* Header with Badge */}
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <div className="relative">
                   <div className="absolute inset-0 animate-pulse rounded-full bg-primary/20 blur-xl" />
                   <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-primary/30 bg-primary/10">

@@ -13,8 +13,6 @@ import { ReferralBanner } from "@/components/ReferralBanner";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
-  { href: "/daily", label: "Daily Quiz" },
-  { href: "/practice", label: "Practice" },
   { href: "/game-modes", label: "Game Modes" },
   { href: "/history", label: "History" },
 ];

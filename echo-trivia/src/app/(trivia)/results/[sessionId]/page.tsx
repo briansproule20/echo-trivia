@@ -464,15 +464,19 @@ ${shareUrl}`;
           )}
 
           {/* Actions */}
-          <div className={`grid grid-cols-2 ${quizResults ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}>
-            <Button onClick={handleRetry} size="lg" variant="outline">
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Practice Similar
-            </Button>
-            <Button onClick={handleShare} size="lg" variant="outline">
-              <Share2 className="mr-2 h-4 w-4" />
-              Share Score
-            </Button>
+          <div className={`grid ${isFaceoffMode ? 'grid-cols-2' : 'grid-cols-2'} ${!isFaceoffMode && quizResults ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}>
+            {!isFaceoffMode && (
+              <>
+                <Button onClick={handleRetry} size="lg" variant="outline">
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Practice Similar
+                </Button>
+                <Button onClick={handleShare} size="lg" variant="outline">
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Share Score
+                </Button>
+              </>
+            )}
             {quizResults && (
               <Button onClick={() => setShowStatsDialog(true)} size="lg" variant="outline">
                 <BarChart3 className="mr-2 h-4 w-4" />

@@ -21,6 +21,7 @@ export default function ProfilePage() {
   const [editingUsername, setEditingUsername] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [currentUsername, setCurrentUsername] = useState("");
+  const [faceoffStats, setFaceoffStats] = useState({ played: 0 });
 
   useEffect(() => {
     if (echo.user?.id) {
@@ -62,6 +63,14 @@ export default function ProfilePage() {
       if (streakRes.ok) {
         const data = await streakRes.json();
         setStreak(data.streak);
+      }
+
+      // Fetch faceoff stats - count sessions with game_mode = 'faceoff'
+      const sessionsRes = await fetch(`/api/user/sessions?echo_user_id=${echo.user.id}`);
+      if (sessionsRes.ok) {
+        const data = await sessionsRes.json();
+        const faceoffCount = data.sessions?.filter((s: any) => s.game_mode === 'faceoff').length || 0;
+        setFaceoffStats({ played: faceoffCount });
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -241,7 +250,7 @@ export default function ProfilePage() {
               <CardHeader className="pb-2 sm:pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
-                    Faceoff Wins
+                    Faceoffs Played
                   </CardTitle>
                   <Badge variant="secondary" className="text-xs">Beta</Badge>
                 </div>
@@ -249,70 +258,61 @@ export default function ProfilePage() {
               <CardContent>
                 <div className="flex items-center gap-2">
                   <Swords className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
-                  <span className="text-2xl sm:text-3xl font-bold">0</span>
+                  <span className="text-2xl sm:text-3xl font-bold">{faceoffStats.played}</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Challenge victories
+                  Challenges completed
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="opacity-60">
               <CardHeader className="pb-2 sm:pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
-                    Survival Streak
-                  </CardTitle>
-                  <Badge variant="outline" className="text-xs">Coming Soon</Badge>
-                </div>
+                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  Survival Streak
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2">
                   <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
-                  <span className="text-2xl sm:text-3xl font-bold">0</span>
+                  <span className="text-2xl sm:text-3xl font-bold">-</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Longest streak
+                  Coming soon
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="opacity-60">
               <CardHeader className="pb-2 sm:pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
-                    Jeopardy High Score
-                  </CardTitle>
-                  <Badge variant="outline" className="text-xs">Coming Soon</Badge>
-                </div>
+                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  Jeopardy High Score
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2">
                   <Star className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
-                  <span className="text-2xl sm:text-3xl font-bold">$0</span>
+                  <span className="text-2xl sm:text-3xl font-bold">-</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Best earnings
+                  Coming soon
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="opacity-60">
               <CardHeader className="pb-2 sm:pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
-                    Campaign Level
-                  </CardTitle>
-                  <Badge variant="outline" className="text-xs">Coming Soon</Badge>
-                </div>
+                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  Campaign Level
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2">
                   <Castle className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-500" />
-                  <span className="text-2xl sm:text-3xl font-bold">0</span>
+                  <span className="text-2xl sm:text-3xl font-bold">-</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Wizard&apos;s Tower
+                  Coming soon
                 </p>
               </CardContent>
             </Card>

@@ -164,6 +164,19 @@ export function Navbar() {
                       <FileQuestion className="h-4 w-4" />
                       FAQs & Docs
                     </Link>
+
+                    {/* Lore */}
+                    <Link
+                      href="/lore"
+                      className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
+                        pathname === "/lore"
+                          ? "text-primary bg-primary/10"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      <BookOpen className="h-4 w-4" />
+                      Lore
+                    </Link>
                   </div>
                 </div>
               </SheetContent>

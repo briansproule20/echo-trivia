@@ -11,7 +11,7 @@ import { FinishQuizFlurp } from "@/components/trivia/FinishQuizFlurp";
 import { storage } from "@/lib/storage";
 import { getRandomTitle } from "@/lib/quiz-utils";
 import { Input } from "@/components/ui/input";
-import { CheckCircle2, XCircle, RotateCcw, Home, Share2, BarChart3, Check, X, User } from "lucide-react";
+import { CheckCircle2, XCircle, RotateCcw, Home, Share2, BarChart3, Check, X, User, Swords, Loader2 } from "lucide-react";
 import type { Session } from "@/lib/types";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 
@@ -30,6 +30,12 @@ export default function ResultsPage() {
   const [isLoadingUsername, setIsLoadingUsername] = useState(true);
   const [showStatsDialog, setShowStatsDialog] = useState(false);
   const [showFlurp, setShowFlurp] = useState(true);
+
+  // Faceoff sharing state
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [isCreatingChallenge, setIsCreatingChallenge] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const loadSession = async () => {
@@ -229,6 +235,55 @@ ${shareUrl}`;
     }
   };
 
+  // Handle Faceoff challenge creation
+  const handleCreateFaceoffChallenge = async () => {
+    if (!session || !echo.user?.id) return;
+
+    setIsCreatingChallenge(true);
+    setShareError(null);
+
+    try {
+      const response = await fetch('/api/faceoff/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session,
+          echo_user_id: echo.user.id,
+          echo_user_name: currentUsername || echo.user.name,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Failed to create challenge:', errorData);
+        throw new Error(errorData.error || 'Failed to create challenge');
+      }
+
+      const data = await response.json();
+      setShareUrl(data.shareUrl);
+    } catch (error) {
+      console.error('Error creating faceoff challenge:', error);
+      setShareError(error instanceof Error ? error.message : 'Failed to create shareable challenge. Please try again.');
+    } finally {
+      setIsCreatingChallenge(false);
+    }
+  };
+
+  // Handle copying share URL
+  const handleCopyShareUrl = async () => {
+    if (!shareUrl) return;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
+  };
+
+  const isFaceoffMode = session?.gameMode === 'faceoff';
+
   return (
     <>
       <FinishQuizFlurp isVisible={showFlurp} onAnimationComplete={() => setShowFlurp(false)} />
@@ -334,6 +389,79 @@ ${shareUrl}`;
               })}
             </CardContent>
           </Card>
+
+          {/* Faceoff Challenge Share Card */}
+          {isFaceoffMode && (
+            <Card className="border-primary/30 bg-gradient-to-br from-primary/10 via-transparent to-transparent">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Swords className="h-5 w-5 text-primary" />
+                  Challenge Your Friends
+                  <Badge variant="default" className="ml-2">Beta</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {!shareUrl ? (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      Create a shareable link so your friends can take the exact same quiz and compare scores!
+                    </p>
+                    {shareError && (
+                      <p className="text-sm text-destructive">{shareError}</p>
+                    )}
+                    <Button
+                      onClick={handleCreateFaceoffChallenge}
+                      disabled={isCreatingChallenge}
+                      className="w-full"
+                      size="lg"
+                    >
+                      {isCreatingChallenge ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating Challenge...
+                        </>
+                      ) : (
+                        <>
+                          <Share2 className="mr-2 h-4 w-4" />
+                          Generate Share Link
+                        </>
+                      )}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      Share this link with your friends! They'll face the exact same questions.
+                    </p>
+                    <div className="flex gap-2">
+                      <Input
+                        value={shareUrl}
+                        readOnly
+                        className="font-mono text-xs sm:text-sm"
+                      />
+                      <Button
+                        onClick={handleCopyShareUrl}
+                        variant="outline"
+                        size="icon"
+                        className="shrink-0"
+                      >
+                        {copied ? (
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Share2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {copied && (
+                      <p className="text-xs text-green-600 dark:text-green-400">
+                        Copied to clipboard!
+                      </p>
+                    )}
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Actions */}
           <div className={`grid grid-cols-2 ${quizResults ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}>

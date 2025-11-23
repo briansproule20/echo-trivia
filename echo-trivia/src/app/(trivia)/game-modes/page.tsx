@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { DotBackground } from "@/components/ui/dot-background";
 import { EncryptedText } from "@/components/ui/encrypted-text";
-import { Calendar, Sparkles, Zap, Lock, Castle, Trophy, Star } from "lucide-react";
+import { Calendar, Sparkles, Zap, Lock, Castle, Trophy, Star, Swords } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface GameModeCardProps {
   title: string;
@@ -12,10 +13,11 @@ interface GameModeCardProps {
   icon: React.ReactNode;
   href?: string;
   comingSoon?: boolean;
+  beta?: boolean;
   delay?: number;
 }
 
-function GameModeCard({ title, description, icon, href, comingSoon = false, delay = 0 }: GameModeCardProps) {
+function GameModeCard({ title, description, icon, href, comingSoon = false, beta = false, delay = 0 }: GameModeCardProps) {
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -91,6 +93,11 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, dela
               <Lock className="h-3 w-3" />
               Coming Soon
             </div>
+          )}
+          {beta && (
+            <Badge variant="default" className="rounded-full px-3 py-1 text-xs font-medium">
+              Beta
+            </Badge>
           )}
         </div>
 
@@ -322,6 +329,13 @@ export default function GameModesPage() {
       href: "/practice",
     },
     {
+      title: "Faceoff",
+      description: "Create custom challenges and share them with friends. Generate a quiz, get a shareable link, and compete for the best score!",
+      icon: <Swords className="h-7 w-7 text-primary" />,
+      href: "/faceoff",
+      beta: true,
+    },
+    {
       title: "Endless Survival",
       description: "Answer questions until you get one wrong. How long can you survive? Push your limits.",
       icon: <Zap className="h-7 w-7 text-primary" />,
@@ -400,18 +414,52 @@ export default function GameModesPage() {
             </div>
 
             {/* Game Mode Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-              {gameModes.map((mode, index) => (
+            <div className="space-y-6 lg:space-y-8">
+              {/* Daily and Practice - Row 1 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                {gameModes.slice(0, 2).map((mode, index) => (
+                  <GameModeCard
+                    key={mode.title}
+                    title={mode.title}
+                    description={mode.description}
+                    icon={mode.icon}
+                    href={mode.href}
+                    comingSoon={mode.comingSoon}
+                    beta={mode.beta}
+                    delay={index * 100}
+                  />
+                ))}
+              </div>
+
+              {/* Faceoff - Full width */}
+              <div>
                 <GameModeCard
-                  key={mode.title}
-                  title={mode.title}
-                  description={mode.description}
-                  icon={mode.icon}
-                  href={mode.href}
-                  comingSoon={mode.comingSoon}
-                  delay={index * 100}
+                  key={gameModes[2].title}
+                  title={gameModes[2].title}
+                  description={gameModes[2].description}
+                  icon={gameModes[2].icon}
+                  href={gameModes[2].href}
+                  comingSoon={gameModes[2].comingSoon}
+                  beta={gameModes[2].beta}
+                  delay={200}
                 />
-              ))}
+              </div>
+
+              {/* Endless and Jeopardy - Row 3 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                {gameModes.slice(3).map((mode, index) => (
+                  <GameModeCard
+                    key={mode.title}
+                    title={mode.title}
+                    description={mode.description}
+                    icon={mode.icon}
+                    href={mode.href}
+                    comingSoon={mode.comingSoon}
+                    beta={mode.beta}
+                    delay={(index + 3) * 100}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Campaign Mode - Full Width Card */}

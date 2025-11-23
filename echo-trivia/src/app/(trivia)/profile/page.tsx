@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Target, Flame, Clock, Award, Edit2, Check, X, BarChart3, ArrowRight } from "lucide-react";
+import { Trophy, Target, Flame, Clock, Award, Edit2, Check, X, BarChart3, ArrowRight, Swords, Zap, Star, Castle } from "lucide-react";
 import Link from "next/link";
 import type { UserStats, UserAchievement, DailyStreak } from "@/lib/supabase-types";
 
@@ -231,6 +231,89 @@ export default function ProfilePage() {
                     {formatTime(stats?.total_time_played || 0)}
                   </span>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Game Mode Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <Card>
+              <CardHeader className="pb-2 sm:pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+                    Faceoff Wins
+                  </CardTitle>
+                  <Badge variant="secondary" className="text-xs">Beta</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2">
+                  <Swords className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
+                  <span className="text-2xl sm:text-3xl font-bold">0</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Challenge victories
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2 sm:pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+                    Survival Streak
+                  </CardTitle>
+                  <Badge variant="outline" className="text-xs">Coming Soon</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+                  <span className="text-2xl sm:text-3xl font-bold">0</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Longest streak
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2 sm:pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+                    Jeopardy High Score
+                  </CardTitle>
+                  <Badge variant="outline" className="text-xs">Coming Soon</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2">
+                  <Star className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
+                  <span className="text-2xl sm:text-3xl font-bold">$0</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Best earnings
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2 sm:pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+                    Campaign Level
+                  </CardTitle>
+                  <Badge variant="outline" className="text-xs">Coming Soon</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2">
+                  <Castle className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-500" />
+                  <span className="text-2xl sm:text-3xl font-bold">0</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Wizard&apos;s Tower
+                </p>
               </CardContent>
             </Card>
           </div>

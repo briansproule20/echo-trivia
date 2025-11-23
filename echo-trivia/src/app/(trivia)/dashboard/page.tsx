@@ -49,7 +49,7 @@ import {
 import { motion } from "framer-motion";
 
 // Custom tooltip component for Recharts that matches shadcn UI theme
-const CustomChartTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
+const CustomChartTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload || !payload.length) return null;
 
   return (

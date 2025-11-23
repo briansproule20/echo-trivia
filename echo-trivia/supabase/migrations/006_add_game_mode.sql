@@ -5,6 +5,7 @@
 -- 'endless' = Endless Survival
 -- 'jeopardy' = Jeopardy Mode
 -- 'campaign' = The Wizard's Tower Campaign
+-- 'faceoff' = Faceoff Challenge Mode
 
 alter table public.quiz_sessions
 add column game_mode text;
@@ -24,4 +25,4 @@ end
 where game_mode is null;
 
 -- Add comment for documentation
-comment on column public.quiz_sessions.game_mode is 'Game mode type: daily, practice, endless, jeopardy, campaign';
+comment on column public.quiz_sessions.game_mode is 'Game mode type: daily, practice, endless, jeopardy, campaign, faceoff';

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TooltipProps } from "recharts";
 import {
   BarChart,
   Bar,
@@ -46,6 +47,33 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
+
+// Custom tooltip component for Recharts that matches shadcn UI theme
+const CustomChartTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
+  if (!active || !payload || !payload.length) return null;
+
+  return (
+    <div className="rounded-lg border bg-popover p-2.5 shadow-md text-popover-foreground">
+      <div className="grid gap-1.5">
+        {label && (
+          <p className="text-[0.7rem] sm:text-xs font-medium">{label}</p>
+        )}
+        {payload.map((entry: any, index: number) => (
+          <div key={index} className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5">
+              <div
+                className="h-2 w-2 rounded-full shrink-0"
+                style={{ backgroundColor: entry.color || entry.fill }}
+              />
+              <span className="text-[0.7rem] sm:text-xs text-muted-foreground">{entry.name}</span>
+            </div>
+            <span className="text-[0.7rem] sm:text-xs font-semibold">{entry.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export default function DashboardPage() {
   const echo = useEcho();
@@ -362,10 +390,7 @@ export default function DashboardPage() {
                         <Cell key={`cell-${index}`} fill={entry.fill} />
                       ))}
                     </Pie>
-                    <Tooltip
-                      formatter={(value: any) => value}
-                      contentStyle={{ fontSize: '12px' }}
-                    />
+                    <Tooltip content={<CustomChartTooltip />} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="flex justify-center gap-4 mt-2">
@@ -394,10 +419,7 @@ export default function DashboardPage() {
                   <BarChart data={journeyData} layout="vertical" margin={{ left: 10, right: 10 }}>
                     <XAxis type="number" hide />
                     <YAxis type="category" dataKey="name" width={80} fontSize={11} />
-                    <Tooltip
-                      cursor={false}
-                      contentStyle={{ fontSize: '12px' }}
-                    />
+                    <Tooltip cursor={false} content={<CustomChartTooltip />} />
                     <Bar dataKey="value" radius={[0, 8, 8, 0]}>
                       {journeyData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.fill} />

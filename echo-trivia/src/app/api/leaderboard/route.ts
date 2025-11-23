@@ -14,15 +14,10 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient()
 
-    console.log('=== LEADERBOARD API CALLED ===')
-    console.log('Period:', period)
-    console.log('Category:', category)
-    console.log('Rank By:', rankBy)
-
     // Build query - ONLY include daily challenges for global/daily leaderboards
     let query = supabase
       .from('quiz_sessions')
-      .select('echo_user_id, score_percentage, correct_answers, completed_at, category, is_daily, game_mode')
+      .select('echo_user_id, score_percentage, correct_answers, completed_at, category')
       .eq('is_daily', true) // CRITICAL: Only count daily challenges
 
     // Filter by category if specified
@@ -53,18 +48,6 @@ export async function GET(request: NextRequest) {
     const { data: sessions, error: sessionsError } = await query
 
     if (sessionsError) throw sessionsError
-
-    console.log('=== QUERY RESULTS ===')
-    console.log('Sessions found:', sessions?.length || 0)
-    if (sessions && sessions.length > 0) {
-      console.log('Sample session:', JSON.stringify(sessions[0], null, 2))
-      console.log('All sessions is_daily values:', sessions.map(s => ({
-        echo_user_id: s.echo_user_id,
-        is_daily: s.is_daily,
-        game_mode: s.game_mode,
-        category: s.category
-      })))
-    }
 
     if (!sessions || sessions.length === 0) {
       return NextResponse.json({ leaderboard: [] })

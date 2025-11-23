@@ -124,12 +124,6 @@ function PracticeContent() {
         gameMode: 'practice',
       };
 
-      console.log('🔍 PRACTICE SESSION CREATED:', {
-        gameMode: session.gameMode,
-        seeded: session.quiz.seeded,
-        category: session.quiz.category,
-      });
-
       setSession(session);
       await storage.saveSession(session);
       router.push(`/play/${session.id}`);

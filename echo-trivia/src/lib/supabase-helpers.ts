@@ -58,13 +58,6 @@ export async function submitQuizToSupabase(
     // Determine if this is a daily challenge based on gameMode (most reliable)
     const isDaily = session.gameMode === 'daily'
 
-    console.log('🔍 QUIZ SUBMISSION DEBUG:', {
-      gameMode: session.gameMode,
-      isDaily,
-      seeded: session.quiz.seeded,
-      category: session.quiz.category,
-    })
-
     const payload: SaveQuizSessionRequest = {
       echo_user_id: echoUserId,
       echo_user_name: echoUserName,

@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Medal, Award, TrendingUp } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Trophy, Medal, Award, TrendingUp, HelpCircle, User } from "lucide-react";
 import type { LeaderboardEntry } from "@/lib/supabase-types";
 import Link from "next/link";
 
@@ -46,14 +47,68 @@ export function MiniLeaderboard() {
     return "bg-background";
   };
 
+  const HeaderContent = () => (
+    <div className="flex items-center justify-between gap-2">
+      <CardTitle className="text-lg flex items-center gap-2">
+        <TrendingUp className="h-5 w-5 text-primary" />
+        Today's Top Players
+      </CardTitle>
+      <div className="flex items-center gap-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              className="text-muted-foreground hover:text-foreground transition-colors shrink-0 p-1 hover:bg-muted rounded-full"
+              aria-label="How leaderboards work"
+            >
+              <HelpCircle className="h-4 w-4" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-[300px] sm:w-[360px]">
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <h4 className="font-semibold text-sm leading-none">How Leaderboards Work</h4>
+                <p className="text-xs text-muted-foreground">
+                  Compete with players around the world
+                </p>
+              </div>
+              <div className="space-y-2.5 text-sm">
+                <div className="flex gap-2">
+                  <Trophy className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-xs">Daily Challenges Only</p>
+                    <p className="text-xs text-muted-foreground">Only your daily challenge scores count toward leaderboard rankings</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <User className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-xs">Practice Tracking</p>
+                    <p className="text-xs text-muted-foreground">Practice quizzes are tracked privately in your profile and dashboard</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Award className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-xs">Qualification</p>
+                    <p className="text-xs text-muted-foreground">Minimum 5 daily challenges required for All Time, Monthly, and Weekly boards</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+        <Link href="/leaderboard" className="text-xs text-primary hover:underline">
+          View All
+        </Link>
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            Today's Top Players
-          </CardTitle>
+          <HeaderContent />
         </CardHeader>
         <CardContent>
           <div className="text-center py-4 text-sm text-muted-foreground">
@@ -68,10 +123,7 @@ export function MiniLeaderboard() {
     return (
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            Today's Top Players
-          </CardTitle>
+          <HeaderContent />
         </CardHeader>
         <CardContent>
           <div className="text-center py-4 text-sm text-muted-foreground">
@@ -85,15 +137,7 @@ export function MiniLeaderboard() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            Today's Top Players
-          </CardTitle>
-          <Link href="/leaderboard" className="text-xs text-primary hover:underline">
-            View All
-          </Link>
-        </div>
+        <HeaderContent />
       </CardHeader>
       <CardContent>
         <div className="space-y-2">

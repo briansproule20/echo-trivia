@@ -14,10 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body: SaveQuizSessionRequest = await request.json()
-    console.log('=== QUIZ SUBMIT API ===')
     console.log('Request body:', JSON.stringify(body, null, 2))
-    console.log('is_daily value:', body.is_daily)
-    console.log('game_mode value:', body.game_mode)
 
     const {
       echo_user_id,

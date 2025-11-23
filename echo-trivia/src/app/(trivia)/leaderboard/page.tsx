@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trophy, Medal, Award, User } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Trophy, Medal, Award, User, HelpCircle } from "lucide-react";
 import type { LeaderboardEntry } from "@/lib/supabase-types";
 
 export default function LeaderboardPage() {
@@ -96,12 +97,57 @@ export default function LeaderboardPage() {
             <TabsContent value={period} className="mt-4 sm:mt-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg sm:text-xl">
-                    {period === 'all' && 'All Time Leaders (Top 25)'}
-                    {period === 'monthly' && 'Top 25 This Month'}
-                    {period === 'weekly' && 'Top 25 This Week'}
-                    {period === 'daily' && 'Top 25 Today'}
-                  </CardTitle>
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-lg sm:text-xl">
+                      {period === 'all' && 'All Time Leaders (Top 25)'}
+                      {period === 'monthly' && 'Top 25 This Month'}
+                      {period === 'weekly' && 'Top 25 This Week'}
+                      {period === 'daily' && 'Top 25 Today'}
+                    </CardTitle>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          className="text-muted-foreground hover:text-foreground transition-colors shrink-0 p-1 hover:bg-muted rounded-full"
+                          aria-label="How leaderboards work"
+                        >
+                          <HelpCircle className="h-5 w-5" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" className="w-[320px] sm:w-[380px]">
+                        <div className="space-y-3">
+                          <div className="space-y-1">
+                            <h4 className="font-semibold text-base leading-none">How Leaderboards Work</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Compete with players around the world
+                            </p>
+                          </div>
+                          <div className="space-y-2.5 text-sm">
+                            <div className="flex gap-2">
+                              <Trophy className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                              <div>
+                                <p className="font-medium">Daily Challenges Only</p>
+                                <p className="text-xs text-muted-foreground">Only your daily challenge scores count toward leaderboard rankings</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <User className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                              <div>
+                                <p className="font-medium">Practice Tracking</p>
+                                <p className="text-xs text-muted-foreground">Practice quizzes are tracked privately in your profile and dashboard</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Award className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                              <div>
+                                <p className="font-medium">Qualification</p>
+                                <p className="text-xs text-muted-foreground">Minimum 5 daily challenges required for All Time, Monthly, and Weekly boards</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {loading ? (

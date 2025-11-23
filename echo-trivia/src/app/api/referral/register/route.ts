@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import Echo from "@merit-systems/echo-next-sdk";
 
+export const dynamic = 'force-dynamic';
+
 const echo = Echo({
   appId: process.env.ECHO_APP_ID!,
 });

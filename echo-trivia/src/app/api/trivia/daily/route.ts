@@ -3,8 +3,10 @@
 
 import { NextResponse } from "next/server";
 import { unstable_cache } from "next/cache";
-import { getTodayString, getDailySeed, SeededRandom } from "@/lib/quiz-utils";
+import { getTodayString, getDailySeed } from "@/lib/quiz-utils";
 import { CATEGORIES } from "@/lib/types";
+
+export const dynamic = 'force-dynamic';
 
 // Cached challenge generator - generates once per day with date-specific cache key
 async function getDailyChallenge(date: string) {

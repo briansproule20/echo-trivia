@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Swords, AlertCircle, ArrowRight } from 'lucide-react'
 import { Session } from '@/lib/types'
-import { generateId } from '@/lib/utils'
+import { generateId } from '@/lib/quiz-utils'
 import { storage } from '@/lib/storage'
 import { usePlayStore } from '@/lib/store'
 

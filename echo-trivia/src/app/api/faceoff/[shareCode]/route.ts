@@ -4,10 +4,10 @@ import { createClient } from '@/utils/supabase/server'
 // GET /api/faceoff/[shareCode] - Fetch a challenge by share code
 export async function GET(
   request: NextRequest,
-  { params }: { params: { shareCode: string } }
+  { params }: { params: Promise<{ shareCode: string }> }
 ) {
   try {
-    const { shareCode } = params
+    const { shareCode } = await params
 
     if (!shareCode) {
       return NextResponse.json({ error: 'Share code is required' }, { status: 400 })

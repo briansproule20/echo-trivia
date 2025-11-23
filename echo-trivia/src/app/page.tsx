@@ -11,6 +11,7 @@ import type { Session } from "@/lib/types";
 import { motion } from "framer-motion";
 import { DotBackground } from "@/components/ui/dot-background";
 import { MiniLeaderboard } from "@/components/trivia/MiniLeaderboard";
+import { CommunityLoreSection } from "@/components/trivia/CommunityLoreSection";
 import { Footer } from "@/components/Footer";
 import { FlipText } from "@/components/ui/flip-text";
 
@@ -83,6 +84,11 @@ export default function HomePage() {
         {/* Mini Leaderboard */}
         <div className="max-w-3xl mx-auto mb-12">
           <MiniLeaderboard />
+        </div>
+
+        {/* Community Lore Section */}
+        <div className="max-w-3xl mx-auto mb-12">
+          <CommunityLoreSection />
         </div>
 
         {/* Recent Sessions */}

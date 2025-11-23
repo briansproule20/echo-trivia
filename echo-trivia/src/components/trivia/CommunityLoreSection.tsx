@@ -1,0 +1,270 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { Card } from '@/components/ui/card'
+import { Skull, Sparkles, TrendingUp, HelpCircle } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { motion } from 'framer-motion'
+
+interface CommunityStats {
+  totalCorrectAnswers: number
+  currentTier: {
+    level: number
+    goal: number
+    name: string
+  }
+  nextTier: {
+    level: number
+    goal: number
+    name: string
+  } | null
+  progress: number
+  allTiers: Array<{
+    level: number
+    goal: number
+    name: string
+  }>
+}
+
+export function CommunityLoreSection() {
+  const [stats, setStats] = useState<CommunityStats | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchCommunityStats() {
+      try {
+        const response = await fetch('/api/community/stats')
+        if (response.ok) {
+          const data = await response.json()
+          setStats(data)
+        }
+      } catch (error) {
+        console.error('Error fetching community stats:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCommunityStats()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="w-full h-64 animate-pulse bg-gradient-to-br from-slate-900/50 to-slate-800/50 rounded-lg" />
+    )
+  }
+
+  if (!stats) return null
+
+  const formatNumber = (num: number) => {
+    return num.toLocaleString('en-US')
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="w-full"
+    >
+      <Card className="relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-sm">
+        {/* Atmospheric background effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20" />
+
+        <div className="relative z-10 p-4 sm:p-6">
+          {/* Header with skull icon and help */}
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="flex items-center justify-between mb-6"
+          >
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Skull className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
+                <motion.div
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.5, 0.8, 0.5]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="absolute inset-0 blur-md"
+                >
+                  <Skull className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
+                </motion.div>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                The Wizard's Legion
+              </h2>
+            </div>
+
+            {/* Help Icon */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="text-muted-foreground hover:text-foreground transition-colors">
+                  <HelpCircle className="h-5 w-5" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-[300px] sm:w-[360px]">
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-base">The Wizard's Call</h3>
+                  <p className="text-sm text-muted-foreground">
+                    The Trivia Wizard rallies all players in a unified campaign against ignorance. Every correct answer from any challenge strengthens our collective power and advances the legion through the ranks.
+                  </p>
+
+                  <div className="space-y-2 pt-2 border-t">
+                    <h4 className="font-medium text-sm">Ranks of the Legion</h4>
+                    {stats?.allTiers.map((tier) => (
+                      <div key={tier.level} className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">
+                          {tier.name}
+                        </span>
+                        <span className="font-mono">{tier.goal.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="text-xs text-muted-foreground pt-2 border-t">
+                    All who answer correctly contribute: Daily Challenges, Practice, Faceoff, and beyond!
+                  </p>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </motion.div>
+
+          {/* Lore text */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="mb-6 space-y-2"
+          >
+            <p className="text-muted-foreground leading-relaxed text-sm">
+              Under the Trivia Wizard's guidance, we stand united against the wretched forces of ignorance. Each correct answer strikes a blow for knowledge, empowering our legion's march toward enlightenment.
+            </p>
+          </motion.div>
+
+          {/* Stats section */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+            {/* Total answers */}
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              className="relative"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent rounded-lg blur-xl" />
+              <div className="relative bg-card/80 backdrop-blur-sm border border-primary/20 rounded-lg p-4 sm:p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                    Legion Strength
+                  </span>
+                </div>
+                <div className="text-3xl sm:text-4xl font-bold text-primary tabular-nums">
+                  {formatNumber(stats.totalCorrectAnswers)}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">victories over ignorance</div>
+              </div>
+            </motion.div>
+
+            {/* Current tier */}
+            <motion.div
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+              className="relative"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent rounded-lg blur-xl" />
+              <div className="relative bg-card/80 backdrop-blur-sm border border-primary/20 rounded-lg p-4 sm:p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                  <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                    Current Rank
+                  </span>
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold text-foreground">
+                  {stats.nextTier ? stats.currentTier.name : stats.currentTier.name}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  Tier {stats.currentTier.level}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Progress bar */}
+          {stats.nextTier && (
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.5 }}
+              className="space-y-3"
+            >
+              <div className="flex justify-between items-baseline">
+                <span className="text-sm text-muted-foreground">
+                  Next: <span className="text-foreground font-semibold">{stats.nextTier.name}</span>
+                </span>
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  {formatNumber(stats.nextTier.goal - stats.totalCorrectAnswers)} to go
+                </span>
+              </div>
+
+              <div className="relative h-3 bg-secondary rounded-full overflow-hidden border border-border">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${stats.progress}%` }}
+                  transition={{ delay: 1, duration: 1.5, ease: "easeOut" }}
+                  className="absolute inset-y-0 left-0 bg-primary rounded-full"
+                />
+
+                {/* Shimmer effect */}
+                <motion.div
+                  animate={{
+                    x: ['-100%', '200%']
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "linear",
+                    repeatDelay: 1
+                  }}
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                  style={{ width: '50%' }}
+                />
+              </div>
+
+              <div className="text-center">
+                <span className="text-xs text-muted-foreground">
+                  {formatNumber(stats.totalCorrectAnswers)} / {formatNumber(stats.nextTier.goal)}
+                </span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Max tier reached */}
+          {!stats.nextTier && (
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.5 }}
+              className="text-center py-4"
+            >
+              <div className="text-lg sm:text-xl text-primary font-bold">
+                ⚔️ The Legion Stands Triumphant! ⚔️
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Ignorance has been vanquished. The Wizard's followers reign supreme.
+              </p>
+            </motion.div>
+          )}
+        </div>
+      </Card>
+    </motion.div>
+  )
+}

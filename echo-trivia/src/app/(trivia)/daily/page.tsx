@@ -186,6 +186,7 @@ export default function DailyQuizPage() {
         quiz,
         startedAt: new Date().toISOString(),
         submissions: [],
+        gameMode: 'daily',
       };
 
       setSession(session);

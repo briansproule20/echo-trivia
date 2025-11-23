@@ -113,13 +113,22 @@ function PracticeContent() {
       quiz.title = `${finalCategory} Practice`;
       quiz.description = `${numQuestions} questions • ${difficulty === "mixed" ? "Mixed" : difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} difficulty`;
       quiz.category = finalCategory; // Explicitly set the category to ensure custom categories are preserved
+      // CRITICAL: Ensure seeded is explicitly false for practice
+      quiz.seeded = false;
 
       const session: Session = {
         id: generateId(),
         quiz,
         startedAt: new Date().toISOString(),
         submissions: [],
+        gameMode: 'practice',
       };
+
+      console.log('🔍 PRACTICE SESSION CREATED:', {
+        gameMode: session.gameMode,
+        seeded: session.quiz.seeded,
+        category: session.quiz.category,
+      });
 
       setSession(session);
       await storage.saveSession(session);

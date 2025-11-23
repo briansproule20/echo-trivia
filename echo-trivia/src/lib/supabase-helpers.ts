@@ -55,6 +55,16 @@ export async function submitQuizToSupabase(
       }
     })
 
+    // Determine if this is a daily challenge based on gameMode (most reliable)
+    const isDaily = session.gameMode === 'daily'
+
+    console.log('🔍 QUIZ SUBMISSION DEBUG:', {
+      gameMode: session.gameMode,
+      isDaily,
+      seeded: session.quiz.seeded,
+      category: session.quiz.category,
+    })
+
     const payload: SaveQuizSessionRequest = {
       echo_user_id: echoUserId,
       echo_user_name: echoUserName,
@@ -65,11 +75,12 @@ export async function submitQuizToSupabase(
       score_percentage: percentage,
       difficulty,
       quiz_type: type,
-      is_daily: session.quiz.seeded || false,
+      is_daily: isDaily,
       daily_date: dailyDate,
       title: session.earnedTitle,
       time_taken: timeTaken,
       session_id: sessionId,
+      game_mode: session.gameMode || 'practice', // Default to practice if not set
       submissions, // Include individual submissions for validation
     }
 

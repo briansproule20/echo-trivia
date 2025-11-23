@@ -55,6 +55,7 @@ export interface Session {
   score?: number;
   earnedTitle?: string;
   earnedTier?: string;
+  gameMode?: 'daily' | 'practice' | 'endless' | 'jeopardy' | 'campaign';
 }
 
 export const CATEGORIES = [

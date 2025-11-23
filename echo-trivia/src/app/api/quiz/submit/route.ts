@@ -14,7 +14,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body: SaveQuizSessionRequest = await request.json()
+    console.log('=== QUIZ SUBMIT API ===')
     console.log('Request body:', JSON.stringify(body, null, 2))
+    console.log('is_daily value:', body.is_daily)
+    console.log('game_mode value:', body.game_mode)
 
     const {
       echo_user_id,
@@ -31,6 +34,7 @@ export async function POST(request: NextRequest) {
       title,
       time_taken,
       session_id,
+      game_mode,
       submissions,
     } = body
 
@@ -187,6 +191,7 @@ export async function POST(request: NextRequest) {
         daily_date: daily_date || null,
         title: title || null,
         time_taken: time_taken || null,
+        game_mode: game_mode || (is_daily ? 'daily' : 'practice'),
       })
       .select()
       .single()

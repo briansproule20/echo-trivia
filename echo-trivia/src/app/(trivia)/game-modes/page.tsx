@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { DotBackground } from "@/components/ui/dot-background";
 import { EncryptedText } from "@/components/ui/encrypted-text";
 import { Vortex } from "@/components/ui/vortex";
+import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
 import { Calendar, Sparkles, Zap, Lock, Castle, Trophy, Star, Swords } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -17,9 +18,10 @@ interface GameModeCardProps {
   beta?: boolean;
   delay?: number;
   useVortex?: boolean;
+  useBeams?: boolean;
 }
 
-function GameModeCard({ title, description, icon, href, comingSoon = false, beta = false, delay = 0, useVortex = false }: GameModeCardProps) {
+function GameModeCard({ title, description, icon, href, comingSoon = false, beta = false, delay = 0, useVortex = false, useBeams = false }: GameModeCardProps) {
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -43,7 +45,7 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
   return (
     <div
       ref={cardRef}
-      className={`group relative overflow-hidden rounded-2xl border border-border/40 ${useVortex ? 'bg-transparent' : 'bg-card/50 backdrop-blur-sm'} transition-all duration-500 ${
+      className={`group relative overflow-hidden rounded-2xl border border-border/40 ${useVortex || useBeams ? 'bg-transparent' : 'bg-card/50 backdrop-blur-sm'} transition-all duration-500 ${
         comingSoon ? "opacity-60" : "cursor-pointer hover:border-primary/40"
       }`}
       style={{
@@ -56,9 +58,22 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
       onMouseLeave={() => setIsHovering(false)}
       onClick={handleClick}
     >
+      {/* Flashlight effect - always render for all cards */}
+      {isHovering && !comingSoon && (
+        <div
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-20"
+          style={{
+            background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 255, 255, 0.03), transparent 40%)`,
+          }}
+        />
+      )}
+
+      {/* Solid background layer for all cards */}
+      <div className="absolute inset-0 bg-gradient-to-br from-card/80 via-card/50 to-card/80 backdrop-blur-sm"></div>
+
       {useVortex ? (
         /* Vortex background for Daily Challenge */
-        <div className="absolute inset-0 h-full bg-card/50 backdrop-blur-sm">
+        <div className="absolute inset-0 h-full">
           <Vortex
             backgroundColor="transparent"
             rangeY={800}
@@ -68,18 +83,15 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
             containerClassName="h-full"
           />
         </div>
+      ) : useBeams ? (
+        /* Animated beams for Practice Mode */
+        <div className="absolute inset-0 h-full w-full">
+          <BackgroundBeamsWithCollision className="h-full w-full rounded-2xl">
+            <div className="absolute inset-0 pointer-events-none" />
+          </BackgroundBeamsWithCollision>
+        </div>
       ) : (
         <>
-          {/* Flashlight effect */}
-          {isHovering && !comingSoon && (
-            <div
-              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              style={{
-                background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 255, 255, 0.03), transparent 40%)`,
-              }}
-            />
-          )}
-
           {/* Animated clip-path background */}
           <div className="absolute inset-0 opacity-30">
             {[...Array(6)].map((_, i) => (
@@ -134,10 +146,11 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
         {!comingSoon && (
           <button className="group/btn relative overflow-hidden rounded-full border border-border bg-background px-6 py-2.5 text-sm font-medium transition-all duration-300 hover:scale-105">
             <span className="relative z-10">Start Playing</span>
-            {/* Border beam on hover */}
+            {/* Border beams on hover - dual beams synchronized */}
             <span className="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-500 group-hover/btn:opacity-100">
-              <span className="absolute inset-[-1px] rounded-full blur-[0.5px] animate-[spin_4s_linear_infinite]" style={{
-                background: 'conic-gradient(from 0deg, transparent 0%, transparent 20%, var(--primary) 30%, transparent 40%, transparent 100%)'
+              {/* Dual beam gradient - both beams in single gradient */}
+              <span className="absolute inset-[-1px] rounded-full blur-[0.5px] animate-[spin_6s_linear_infinite]" style={{
+                background: 'conic-gradient(from 0deg, transparent 0%, transparent 15%, var(--primary) 25%, transparent 35%, transparent 50%, transparent 65%, var(--primary) 75%, transparent 85%, transparent 100%)'
               }} />
               <span className="absolute inset-[1px] rounded-full bg-background" />
             </span>
@@ -346,6 +359,7 @@ export default function GameModesPage() {
       description: "Unlimited custom quizzes on any topic. Choose your difficulty, categories, and question count.",
       icon: <Sparkles className="h-7 w-7 text-primary" />,
       href: "/practice",
+      useBeams: true,
     },
     {
       title: "Faceoff",
@@ -408,6 +422,24 @@ export default function GameModesPage() {
           }
         }
 
+        @keyframes spinReverse {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(-360deg);
+          }
+        }
+
+        @keyframes spinSmooth {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+
         :root {
           --primary-rgb: 147, 51, 234;
           --chart-4-hsl: 84 76% 80%;
@@ -447,6 +479,7 @@ export default function GameModesPage() {
                     beta={mode.beta}
                     delay={index * 100}
                     useVortex={mode.useVortex}
+                    useBeams={mode.useBeams}
                   />
                 ))}
               </div>

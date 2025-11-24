@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Calculate creator's score
     const creatorScore = session.submissions.filter(s => s.correct).length
+    const creatorTitle = session.earnedTitle || null
 
     // Save challenge to database
     const { data: challenge, error: challengeError } = await supabase
@@ -56,6 +57,7 @@ export async function POST(request: NextRequest) {
         settings,
         share_code: shareCode,
         creator_score: creatorScore,
+        creator_title: creatorTitle,
       })
       .select()
       .single()

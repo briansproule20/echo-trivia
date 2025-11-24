@@ -154,7 +154,7 @@ export default function FaceoffChallengePage() {
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Type</span>
-              <span className="font-medium capitalize">{challenge.settings.quiz_type}</span>
+              <span className="font-medium capitalize">{challenge.settings.quiz_type.replace(/_/g, ' ')}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Times Played</span>

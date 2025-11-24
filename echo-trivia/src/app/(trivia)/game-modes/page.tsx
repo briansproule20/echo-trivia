@@ -6,6 +6,7 @@ import { DotBackground } from "@/components/ui/dot-background";
 import { EncryptedText } from "@/components/ui/encrypted-text";
 import { Vortex } from "@/components/ui/vortex";
 import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
+import { Illustration } from "@/components/ui/glowing-stars";
 import { Calendar, Sparkles, Zap, Lock, Castle, Trophy, Star, Swords } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -19,9 +20,10 @@ interface GameModeCardProps {
   delay?: number;
   useVortex?: boolean;
   useBeams?: boolean;
+  useStars?: boolean;
 }
 
-function GameModeCard({ title, description, icon, href, comingSoon = false, beta = false, delay = 0, useVortex = false, useBeams = false }: GameModeCardProps) {
+function GameModeCard({ title, description, icon, href, comingSoon = false, beta = false, delay = 0, useVortex = false, useBeams = false, useStars = false }: GameModeCardProps) {
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -45,7 +47,7 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
   return (
     <div
       ref={cardRef}
-      className={`group relative overflow-hidden rounded-2xl border border-border/40 ${useVortex || useBeams ? 'bg-transparent' : 'bg-card/50 backdrop-blur-sm'} transition-all duration-500 ${
+      className={`group relative overflow-hidden rounded-2xl border border-border/40 ${useVortex || useBeams || useStars ? 'bg-transparent' : 'bg-card/50 backdrop-blur-sm'} transition-all duration-500 ${
         comingSoon ? "opacity-60" : "cursor-pointer hover:border-primary/40"
       }`}
       style={{
@@ -68,8 +70,15 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
         />
       )}
 
-      {/* Solid background layer for all cards */}
-      <div className="absolute inset-0 bg-gradient-to-br from-card/80 via-card/50 to-card/80 backdrop-blur-sm"></div>
+      {/* Solid background layer - for non-animated cards */}
+      {!useVortex && !useBeams && !useStars && (
+        <div className="absolute inset-0 bg-gradient-to-br from-card/80 via-card/50 to-card/80 backdrop-blur-sm"></div>
+      )}
+
+      {/* Solid background for Jeopardy with stars */}
+      {useStars && (
+        <div className="absolute inset-0 bg-card"></div>
+      )}
 
       {useVortex ? (
         /* Vortex background for Daily Challenge */
@@ -89,6 +98,11 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
           <BackgroundBeamsWithCollision className="h-full w-full rounded-2xl">
             <div className="absolute inset-0 pointer-events-none" />
           </BackgroundBeamsWithCollision>
+        </div>
+      ) : useStars ? (
+        /* Glowing stars for Jeopardy Mode */
+        <div className="absolute inset-0 h-full w-full z-[5] pointer-events-none">
+          <Illustration mouseEnter={isHovering} />
         </div>
       ) : (
         <>
@@ -379,6 +393,7 @@ export default function GameModesPage() {
       description: "Answer in the form of a question. Choose categories and wager points in this classic game show format.",
       icon: <Lock className="h-7 w-7 text-primary" />,
       comingSoon: true,
+      useStars: true,
     },
   ];
 
@@ -510,6 +525,7 @@ export default function GameModesPage() {
                     comingSoon={mode.comingSoon}
                     beta={mode.beta}
                     delay={(index + 3) * 100}
+                    useStars={mode.useStars}
                   />
                 ))}
               </div>

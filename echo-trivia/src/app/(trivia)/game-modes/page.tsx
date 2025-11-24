@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { DotBackground } from "@/components/ui/dot-background";
 import { EncryptedText } from "@/components/ui/encrypted-text";
+import { Vortex } from "@/components/ui/vortex";
 import { Calendar, Sparkles, Zap, Lock, Castle, Trophy, Star, Swords } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -15,9 +16,10 @@ interface GameModeCardProps {
   comingSoon?: boolean;
   beta?: boolean;
   delay?: number;
+  useVortex?: boolean;
 }
 
-function GameModeCard({ title, description, icon, href, comingSoon = false, beta = false, delay = 0 }: GameModeCardProps) {
+function GameModeCard({ title, description, icon, href, comingSoon = false, beta = false, delay = 0, useVortex = false }: GameModeCardProps) {
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -41,7 +43,7 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
   return (
     <div
       ref={cardRef}
-      className={`group relative overflow-hidden rounded-2xl border border-border/40 bg-card/50 backdrop-blur-sm transition-all duration-500 ${
+      className={`group relative overflow-hidden rounded-2xl border border-border/40 ${useVortex ? 'bg-transparent' : 'bg-card/50 backdrop-blur-sm'} transition-all duration-500 ${
         comingSoon ? "opacity-60" : "cursor-pointer hover:border-primary/40"
       }`}
       style={{
@@ -54,30 +56,46 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
       onMouseLeave={() => setIsHovering(false)}
       onClick={handleClick}
     >
-      {/* Flashlight effect */}
-      {isHovering && !comingSoon && (
-        <div
-          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          style={{
-            background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 255, 255, 0.03), transparent 40%)`,
-          }}
-        />
-      )}
-
-      {/* Animated clip-path background */}
-      <div className="absolute inset-0 opacity-30">
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute inset-y-0 w-[16.666%] bg-gradient-to-b from-primary/20 via-transparent to-primary/20"
-            style={{
-              left: `${i * 16.666}%`,
-              animation: `clipReveal 3s ease-in-out infinite`,
-              animationDelay: `${i * 0.15}s`,
-            }}
+      {useVortex ? (
+        /* Vortex background for Daily Challenge */
+        <div className="absolute inset-0 h-full bg-card/50 backdrop-blur-sm">
+          <Vortex
+            backgroundColor="transparent"
+            rangeY={800}
+            particleCount={500}
+            baseHue={220}
+            className="flex items-center flex-col justify-center w-full h-full opacity-70"
+            containerClassName="h-full"
           />
-        ))}
-      </div>
+        </div>
+      ) : (
+        <>
+          {/* Flashlight effect */}
+          {isHovering && !comingSoon && (
+            <div
+              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style={{
+                background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 255, 255, 0.03), transparent 40%)`,
+              }}
+            />
+          )}
+
+          {/* Animated clip-path background */}
+          <div className="absolute inset-0 opacity-30">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute inset-y-0 w-[16.666%] bg-gradient-to-b from-primary/20 via-transparent to-primary/20"
+                style={{
+                  left: `${i * 16.666}%`,
+                  animation: `clipReveal 3s ease-in-out infinite`,
+                  animationDelay: `${i * 0.15}s`,
+                }}
+              />
+            ))}
+          </div>
+        </>
+      )}
 
       <div className="relative p-8 z-10">
         {/* Icon with glow */}
@@ -321,6 +339,7 @@ export default function GameModesPage() {
       description: "One curated quiz every day. Test yourself against the global leaderboard and climb the ranks.",
       icon: <Calendar className="h-7 w-7 text-primary" />,
       href: "/daily",
+      useVortex: true,
     },
     {
       title: "Practice Mode",
@@ -427,6 +446,7 @@ export default function GameModesPage() {
                     comingSoon={mode.comingSoon}
                     beta={mode.beta}
                     delay={index * 100}
+                    useVortex={mode.useVortex}
                   />
                 ))}
               </div>

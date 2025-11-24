@@ -7,6 +7,8 @@ import { EncryptedText } from "@/components/ui/encrypted-text";
 import { Vortex } from "@/components/ui/vortex";
 import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
 import { Illustration } from "@/components/ui/glowing-stars";
+import { ShootingStars } from "@/components/ui/shooting-stars";
+import { StarsBackground } from "@/components/ui/stars-background";
 import { Calendar, Sparkles, Zap, Lock, Castle, Trophy, Star, Swords } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -70,19 +72,12 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
         />
       )}
 
-      {/* Solid background layer - for non-animated cards */}
-      {!useVortex && !useBeams && !useStars && (
-        <div className="absolute inset-0 bg-gradient-to-br from-card/80 via-card/50 to-card/80 backdrop-blur-sm"></div>
-      )}
-
-      {/* Solid background for Jeopardy with stars */}
-      {useStars && (
-        <div className="absolute inset-0 bg-card"></div>
-      )}
+      {/* Solid backgrounds for all cards */}
+      <div className="absolute inset-0 bg-card"></div>
 
       {useVortex ? (
         /* Vortex background for Daily Challenge */
-        <div className="absolute inset-0 h-full">
+        <div className="absolute inset-0 h-full z-[1]">
           <Vortex
             backgroundColor="transparent"
             rangeY={800}
@@ -94,7 +89,7 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
         </div>
       ) : useBeams ? (
         /* Animated beams for Practice Mode */
-        <div className="absolute inset-0 h-full w-full">
+        <div className="absolute inset-0 h-full w-full z-[1]">
           <BackgroundBeamsWithCollision className="h-full w-full rounded-2xl">
             <div className="absolute inset-0 pointer-events-none" />
           </BackgroundBeamsWithCollision>
@@ -194,7 +189,7 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
   return (
     <div
       ref={cardRef}
-      className="group relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br from-card/80 via-card/50 to-card/80 backdrop-blur-sm transition-all duration-500 cursor-pointer hover:border-primary/40"
+      className="group relative overflow-hidden rounded-2xl border border-border/40 bg-card transition-all duration-500 cursor-pointer hover:border-primary/40"
       style={{
         animationDelay: `${delay}ms`,
         animation: "slideInFromBottom 0.6s ease-out forwards",
@@ -204,30 +199,19 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
+      {/* Shooting Stars and Stars Background */}
+      <ShootingStars />
+      <StarsBackground />
+
       {/* Flashlight effect */}
       {isHovering && (
         <div
-          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-20"
           style={{
             background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 255, 255, 0.03), transparent 40%)`,
           }}
         />
       )}
-
-      {/* Animated clip-path background */}
-      <div className="absolute inset-0 opacity-20">
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute inset-y-0 w-[12.5%] bg-gradient-to-b from-primary/30 via-transparent to-primary/30"
-            style={{
-              left: `${i * 12.5}%`,
-              animation: `clipReveal 4s ease-in-out infinite`,
-              animationDelay: `${i * 0.2}s`,
-            }}
-          />
-        ))}
-      </div>
 
       <div className="relative p-8 md:p-10">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
@@ -262,10 +246,10 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
             {/* Description */}
             <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
               <p>
-                Embark on an <span className="text-foreground font-medium">infinite ascent</span> through the legendary Wizard's Tower. Each floor presents a new category challenge as you climb higher and higher into the mystical realm.
+                The Wizard summons you to his Tower—a spire where knowledge is cultivated like rare fruit and questions grow wild between ancient texts. As you answer correctly, you ascend. Each floor brings a <span className="text-foreground font-medium">new category challenge</span> drawn from his vast archive.
               </p>
               <p>
-                Watch the tower <span className="text-foreground font-medium">evolve with the seasons</span> and themes as you progress. Dynamic parallax scrolling creates the illusion of endless heights — there's always another floor waiting above.
+                The climb is endless. The questions, relentless. <span className="text-foreground font-medium">How high can you ascend</span> before Ignorance catches up? Master categories, earn achievements, and prove yourself worthy of joining the Legion.
               </p>
             </div>
 
@@ -294,8 +278,8 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
                   <Sparkles className="h-3 w-3 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-foreground">Visual Evolution</p>
-                  <p className="text-xs text-muted-foreground">Seasons & themes change with progress</p>
+                  <p className="text-xs font-medium text-foreground">Progressive Difficulty</p>
+                  <p className="text-xs text-muted-foreground">Questions get harder as you climb</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">

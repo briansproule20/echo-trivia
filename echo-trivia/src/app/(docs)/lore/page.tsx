@@ -27,9 +27,6 @@ export default function LorePage() {
             </p>
           </div>
 
-          {/* Community Lore Card */}
-          <CommunityLoreSection />
-
           {/* Trivia Wizard Card */}
           <div className="flex justify-center items-center py-8 w-full">
             <CometCard className="w-full md:w-auto">
@@ -64,12 +61,92 @@ export default function LorePage() {
             </CometCard>
           </div>
 
-          {/* Coming Soon Message */}
-          <div className="text-center py-8">
-            <p className="text-muted-foreground text-sm sm:text-base">
-              More lore coming soon...
-            </p>
+          {/* The Tower Archive */}
+          <div className="space-y-8 py-8">
+            <div className="space-y-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-center">
+                The Tower Archive
+              </h2>
+
+              <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none space-y-4">
+                <p className="text-muted-foreground leading-relaxed">
+                  At the apex of the world sits the Tower—a spire of glass and stone that pierces the clouds.
+                  Within its highest chamber, the Wizard maintains his vigil. The space defies easy description:
+                  part archive, part library, part greenhouse. Shelves of ancient texts spiral upward into shadow,
+                  their spines whispering forgotten truths. Vines heavy with luminescent fruit wind between reading
+                  desks. The air smells of old paper and living things.
+                </p>
+
+                <p className="text-muted-foreground leading-relaxed">
+                  He does not sleep. Through crystalline windows that show every corner of the world, he watches
+                  the spread of Ignorance—that abyssal force that seeps through the cracks in understanding. It
+                  takes many forms: a lie repeated until believed, a question left unasked, a truth discarded for
+                  comfort. Where it spreads, communities fracture. Neighbors become strangers. Knowledge turns to
+                  ash in mouths that forget how to speak it.
+                </p>
+
+                <p className="text-muted-foreground leading-relaxed">
+                  The Wizard has seen civilizations devoured this way. Not through conquest or plague, but through
+                  the slow erosion of shared reality. When people cannot agree on what is true, they cannot stand
+                  together. Ignorance knows this. It whispers different lies to different ears until no common
+                  ground remains.
+                </p>
+
+                <p className="text-muted-foreground leading-relaxed">
+                  So he works. His hands move across maps and tomes, tracing patterns in the chaos. He cultivates
+                  questions the way others grow wheat—carefully, deliberately, knowing that the right question at
+                  the right time can shatter years of comfortable delusion. He sends them out into the world through
+                  channels both arcane and mundane, each one a small light against the encroaching dark.
+                </p>
+
+                <p className="text-muted-foreground leading-relaxed">
+                  This is not a war that can be won with swords. The enemy has no body to strike, no fortress to
+                  breach. It lives in the spaces between knowing and not-knowing, feeding on apathy and fear. The
+                  Wizard's weapon is simpler and more dangerous: curiosity. The insistence that truth matters. The
+                  radical act of asking "why."
+                </p>
+
+                <p className="text-muted-foreground leading-relaxed">
+                  In the Tower's highest chamber, surrounded by the accumulated knowledge of ages, the Wizard tends
+                  his garden of questions. Each answer he uncovers plants the seed for ten more inquiries. The work
+                  is endless. The work is necessary. Below, in the world that doesn't know his name, humanity stumbles
+                  forward—divided, confused, but not yet lost. Not while someone still watches. Not while the questions
+                  keep coming.
+                </p>
+
+                <p className="text-muted-foreground leading-relaxed">
+                  But the Wizard does not work alone. He cannot. One mind, however vast, cannot counter the entropy
+                  of forgetting that spreads across millions. So he reaches out—not with proclamations or prophecy,
+                  but with puzzles. Small challenges scattered across the world like breadcrumbs. Those who follow
+                  them, who cannot help but seek answers, who feel the pull of knowing—these are the ones he finds.
+                </p>
+
+                <p className="text-muted-foreground leading-relaxed">
+                  They come from everywhere. Scholars and skeptics, students and street-corner philosophers. The
+                  chronically curious. The constitutionally unable to accept "because I said so" as sufficient
+                  explanation. Each one a small bulwark against the dark. The Wizard does not command them—he
+                  merely shows them what they already suspected: that questions matter. That the pursuit of
+                  understanding is not frivolous but fundamental. That in a world drowning in convenient lies,
+                  the simple act of seeking truth is rebellion.
+                </p>
+
+                <p className="text-muted-foreground leading-relaxed">
+                  They become his Legion. Not soldiers but seekers. Armed not with weapons but with the stubborn
+                  refusal to stop asking why. They carry his questions into places the Tower's light cannot reach—
+                  into conversations and classrooms, into moments of doubt and decision. Where Ignorance whispers
+                  that truth is too hard, too inconvenient, too dangerous, they answer with another question. And
+                  another. And another.
+                </p>
+
+                <p className="text-muted-foreground leading-relaxed italic text-center pt-4">
+                  The battle continues. The Tower stands. And the Legion grows.
+                </p>
+              </div>
+            </div>
           </div>
+
+          {/* Community Lore Card */}
+          <CommunityLoreSection />
         </div>
       </div>
     </DotBackground>

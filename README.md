@@ -307,17 +307,8 @@ Category Mastery Paths
 “Boss Questions”
 - End-of-quiz ultra-hard question that gives bonus XP or a special badge.
 
-Streak Mode
-- Endless mode where you answer until you miss one, with streak tracking.
-  
 Progressive Hints
 - Tiered hint system: word reveal → elimination → full explanation.
-
-Challenge Mode
-- User-generated challenges with fixed settings you can send to friends.
-
-Rivalries & “Beat My Score” Links
-- A one-click “beat my score” deep link that auto-loads the same quiz seed.
 
 Profile Badges
 - Achievement-based icons (e.g., “History Master”, “Perfectionist 10×”).
@@ -369,12 +360,15 @@ Curriculum Mode:
 - AP/IB-style structured practice sets (English, History, Bio)
 
 UI/UX & App Polish
+UI Themes:
+- Paperwhite theme for UI... other themes being considered
+  
 Offline Mode
 - Caches recipes and quizzes for offline play in PWA mode.
+
 PWA Installable App
 - Fully badge-able, themed, and with push notifications.
-Animated Quiz Flow
-- Micro-animations for correct/incorrect, titles, progress bars, sharing.
+
 Accessibility Improvements
 - Large text mode
 - Dyslexia-friendly font

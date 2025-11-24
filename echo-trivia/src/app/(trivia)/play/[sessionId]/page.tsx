@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { QuestionCard } from "@/components/trivia/QuestionCard";
 import { Timer } from "@/components/trivia/Timer";
+import { FinishQuizFlurp } from "@/components/trivia/FinishQuizFlurp";
 import { usePlayStore } from "@/lib/store";
 import { storage } from "@/lib/storage";
 import { getRandomTitle, calculateScore } from "@/lib/quiz-utils";
@@ -25,6 +26,7 @@ export default function PlayPage() {
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false);
   const [startTime, setStartTime] = useState<number>(Date.now());
+  const [showFlurp, setShowFlurp] = useState(false);
 
   useEffect(() => {
     // Load session from storage if not in state
@@ -170,13 +172,11 @@ export default function PlayPage() {
     }
 
     setIsSubmittingQuiz(true);
+    setShowFlurp(true);
     endSession();
 
     try {
       await finalizeSession(currentSession);
-
-      // Navigate immediately to results page (don't wait for submission)
-      router.push(`/results/${sessionId}`);
     } catch (error) {
       console.error('Error finishing quiz:', error);
     } finally {
@@ -184,6 +184,11 @@ export default function PlayPage() {
     }
   };
 
+  const handleFlurpComplete = () => {
+    router.push(`/results/${sessionId}`);
+  };
+
+  
   const handleTimeExpire = () => {
     if (!currentSubmission) {
       // Auto-submit as incorrect
@@ -204,6 +209,8 @@ export default function PlayPage() {
   };
 
   return (
+    <>
+    <FinishQuizFlurp isVisible={showFlurp} onExpanded={handleFlurpComplete} />
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-4xl mx-auto space-y-6">
@@ -251,6 +258,7 @@ export default function PlayPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

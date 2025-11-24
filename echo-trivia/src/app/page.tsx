@@ -14,10 +14,24 @@ import { MiniLeaderboard } from "@/components/trivia/MiniLeaderboard";
 import { CommunityLoreSection } from "@/components/trivia/CommunityLoreSection";
 import { Footer } from "@/components/Footer";
 import { FlipText } from "@/components/ui/flip-text";
+import { FinishQuizFlurp } from "@/components/trivia/FinishQuizFlurp";
 
 export default function HomePage() {
   const router = useRouter();
   const [recentSessions, setRecentSessions] = useState<Session[]>([]);
+  const [showFlurp, setShowFlurp] = useState(false);
+  const [pendingResultsId, setPendingResultsId] = useState<string | null>(null);
+
+  const handleViewResults = (sessionId: string) => {
+    setPendingResultsId(sessionId);
+    setShowFlurp(true);
+  };
+
+  const handleFlurpComplete = () => {
+    if (pendingResultsId) {
+      router.push(`/results/${pendingResultsId}`);
+    }
+  };
 
   useEffect(() => {
     const loadSessions = async () => {
@@ -28,6 +42,8 @@ export default function HomePage() {
   }, []);
 
   return (
+    <>
+    <FinishQuizFlurp isVisible={showFlurp} onExpanded={handleFlurpComplete} />
     <DotBackground className="min-h-screen">
       <div className="container mx-auto px-3 py-6 sm:px-4 sm:py-12">
         {/* Hero Section */}
@@ -117,7 +133,7 @@ export default function HomePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: idx * 0.1 }}
-                    onClick={() => router.push(`/results/${session.id}`)}
+                    onClick={() => handleViewResults(session.id)}
                     className="cursor-pointer"
                   >
                     <Card className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-border hover:shadow-lg transition-all duration-300 h-full flex flex-col">
@@ -175,7 +191,7 @@ export default function HomePage() {
                           className="w-full mt-auto group-hover:bg-primary group-hover:text-primary-foreground transition-colors pointer-events-none md:pointer-events-auto"
                           onClick={(e) => {
                             e.stopPropagation();
-                            router.push(`/results/${session.id}`);
+                            handleViewResults(session.id);
                           }}
                         >
                           View Results
@@ -192,5 +208,6 @@ export default function HomePage() {
       </div>
       <Footer />
     </DotBackground>
+    </>
   );
 }

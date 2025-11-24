@@ -1,54 +1,79 @@
 "use client";
 
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { useEffect } from "react";
 
 interface FinishQuizFlurpProps {
   isVisible: boolean;
-  onAnimationComplete?: () => void;
+  fadeOnly?: boolean; // Start already expanded, just fade out
+  onExpanded?: () => void; // Called when circle fully covers screen
+  onAnimationComplete?: () => void; // Called when fade finishes
 }
 
-const flurpVariants: Variants = {
-  hidden: {
-    scale: 0,
-    opacity: 0.8,
-  },
-  visible: {
-    scale: 50,
-    opacity: 0,
-    transition: {
-      scale: {
-        type: "tween",
-        duration: 3.5,
-        ease: [0.43, 0.13, 0.23, 0.96], // Smooth easeInOutQuart
-      },
-      opacity: {
-        duration: 3.5,
-        ease: "easeInOut",
-      },
-    },
-  },
-};
+export function FinishQuizFlurp({ isVisible, fadeOnly = false, onExpanded, onAnimationComplete }: FinishQuizFlurpProps) {
+  useEffect(() => {
+    if (!isVisible) return;
 
-export function FinishQuizFlurp({ isVisible, onAnimationComplete }: FinishQuizFlurpProps) {
+    if (fadeOnly) {
+      // Fade out over 500ms to give page time to render
+      const doneTimer = setTimeout(() => {
+        onAnimationComplete?.();
+      }, 500);
+      return () => clearTimeout(doneTimer);
+    }
+
+    // Navigate early (50% = 1100ms) to give results page time to load
+    const expandedTimer = setTimeout(() => {
+      onExpanded?.();
+    }, 1100);
+
+    const doneTimer = setTimeout(() => {
+      onAnimationComplete?.();
+    }, 2200);
+
+    return () => {
+      clearTimeout(expandedTimer);
+      clearTimeout(doneTimer);
+    };
+  }, [isVisible, fadeOnly, onExpanded, onAnimationComplete]);
+
+  if (!isVisible) return null;
+
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          className="pointer-events-none fixed inset-0 z-[100] flex items-center justify-center overflow-hidden"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          {/* Single smooth expanding wave */}
-          <motion.div
-            variants={flurpVariants}
-            initial="hidden"
-            animate="visible"
-            onAnimationComplete={onAnimationComplete}
-            className="absolute h-[200vmax] w-[200vmax] rounded-full bg-primary"
-          />
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div className="pointer-events-none fixed inset-0 z-[100] flex items-center justify-center overflow-hidden">
+      <div
+        className="absolute rounded-full bg-primary"
+        style={{
+          width: "50px",
+          height: "50px",
+          animation: fadeOnly ? "fade-only 0.5s ease-out forwards" : "expand-and-fade 2.2s ease-out forwards",
+        }}
+      />
+      <style jsx>{`
+        @keyframes expand-and-fade {
+          0% {
+            transform: scale(0);
+            opacity: 1;
+          }
+          85% {
+            transform: scale(45);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(45);
+            opacity: 0;
+          }
+        }
+        @keyframes fade-only {
+          0% {
+            transform: scale(45);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(45);
+            opacity: 0;
+          }
+        }
+      `}</style>
+    </div>
   );
 }

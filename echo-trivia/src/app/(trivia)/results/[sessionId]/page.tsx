@@ -38,6 +38,10 @@ export default function ResultsPage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const loadSession = async () => {
       const loadedSession = await storage.getSession(sessionId);
       if (loadedSession) {
@@ -298,8 +302,8 @@ ${shareUrl}`;
 
   return (
     <>
-      <FinishQuizFlurp isVisible={showFlurp} onAnimationComplete={() => setShowFlurp(false)} />
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <FinishQuizFlurp isVisible={showFlurp} fadeOnly onAnimationComplete={() => setShowFlurp(false)} />
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto px-3 py-6 sm:px-4 sm:py-12">
         <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
           {/* Score Banner */}

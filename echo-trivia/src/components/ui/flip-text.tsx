@@ -10,9 +10,13 @@ interface FlipTextProps {
 }
 
 export function FlipText({ words, duration = 2000, className = "" }: FlipTextProps) {
-  const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * words.length));
+  // Start with index 0 to avoid hydration mismatch, randomize after mount
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
+    // Randomize on first mount
+    setCurrentIndex(Math.floor(Math.random() * words.length));
+
     const interval = setInterval(() => {
       setCurrentIndex((prev) => {
         let nextIndex;

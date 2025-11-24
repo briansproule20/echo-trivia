@@ -283,6 +283,18 @@ ${shareUrl}`;
   };
 
   const isFaceoffMode = session?.gameMode === 'faceoff';
+  const isFaceoffChallenger = isFaceoffMode && session?.faceoffChallenge;
+  const creatorScore = session?.faceoffChallenge?.creatorScore;
+  const creatorUsername = session?.faceoffChallenge?.creatorUsername || 'Challenger';
+
+  // Determine winner for head-to-head
+  const getMatchResult = () => {
+    if (creatorScore === null || creatorScore === undefined) return null;
+    if (score > creatorScore) return 'win';
+    if (score < creatorScore) return 'lose';
+    return 'tie';
+  };
+  const matchResult = getMatchResult();
 
   return (
     <>
@@ -390,8 +402,56 @@ ${shareUrl}`;
             </CardContent>
           </Card>
 
-          {/* Faceoff Challenge Share Card */}
-          {isFaceoffMode && (
+          {/* Head-to-Head Results for Faceoff Challenger */}
+          {isFaceoffChallenger && creatorScore !== null && creatorScore !== undefined && (
+            <Card className="border-primary/30 bg-gradient-to-br from-primary/10 via-transparent to-transparent">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Swords className="h-5 w-5 text-primary" />
+                  Head to Head
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between gap-4">
+                  {/* You */}
+                  <div className="flex-1 text-center">
+                    <p className="text-sm text-muted-foreground mb-1">You</p>
+                    <p className={`text-4xl font-bold ${matchResult === 'win' ? 'text-green-500' : matchResult === 'lose' ? 'text-red-500' : 'text-primary'}`}>
+                      {score}
+                    </p>
+                  </div>
+
+                  {/* VS */}
+                  <div className="flex flex-col items-center">
+                    <span className="text-xl font-bold text-muted-foreground">VS</span>
+                    {matchResult && (
+                      <Badge
+                        variant={matchResult === 'win' ? 'default' : matchResult === 'lose' ? 'destructive' : 'secondary'}
+                        className="mt-2"
+                      >
+                        {matchResult === 'win' ? 'You Win!' : matchResult === 'lose' ? 'You Lose' : 'Tie!'}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Creator */}
+                  <div className="flex-1 text-center">
+                    <p className="text-sm text-muted-foreground mb-1 truncate">{creatorUsername}</p>
+                    <p className={`text-4xl font-bold ${matchResult === 'lose' ? 'text-green-500' : matchResult === 'win' ? 'text-red-500' : 'text-primary'}`}>
+                      {creatorScore}
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-center text-sm text-muted-foreground mt-4">
+                  Out of {session.quiz.questions.length} questions
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Faceoff Challenge Share Card - only for non-challenger faceoff (creator viewing results) */}
+          {isFaceoffMode && !isFaceoffChallenger && (
             <Card className="border-primary/30 bg-gradient-to-br from-primary/10 via-transparent to-transparent">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
@@ -464,33 +524,41 @@ ${shareUrl}`;
           )}
 
           {/* Actions */}
-          <div className={`grid ${isFaceoffMode ? 'grid-cols-2' : 'grid-cols-2'} ${!isFaceoffMode && quizResults ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}>
-            {!isFaceoffMode && (
-              <>
-                <Button onClick={handleRetry} size="lg" variant="outline">
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  Practice Similar
-                </Button>
-                <Button onClick={handleShare} size="lg" variant="outline">
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Share Score
-                </Button>
-              </>
-            )}
-            {quizResults && (
-              <Button onClick={() => setShowStatsDialog(true)} size="lg" variant="outline">
-                <BarChart3 className="mr-2 h-4 w-4" />
-                View Stats
-              </Button>
-            )}
-            <Button onClick={() => router.push("/")} size="lg">
+          {isFaceoffChallenger ? (
+            /* Simplified actions for faceoff challenger - just Home button */
+            <Button onClick={() => router.push("/")} size="lg" className="w-full">
               <Home className="mr-2 h-4 w-4" />
               Home
             </Button>
-          </div>
+          ) : (
+            <div className={`grid grid-cols-2 ${!isFaceoffMode && quizResults ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}>
+              {!isFaceoffMode && (
+                <>
+                  <Button onClick={handleRetry} size="lg" variant="outline">
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Practice Similar
+                  </Button>
+                  <Button onClick={handleShare} size="lg" variant="outline">
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share Score
+                  </Button>
+                </>
+              )}
+              {quizResults && (
+                <Button onClick={() => setShowStatsDialog(true)} size="lg" variant="outline">
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  View Stats
+                </Button>
+              )}
+              <Button onClick={() => router.push("/")} size="lg">
+                <Home className="mr-2 h-4 w-4" />
+                Home
+              </Button>
+            </div>
+          )}
 
-          {/* Username Display - Simple inline edit at bottom */}
-          {echo.user?.id && !isLoadingUsername && (
+          {/* Username Display - Simple inline edit at bottom (hide for faceoff challengers) */}
+          {echo.user?.id && !isLoadingUsername && !isFaceoffChallenger && (
             <Card className="border-muted">
               <CardContent className="pt-4 sm:pt-6">
                 <div className="flex items-center gap-3">

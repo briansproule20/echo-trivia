@@ -57,6 +57,12 @@ export interface Session {
   earnedTier?: string;
   gameMode?: 'daily' | 'practice' | 'endless' | 'jeopardy' | 'campaign' | 'faceoff';
   isAuthenticated?: boolean; // Whether user was signed in when starting session
+  // Faceoff challenge info (for challenger, not creator)
+  faceoffChallenge?: {
+    shareCode: string;
+    creatorUsername: string | null;
+    creatorScore: number | null;
+  };
 }
 
 export const CATEGORIES = [

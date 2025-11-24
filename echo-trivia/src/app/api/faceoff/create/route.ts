@@ -43,6 +43,9 @@ export async function POST(request: NextRequest) {
       quiz_type: session.quiz.questions[0]?.type || 'mixed',
     }
 
+    // Calculate creator's score
+    const creatorScore = session.submissions.filter(s => s.correct).length
+
     // Save challenge to database
     const { data: challenge, error: challengeError } = await supabase
       .from('faceoff_challenges')
@@ -52,6 +55,7 @@ export async function POST(request: NextRequest) {
         quiz_data: session.quiz, // Store entire quiz as JSON
         settings,
         share_code: shareCode,
+        creator_score: creatorScore,
       })
       .select()
       .single()

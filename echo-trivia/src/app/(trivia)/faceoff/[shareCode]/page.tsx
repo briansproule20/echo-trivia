@@ -25,6 +25,7 @@ interface FaceoffChallenge {
   id: string
   creator_echo_user_id: string
   creator_username: string | null
+  creator_score: number | null
   quiz_data: any // The Quiz object stored as JSONB
   settings: {
     category: string
@@ -141,6 +142,12 @@ export default function FaceoffChallengePage() {
       gameMode: 'faceoff',
       // Store auth state for answer evaluation
       isAuthenticated: authenticated,
+      // Store faceoff challenge info for results comparison
+      faceoffChallenge: {
+        shareCode: challenge.share_code,
+        creatorUsername: challenge.creator_username,
+        creatorScore: challenge.creator_score,
+      },
     }
 
     // Store in IndexedDB for proper persistence

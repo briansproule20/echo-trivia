@@ -56,6 +56,7 @@ export interface Session {
   earnedTitle?: string;
   earnedTier?: string;
   gameMode?: 'daily' | 'practice' | 'endless' | 'jeopardy' | 'campaign' | 'faceoff';
+  isAuthenticated?: boolean; // Whether user was signed in when starting session
 }
 
 export const CATEGORIES = [

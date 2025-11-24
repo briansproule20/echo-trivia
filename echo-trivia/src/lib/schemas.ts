@@ -75,6 +75,7 @@ export const SessionSchema = z.object({
 export const EvaluateRequestSchema = z.object({
   question: QuestionSchema,
   response: z.string(),
+  isAuthenticated: z.boolean().optional(), // If false, use exact matching only for short answers
 });
 
 export const EvaluateResponseSchema = z.object({

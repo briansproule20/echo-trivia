@@ -77,6 +77,8 @@ export default function PlayPage() {
         body: JSON.stringify({
           question: currentQuestion,
           response,
+          // Pass auth state - use session's isAuthenticated flag, or check current echo user
+          isAuthenticated: currentSession.isAuthenticated ?? !!echo.user,
         }),
       });
 

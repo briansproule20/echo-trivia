@@ -14,7 +14,7 @@ Be generous with synonyms, common abbreviations, and minor spelling variations.`
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { question, response } = EvaluateRequestSchema.parse(body);
+    const { question, response, isAuthenticated } = EvaluateRequestSchema.parse(body);
 
     let correct = false;
     let explanation = question.explanation || "";
@@ -22,14 +22,14 @@ export async function POST(req: Request) {
     // Multiple choice and true/false: strict comparison
     if (question.type === "multiple_choice" || question.type === "true_false") {
       correct = response.toLowerCase().trim() === question.answer.toLowerCase().trim();
-      
+
       if (!explanation) {
         explanation = correct
           ? "Correct!"
           : `The correct answer is: ${question.answer}`;
       }
     }
-    // Short answer: fuzzy matching with LLM
+    // Short answer: fuzzy matching with LLM (only for authenticated users)
     else if (question.type === "short_answer") {
       // First try case-insensitive exact match
       const normalizedResponse = response.toLowerCase().trim();
@@ -37,8 +37,8 @@ export async function POST(req: Request) {
 
       if (normalizedResponse === normalizedAnswer) {
         correct = true;
-      } else {
-        // Use LLM for fuzzy matching
+      } else if (isAuthenticated !== false) {
+        // Use LLM for fuzzy matching only if authenticated (or auth status unknown for backwards compat)
         const evalResult = await generateText({
           model: anthropic("claude-sonnet-4-20250514"),
           system: FUZZY_EVAL_SYSTEM_PROMPT,
@@ -59,6 +59,7 @@ export async function POST(req: Request) {
           correct = false;
         }
       }
+      // If not authenticated and no exact match, correct stays false
 
       if (!explanation) {
         explanation = correct

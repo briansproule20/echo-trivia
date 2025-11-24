@@ -841,10 +841,82 @@ export default function DashboardPage() {
             {/* Radar Chart - Multi-dimensional Performance */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base sm:text-lg">Performance Metrics</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
-                  Your trivia skills across dimensions
-                </CardDescription>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-base sm:text-lg">Performance Metrics</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">
+                      Your trivia skills across dimensions
+                    </CardDescription>
+                  </div>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="rounded-full p-1.5 hover:bg-accent transition-colors"
+                      >
+                        <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                      </motion.button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Performance Metrics</DialogTitle>
+                        <DialogDescription>
+                          How we calculate your performance across 5 dimensions
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-3">
+                          <div className="space-y-1.5">
+                            <h4 className="font-semibold text-sm flex items-center gap-2">
+                              <span className="text-blue-500">●</span> Speed
+                            </h4>
+                            <p className="text-xs text-muted-foreground pl-4">
+                              Based on your average time per quiz. Faster completion times earn higher scores. Calculated as: 100 - (average seconds ÷ 60 × 10), capped at 100.
+                            </p>
+                          </div>
+                          <div className="space-y-1.5">
+                            <h4 className="font-semibold text-sm flex items-center gap-2">
+                              <span className="text-green-500">●</span> Accuracy
+                            </h4>
+                            <p className="text-xs text-muted-foreground pl-4">
+                              Percentage of questions answered correctly across all quizzes. Calculated as: (correct answers ÷ total questions) × 100.
+                            </p>
+                          </div>
+                          <div className="space-y-1.5">
+                            <h4 className="font-semibold text-sm flex items-center gap-2">
+                              <span className="text-purple-500">●</span> Consistency
+                            </h4>
+                            <p className="text-xs text-muted-foreground pl-4">
+                              How stable your scores are. Measures score variance - the less your scores fluctuate, the higher this metric. Calculated as: 100 - standard deviation of scores.
+                            </p>
+                          </div>
+                          <div className="space-y-1.5">
+                            <h4 className="font-semibold text-sm flex items-center gap-2">
+                              <span className="text-orange-500">●</span> Diversity
+                            </h4>
+                            <p className="text-xs text-muted-foreground pl-4">
+                              How varied your quiz categories are. Higher when you explore more categories. Calculated as: (unique categories ÷ total quizzes) × 100.
+                            </p>
+                          </div>
+                          <div className="space-y-1.5">
+                            <h4 className="font-semibold text-sm flex items-center gap-2">
+                              <span className="text-cyan-500">●</span> Avg Score
+                            </h4>
+                            <p className="text-xs text-muted-foreground pl-4">
+                              Your overall average quiz score across all completed quizzes. Simple average of all score percentages.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="pt-2 border-t border-border/50">
+                          <p className="text-xs text-muted-foreground italic">
+                            All metrics are scored from 0-100, with higher values indicating better performance.
+                          </p>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </CardHeader>
               <CardContent className="pb-2">
                 {radarData.length > 0 ? (

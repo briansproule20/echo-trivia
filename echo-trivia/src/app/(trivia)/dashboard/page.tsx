@@ -896,10 +896,55 @@ export default function DashboardPage() {
             {/* Area Chart - Score Trend */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base sm:text-lg">Score Progression</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
-                  Last {scoreTrend.length} quiz scores over time
-                </CardDescription>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-base sm:text-lg">Score Progression</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">
+                      Last {scoreTrend.length} quiz scores over time
+                    </CardDescription>
+                  </div>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="rounded-full p-1.5 hover:bg-accent transition-colors"
+                      >
+                        <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                      </motion.button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Score Progression</DialogTitle>
+                        <DialogDescription>
+                          Track your performance improvement over time
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-3 py-4">
+                        <p className="text-sm text-muted-foreground">
+                          This chart shows your quiz scores from your most recent sessions, displayed in chronological order from oldest to newest.
+                        </p>
+                        <div className="space-y-2">
+                          <h4 className="font-semibold text-sm">What it shows:</h4>
+                          <ul className="text-xs text-muted-foreground space-y-1 list-disc pl-5">
+                            <li>Your last {scoreTrend.length > 0 ? scoreTrend.length : 20} completed quizzes</li>
+                            <li>Score percentage for each quiz (0-100%)</li>
+                            <li>Category for each quiz (visible on hover)</li>
+                            <li>Trend line showing improvement or decline</li>
+                          </ul>
+                        </div>
+                        <div className="space-y-2">
+                          <h4 className="font-semibold text-sm">How to use it:</h4>
+                          <ul className="text-xs text-muted-foreground space-y-1 list-disc pl-5">
+                            <li>Hover over any point to see quiz details</li>
+                            <li>Look for upward trends showing improvement</li>
+                            <li>Identify categories where you score consistently high or low</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </CardHeader>
               <CardContent className="pb-2">
                 {scoreTrend.length > 0 ? (
@@ -912,21 +957,40 @@ export default function DashboardPage() {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                      <XAxis dataKey="session" fontSize={10} />
-                      <YAxis domain={[0, 100]} fontSize={10} />
+                      <XAxis
+                        dataKey="session"
+                        fontSize={10}
+                      />
+                      <YAxis
+                        domain={[0, 100]}
+                        fontSize={10}
+                        label={{ value: 'Score %', angle: -90, position: 'insideLeft', fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                      />
                       <Tooltip
                         content={({ payload }) => {
                           if (!payload || !payload[0]) return null;
                           const data = payload[0].payload;
+                          const date = new Date(data.date);
+                          const formattedDate = date.toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          });
                           return (
-                            <div className="bg-background border border-border rounded-lg shadow-lg p-3">
-                              <p className="font-semibold text-sm">Quiz #{data.session}</p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Score: {data.score.toFixed(1)}%
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {data.category}
-                              </p>
+                            <div className="bg-background border border-border rounded-lg shadow-lg p-3 min-w-[160px]">
+                              <p className="font-semibold text-sm mb-1.5">Quiz #{data.session}</p>
+                              <div className="space-y-0.5">
+                                <p className="text-xs text-muted-foreground flex justify-between">
+                                  <span>Score:</span>
+                                  <span className="font-semibold text-foreground">{data.score.toFixed(1)}%</span>
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  <span className="font-medium text-foreground">{data.category}</span>
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1 pt-1 border-t border-border/50">
+                                  {formattedDate}
+                                </p>
+                              </div>
                             </div>
                           );
                         }}

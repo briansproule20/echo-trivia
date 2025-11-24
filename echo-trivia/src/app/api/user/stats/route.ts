@@ -164,7 +164,11 @@ export async function GET(request: NextRequest) {
     ]
 
     // Score trend over time (last 20 sessions for area chart)
-    const scoreTrend = sessions
+    // Sort sessions by completion date to ensure chronological order
+    const sortedSessions = [...sessions].sort((a, b) =>
+      new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime()
+    )
+    const scoreTrend = sortedSessions
       .slice(-20)
       .map((s, index) => ({
         session: index + 1,

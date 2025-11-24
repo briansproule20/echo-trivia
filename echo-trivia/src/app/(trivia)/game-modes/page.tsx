@@ -9,6 +9,7 @@ import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-w
 import { Illustration } from "@/components/ui/glowing-stars";
 import { ShootingStars } from "@/components/ui/shooting-stars";
 import { StarsBackground } from "@/components/ui/stars-background";
+import { InfiniteScrollBackground } from "@/components/ui/infinite-scroll-background";
 import { Calendar, Sparkles, Zap, Lock, Castle, Trophy, Star, Swords } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -23,9 +24,11 @@ interface GameModeCardProps {
   useVortex?: boolean;
   useBeams?: boolean;
   useStars?: boolean;
+  useInfiniteScroll?: boolean;
+  infiniteScrollDesktopSpeed?: number;
 }
 
-function GameModeCard({ title, description, icon, href, comingSoon = false, beta = false, delay = 0, useVortex = false, useBeams = false, useStars = false }: GameModeCardProps) {
+function GameModeCard({ title, description, icon, href, comingSoon = false, beta = false, delay = 0, useVortex = false, useBeams = false, useStars = false, useInfiniteScroll = false, infiniteScrollDesktopSpeed }: GameModeCardProps) {
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -49,7 +52,7 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
   return (
     <div
       ref={cardRef}
-      className={`group relative overflow-hidden rounded-2xl border border-border/40 ${useVortex || useBeams || useStars ? 'bg-transparent' : 'bg-card/50 backdrop-blur-sm'} transition-all duration-500 ${
+      className={`group relative overflow-hidden rounded-2xl border border-border/40 ${useVortex || useBeams || useStars || useInfiniteScroll ? 'bg-transparent' : 'bg-card/50 backdrop-blur-sm'} transition-all duration-500 ${
         comingSoon ? "opacity-60" : "cursor-pointer hover:border-primary/40"
       }`}
       style={{
@@ -62,16 +65,6 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
       onMouseLeave={() => setIsHovering(false)}
       onClick={handleClick}
     >
-      {/* Flashlight effect - always render for all cards */}
-      {isHovering && !comingSoon && (
-        <div
-          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-20"
-          style={{
-            background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 255, 255, 0.03), transparent 40%)`,
-          }}
-        />
-      )}
-
       {/* Solid backgrounds for all cards */}
       <div className="absolute inset-0 bg-card"></div>
 
@@ -99,6 +92,11 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
         <div className="absolute inset-0 h-full w-full z-[5] pointer-events-none">
           <Illustration mouseEnter={isHovering} />
         </div>
+      ) : useInfiniteScroll ? (
+        /* Infinite scrolling background for Endless Survival */
+        <div className="absolute inset-0 h-full w-full z-[5] pointer-events-none">
+          <InfiniteScrollBackground speed={15} desktopSpeed={infiniteScrollDesktopSpeed} />
+        </div>
       ) : (
         <>
           {/* Animated clip-path background */}
@@ -116,6 +114,16 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
             ))}
           </div>
         </>
+      )}
+
+      {/* Flashlight effect - skip for infinite scroll card */}
+      {isHovering && !comingSoon && !useInfiniteScroll && (
+        <div
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-[3]"
+          style={{
+            background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 255, 255, 0.03), transparent 40%)`,
+          }}
+        />
       )}
 
       <div className="relative p-8 z-10">
@@ -371,6 +379,8 @@ export default function GameModesPage() {
       description: "Answer questions until you get one wrong. How long can you survive? Push your limits.",
       icon: <Zap className="h-7 w-7 text-primary" />,
       comingSoon: true,
+      useInfiniteScroll: true,
+      infiniteScrollDesktopSpeed: 40,
     },
     {
       title: "Jeopardy Mode",
@@ -510,6 +520,8 @@ export default function GameModesPage() {
                     beta={mode.beta}
                     delay={(index + 3) * 100}
                     useStars={mode.useStars}
+                    useInfiniteScroll={mode.useInfiniteScroll}
+                    infiniteScrollDesktopSpeed={mode.infiniteScrollDesktopSpeed}
                   />
                 ))}
               </div>

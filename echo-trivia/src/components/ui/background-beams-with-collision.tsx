@@ -84,10 +84,10 @@ const CollisionMechanism = React.forwardRef<
     containerRef: React.RefObject<HTMLDivElement>;
     parentRef: React.RefObject<HTMLDivElement>;
     beamOptions?: {
-      initialX?: number;
-      translateX?: number;
-      initialY?: number;
-      translateY?: number;
+      initialX?: number | string;
+      translateX?: number | string;
+      initialY?: number | string;
+      translateY?: number | string;
       rotate?: number;
       className?: string;
       duration?: number;

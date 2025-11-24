@@ -19,20 +19,27 @@ export const InfiniteScrollBackground: React.FC<InfiniteScrollBackgroundProps> =
   const finalDesktopSpeed = desktopSpeed !== undefined ? desktopSpeed : speed;
   const speedRatio = finalDesktopSpeed / mobileSpeed;
 
+  // Pre-computed positions to avoid hydration mismatch
+  const dotPositions = [
+    3, 45, 12, 58, 27, 41, 8, 63, 19, 52, 35, 6, 48, 23, 61, 14, 39, 55, 2, 47,
+    31, 9, 56, 17, 44, 28, 64, 11, 38, 53, 21, 4, 49, 33, 60, 15, 42, 7, 57, 25,
+    46, 13, 59, 30, 5, 51, 18, 62, 36, 10, 54, 22, 43, 1, 50, 34, 65, 16, 40, 26
+  ];
+
+  const linePositions = [74, 82, 77, 91, 85, 79, 95, 73, 88, 76, 93, 81];
+  const speedLinePositions = [
+    75, 89, 78, 94, 72, 86, 80, 97, 74, 91, 77, 95, 83, 73, 88, 79, 96, 76, 92, 84
+  ];
+
   // Generate dots positions once - same positions for mobile and desktop
   const dots = useMemo(() => {
     const count = 60;
     const duration = mobileSpeed * 0.8;
-    // Seeded pseudo-random for vertical positions only
-    const seededRandom = (seed: number) => {
-      const x = Math.sin(seed * 9999) * 10000;
-      return x - Math.floor(x);
-    };
     return Array.from({ length: count }, (_, i) => ({
       id: i,
-      top: seededRandom(i + 1) * 66, // Pseudo-random vertical position
+      top: dotPositions[i % dotPositions.length],
       duration: duration,
-      delay: -((i / count) * duration), // Evenly spread across cycle
+      delay: -((i / count) * duration),
     }));
   }, [mobileSpeed]);
 
@@ -40,13 +47,9 @@ export const InfiniteScrollBackground: React.FC<InfiniteScrollBackgroundProps> =
   const lines = useMemo(() => {
     const count = 12;
     const lineDuration = 15;
-    const seededRandom = (seed: number) => {
-      const x = Math.sin(seed * 9999) * 10000;
-      return x - Math.floor(x);
-    };
     return Array.from({ length: count }, (_, i) => ({
       id: i,
-      top: 72 + seededRandom(i + 200) * 28, // 72% to 100% (ground area)
+      top: linePositions[i],
       duration: lineDuration,
       delay: -((i / count) * lineDuration),
     }));
@@ -56,13 +59,9 @@ export const InfiniteScrollBackground: React.FC<InfiniteScrollBackgroundProps> =
   const speedLines = useMemo(() => {
     const count = 20;
     const speedLineDuration = 9;
-    const seededRandom = (seed: number) => {
-      const x = Math.sin(seed * 9999) * 10000;
-      return x - Math.floor(x);
-    };
     return Array.from({ length: count }, (_, i) => ({
       id: i,
-      top: 72 + seededRandom(i + 300) * 28, // 72% to 100% (ground area)
+      top: speedLinePositions[i],
       duration: speedLineDuration,
       delay: -((i / count) * speedLineDuration),
     }));

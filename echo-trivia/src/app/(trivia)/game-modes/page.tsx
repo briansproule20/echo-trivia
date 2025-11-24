@@ -107,8 +107,8 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
                 className="absolute inset-y-0 w-[16.666%] bg-gradient-to-b from-primary/20 via-transparent to-primary/20"
                 style={{
                   left: `${i * 16.666}%`,
-                  animation: `clipReveal 3s ease-in-out infinite`,
-                  animationDelay: `${i * 0.15}s`,
+                  animation: `clipReveal 3.6s ease-in-out infinite`,
+                  animationDelay: `${i * 0.18}s`,
                 }}
               />
             ))}

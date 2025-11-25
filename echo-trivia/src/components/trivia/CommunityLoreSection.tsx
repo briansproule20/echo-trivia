@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
-import { Skull, Globe, TrendingUp, HelpCircle } from 'lucide-react'
+import { Skull, Globe, TrendingUp, HelpCircle, Users } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { motion } from 'framer-motion'
 
 interface CommunityStats {
   totalCorrectAnswers: number
+  totalUsers: number
   currentTier: {
     level: number
     goal: number
@@ -98,9 +99,15 @@ export function CommunityLoreSection() {
                   <Skull className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
                 </motion.div>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
-                The Wizard's Legion
-              </h2>
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                  The Wizard's Legion
+                </h2>
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Users className="h-3 w-3" />
+                  <span>{formatNumber(stats.totalUsers)} members</span>
+                </div>
+              </div>
             </div>
 
             {/* Help Icon */}

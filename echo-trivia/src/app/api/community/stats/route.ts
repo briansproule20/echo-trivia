@@ -13,6 +13,13 @@ export async function GET() {
 
     if (error) throw error
 
+    // Count total users from users table
+    const { count: totalUsers, error: usersError } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true })
+
+    if (usersError) console.error('Error counting users:', usersError)
+
     const totalCorrectAnswers = data?.reduce((sum, session) => sum + (session.correct_answers || 0), 0) || 0
 
     // Calculate current tier and progress
@@ -52,6 +59,7 @@ export async function GET() {
 
     return NextResponse.json({
       totalCorrectAnswers,
+      totalUsers: totalUsers || 0,
       currentTier: nextTier ? currentTier : tiers[tiers.length - 1],
       nextTier,
       progress: Math.min(progress, 100),

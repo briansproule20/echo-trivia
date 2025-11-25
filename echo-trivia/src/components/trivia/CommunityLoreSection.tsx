@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
-import { Skull, Sparkles, TrendingUp, HelpCircle } from 'lucide-react'
+import { Skull, Globe, TrendingUp, HelpCircle } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { motion } from 'framer-motion'
 
@@ -119,14 +119,23 @@ export function CommunityLoreSection() {
 
                   <div className="space-y-2 pt-2 border-t">
                     <h4 className="font-medium text-sm">Ranks of the Legion</h4>
-                    {stats?.allTiers.map((tier) => (
-                      <div key={tier.level} className="flex justify-between text-xs">
-                        <span className="text-muted-foreground">
-                          {tier.name}
-                        </span>
-                        <span className="font-mono">{tier.goal.toLocaleString()}</span>
-                      </div>
-                    ))}
+                    {stats?.allTiers.map((tier, index) => {
+                      const nextTierGoal = stats.allTiers[index + 1]?.goal
+                      const rangeDisplay = tier.level === 1
+                        ? `0 - ${(nextTierGoal - 1).toLocaleString()}`
+                        : tier.goal.toLocaleString()
+                      const isCompleted = nextTierGoal
+                        ? stats.totalCorrectAnswers >= nextTierGoal
+                        : stats.totalCorrectAnswers >= tier.goal
+                      return (
+                        <div key={tier.level} className={`flex justify-between text-xs ${isCompleted ? 'text-primary' : ''}`}>
+                          <span className={isCompleted ? '' : 'text-muted-foreground'}>
+                            {tier.name}
+                          </span>
+                          <span className="font-mono">{rangeDisplay}</span>
+                        </div>
+                      )
+                    })}
                   </div>
 
                   <p className="text-xs text-muted-foreground pt-2 border-t">
@@ -161,7 +170,7 @@ export function CommunityLoreSection() {
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent rounded-lg blur-xl" />
               <div className="relative bg-card/80 backdrop-blur-sm border border-primary/20 rounded-lg p-4 sm:p-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
+                  <Globe className="h-4 w-4 text-primary" />
                   <span className="text-xs text-muted-foreground uppercase tracking-wider">
                     Legion Strength
                   </span>
@@ -169,7 +178,7 @@ export function CommunityLoreSection() {
                 <div className="text-3xl sm:text-4xl font-bold text-primary tabular-nums">
                   {formatNumber(stats.totalCorrectAnswers)}
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">victories over ignorance</div>
+                <div className="text-xs text-muted-foreground mt-1">correct answers globally</div>
               </div>
             </motion.div>
 

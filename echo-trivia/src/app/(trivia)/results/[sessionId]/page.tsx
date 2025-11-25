@@ -37,9 +37,36 @@ export default function ResultsPage() {
   const [shareError, setShareError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  // Referral code state
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Fetch user's referral code when authenticated
+  useEffect(() => {
+    const fetchReferralCode = async () => {
+      if (!echo.user?.id) return;
+
+      try {
+        const response = await fetch('/api/referral/code');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.code) {
+            setReferralCode(data.code);
+            console.log("[Results] Referral code fetched:", data.code);
+          }
+        } else {
+          console.warn("[Results] Failed to fetch referral code:", response.status);
+        }
+      } catch (error) {
+        console.error("[Results] Error fetching referral code:", error);
+      }
+    };
+
+    fetchReferralCode();
+  }, [echo.user?.id]);
 
   useEffect(() => {
     const loadSession = async () => {
@@ -202,12 +229,9 @@ export default function ResultsPage() {
 
     // Get user's referral code and add to URL
     let shareUrl = "https://trivwiz.com";
-    try {
-      if (echo.user?.id) {
-        shareUrl += `?referral_code=${echo.user.id}`;
-      }
-    } catch (error) {
-      console.error("Failed to get user referral code:", error);
+    if (referralCode) {
+      shareUrl += `?referral_code=${referralCode}`;
+      console.log("[Results] Share URL with referral code:", shareUrl);
     }
 
     const text = `I received the rank of "${earnedTitle}" on Trivia Wizard! 🧙‍♂️

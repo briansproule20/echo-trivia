@@ -17,11 +17,12 @@ export async function GET() {
 
     // Calculate current tier and progress
     const tiers = [
-      { level: 1, goal: 1000, name: 'Initiate' },
-      { level: 2, goal: 10000, name: 'Apprentice' },
-      { level: 3, goal: 100000, name: 'Adept' },
-      { level: 4, goal: 1000000, name: 'Master' },
-      { level: 5, goal: 10000000, name: 'Grand Master' },
+      { level: 1, goal: 0, name: 'Uninitiated' },
+      { level: 2, goal: 1000, name: 'Initiate' },
+      { level: 3, goal: 10000, name: 'Apprentice' },
+      { level: 4, goal: 100000, name: 'Adept' },
+      { level: 5, goal: 1000000, name: 'Master' },
+      { level: 6, goal: 10000000, name: 'Grand Master' },
     ]
 
     let currentTier = tiers[0]

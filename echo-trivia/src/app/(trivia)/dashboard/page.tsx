@@ -792,11 +792,11 @@ export default function DashboardPage() {
                           ? `hsl(${Math.min(dayOfWeekActivity[day].avgScore * 1.2, 120)}, 70%, 50%)`
                           : '#e5e7eb'
                       }))}
-                      margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                       <XAxis dataKey="day" fontSize={11} />
-                      <YAxis fontSize={10} label={{ value: 'Quizzes', angle: -90, position: 'insideLeft', fontSize: 10 }} />
+                      <YAxis fontSize={10} />
                       <Tooltip
                         content={({ payload }) => {
                           if (!payload || !payload[0]) return null;
@@ -1021,7 +1021,7 @@ export default function DashboardPage() {
               <CardContent className="pb-2">
                 {scoreTrend.length > 0 ? (
                   <ResponsiveContainer width="100%" height={240}>
-                    <AreaChart data={scoreTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <AreaChart data={scoreTrend} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
@@ -1036,7 +1036,6 @@ export default function DashboardPage() {
                       <YAxis
                         domain={[0, 100]}
                         fontSize={10}
-                        label={{ value: 'Score %', angle: -90, position: 'insideLeft', fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
                       />
                       <Tooltip
                         content={({ payload }) => {
@@ -1112,11 +1111,11 @@ export default function DashboardPage() {
                           };
                         }).filter(d => d.count > 0);
                       })()}
-                      margin={{ top: 20, right: 10, left: 0, bottom: 10 }}
+                      margin={{ top: 20, right: 30, left: 0, bottom: 10 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                       <XAxis dataKey="difficulty" fontSize={11} />
-                      <YAxis domain={[0, 100]} fontSize={10} label={{ value: 'Avg Score %', angle: -90, position: 'insideLeft', fontSize: 10 }} />
+                      <YAxis domain={[0, 100]} fontSize={10} />
                       <Tooltip
                         content={({ payload }) => {
                           if (!payload || !payload[0]) return null;

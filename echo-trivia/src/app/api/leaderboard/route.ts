@@ -84,9 +84,14 @@ export async function GET(request: NextRequest) {
       })
     )
 
-    // Apply 5-quiz minimum filter for non-daily leaderboards
-    if (period !== 'daily') {
+    // Apply minimum quiz filter based on period
+    // All time: 5 quizzes, Monthly: 3 quizzes, Weekly: 1 quiz, Daily: no minimum
+    if (period === 'all') {
       leaderboardData = leaderboardData.filter(entry => entry.total_quizzes >= 5)
+    } else if (period === 'monthly') {
+      leaderboardData = leaderboardData.filter(entry => entry.total_quizzes >= 3)
+    } else if (period === 'weekly') {
+      leaderboardData = leaderboardData.filter(entry => entry.total_quizzes >= 1)
     }
 
     // Sort by the selected ranking method

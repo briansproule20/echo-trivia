@@ -23,9 +23,10 @@ export function ReferralDetector() {
   const registerReferral = useCallback(async (code: string) => {
     console.log("[ReferralDetector] Attempting to register referral code:", code);
 
-    try {
-      hasRegistered.current = true;
+    // Mark as registered early to prevent duplicate calls
+    hasRegistered.current = true;
 
+    try {
       // Call our API route which handles authentication server-side
       const response = await fetch("/api/referral/register", {
         method: "POST",

@@ -3,12 +3,23 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Coins, Sparkles, Zap, DollarSign, CheckCircle2, ArrowRight, Wallet } from "lucide-react";
+import { Coins, Sparkles, Zap, DollarSign, CheckCircle2, ArrowRight, Wallet, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { DotBackground } from "@/components/ui/dot-background";
+import { useEcho } from "@merit-systems/echo-react-sdk";
+import { Logo } from "@/components/logo";
+import { useState } from "react";
 
 export default function GettingStartedPage() {
   const router = useRouter();
+  const echo = useEcho();
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const isAuthenticated = !!echo.user;
+
+  const handleSignIn = () => {
+    setIsSigningIn(true);
+    echo.signIn();
+  };
 
   return (
     <DotBackground className="min-h-screen">
@@ -68,6 +79,47 @@ export default function GettingStartedPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Sign Up CTA */}
+              {!isAuthenticated && (
+                <div className="pt-4 mt-4 border-t">
+                  <div className="relative">
+                    {/* Animated glow ring */}
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary via-primary/60 to-primary rounded-lg blur-sm opacity-75 animate-pulse" />
+                    <Button
+                      size="lg"
+                      onClick={handleSignIn}
+                      disabled={isSigningIn || echo.isLoading}
+                      className="relative w-full text-base font-semibold shadow-lg hover:shadow-xl transition-shadow"
+                    >
+                      {isSigningIn ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Connecting...
+                        </>
+                      ) : (
+                        <>
+                          <Logo className="mr-2 h-5 w-5" />
+                          Sign Up with Echo
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground text-center mt-3">
+                    Get $1 free credits when you sign up!
+                  </p>
+                </div>
+              )}
+
+              {isAuthenticated && (
+                <div className="pt-4 mt-4 border-t">
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 text-primary">
+                    <CheckCircle2 className="h-5 w-5" />
+                    <span className="font-medium">You're signed in! Ready to play.</span>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, BookOpen, FileQuestion, BarChart3, Trophy, User } from "lucide-react";
+import { Menu, BookOpen, FileQuestion, BarChart3, Trophy, User, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { EchoAccount } from "@/components/echo-account-next";
@@ -50,7 +50,7 @@ export function Navbar() {
             <div className="hidden md:flex items-center gap-6">
               <Link
                 href="/getting-started"
-                className="text-sm font-medium transition-colors hover:text-primary text-muted-foreground"
+                className="text-sm font-medium text-primary animate-[pulse-text_2s_ease-in-out_infinite]"
               >
                 Getting Started
               </Link>

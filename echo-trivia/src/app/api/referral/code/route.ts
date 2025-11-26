@@ -33,9 +33,9 @@ export async function GET() {
     }
 
     // Fetch user's referral code from Echo
-    // TODO: Update this URL once the Echo team exposes the endpoint
+    // GET /api/v1/user/referral?echoAppId=your_app_id
     const response = await fetch(
-      `https://echo.merit.systems/api/v1/apps/${process.env.ECHO_APP_ID}/referral-code`,
+      `https://echo.merit.systems/api/v1/user/referral?echoAppId=${process.env.ECHO_APP_ID}`,
       {
         method: "GET",
         headers: {

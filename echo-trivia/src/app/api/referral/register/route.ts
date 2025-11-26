@@ -29,26 +29,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get the user to check they're not referring themselves
-    const user = await echo.getUser();
-    if (user?.id === code) {
-      return NextResponse.json(
-        { error: "Cannot use your own referral code" },
-        { status: 400 }
-      );
-    }
-
     // Get Echo authentication token
     const token = await echo.getEchoToken();
     if (!token) {
-      console.error("Failed to get Echo token");
+      console.error("[referral/register] Failed to get Echo token");
       return NextResponse.json(
         { error: "Authentication failed" },
         { status: 401 }
       );
     }
 
+    console.log("[referral/register] Registering referral code:", code);
+
     // Make authenticated POST request to Echo API to register the referral
+    // POST /api/v1/user/referral with { echoAppId, code }
     const response = await fetch("https://echo.merit.systems/api/v1/user/referral", {
       method: "POST",
       headers: {
@@ -61,14 +55,14 @@ export async function POST(req: NextRequest) {
       }),
     });
 
-    console.log("Referral API response:", {
+    console.log("[referral/register] Echo API response:", {
       status: response.status,
       statusText: response.statusText,
       ok: response.ok,
     });
 
     const responseData = await response.text();
-    console.log("Referral API response body:", responseData);
+    console.log("[referral/register] Echo API response body:", responseData);
 
     if (!response.ok) {
       return NextResponse.json(

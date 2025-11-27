@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DotBackground } from "@/components/ui/dot-background";
+import { DottedGlowBackground } from "@/components/ui/dotted-glow-background";
 import { Button } from "@/components/ui/button";
 import { Users, Share2, Coins, ExternalLink, Sparkles, BookOpen } from "lucide-react";
 import Link from "next/link";
@@ -27,31 +28,45 @@ export default function ReferralsPage() {
         </div>
 
         {/* CTA Card */}
-        <Card className="mb-12 border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
-          <CardContent className="p-6 sm:p-8">
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <Users className="h-8 w-8 text-primary" />
-              </div>
-              <div className="flex-1 text-center sm:text-left">
-                <h2 className="text-2xl font-bold mb-2">Get Your Referral Link</h2>
-                <p className="text-muted-foreground mb-4">
-                  Visit the Echo referrals page to grab your unique link and start earning 10% from every user you bring to Trivia Wizard.
-                </p>
-                <Button asChild size="lg" className="gap-2">
-                  <Link
-                    href="https://echo.merit.systems/app/135d6f0a-3ac9-4ff2-baba-fa1664a0bc65/referrals"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Get Your Referral Link
-                    <ExternalLink className="h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
+        <div className="relative mb-12 overflow-hidden rounded-xl border border-primary/20 bg-background">
+          <DottedGlowBackground
+            className="pointer-events-none mask-radial-to-90% mask-radial-at-center opacity-30 dark:opacity-100"
+            opacity={1}
+            gap={10}
+            radius={1.6}
+            colorLightVar="--color-neutral-500"
+            glowColorLightVar="--color-neutral-600"
+            colorDarkVar="--color-neutral-500"
+            glowColorDarkVar="--color-primary"
+            backgroundOpacity={0}
+            speedMin={0.3}
+            speedMax={1.6}
+            speedScale={1}
+          />
+          <div className="relative z-10 flex w-full flex-col items-center justify-between gap-6 px-6 py-10 sm:px-8 sm:py-12 md:flex-row">
+            <div className="text-center md:text-left">
+              <h2 className="text-2xl sm:text-3xl font-normal tracking-tight text-neutral-900 dark:text-neutral-300">
+                Ready to{" "}
+                <span className="font-bold text-foreground">Grow the Legion</span>?
+              </h2>
+              <p className="mt-3 max-w-lg text-base text-neutral-600 dark:text-neutral-400">
+                Visit the Echo referrals page to grab your unique link and start earning 10% from every user you bring to Trivia Wizard.
+              </p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="shrink-0">
+              <Button asChild size="lg" className="gap-2">
+                <Link
+                  href="https://echo.merit.systems/app/135d6f0a-3ac9-4ff2-baba-fa1664a0bc65/referrals"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Get Your Referral Link
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
 
         {/* Lore Section */}
         <div className="mb-12">

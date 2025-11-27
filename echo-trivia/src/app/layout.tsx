@@ -2,6 +2,7 @@ import { Navbar } from '@/components/trivia/Navbar';
 import { Providers } from '@/providers';
 import { ReferralDetector } from '@/components/ReferralDetector';
 import { SyncQueueProcessor } from '@/components/SyncQueueProcessor';
+import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Suspense } from 'react';
@@ -43,6 +44,7 @@ export default function RootLayout({
           <SyncQueueProcessor />
           <Navbar />
           {children}
+          <Analytics />
         </Providers>
       </body>
     </html>

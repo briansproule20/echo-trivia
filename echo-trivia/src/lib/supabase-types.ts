@@ -69,6 +69,21 @@ export interface QuizSubmission {
   created_at: string
 }
 
+export interface QuizQuestion {
+  id: string
+  session_id: string
+  question_id: string
+  question_type: string
+  category: string
+  difficulty: string | null
+  prompt: string
+  choices: Array<{ id: string; text: string }> | null
+  correct_answer: string
+  explanation: string | null
+  question_order: number
+  created_at: string
+}
+
 // Stats computed from quiz sessions
 export interface UserStats {
   echo_user_id: string
@@ -121,6 +136,17 @@ export interface SaveQuizSessionRequest {
     correct_answer: string
     is_correct: boolean
     time_ms?: number
+  }>
+  // Full question data for history storage
+  questions?: Array<{
+    id: string
+    type: string
+    category: string
+    difficulty?: string
+    prompt: string
+    choices?: Array<{ id: string; text: string }>
+    answer: string
+    explanation?: string
   }>
 }
 

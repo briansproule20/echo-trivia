@@ -15,6 +15,9 @@ import { ReferralBanner } from "@/components/ReferralBanner";
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
   { href: "/game-modes", label: "Game Modes" },
+];
+
+const AUTH_NAV_ITEMS = [
   { href: "/history", label: "History" },
 ];
 
@@ -104,6 +107,21 @@ export function Navbar() {
                   {/* Navigation Links */}
                   <nav className="flex flex-col space-y-3">
                     {NAV_ITEMS.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`text-lg font-medium transition-colors hover:text-primary px-3 py-2 rounded-md ${
+                          pathname === item.href
+                            ? "text-primary bg-primary/10"
+                            : "text-muted-foreground hover:bg-accent"
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+
+                    {/* Auth-only Nav Items (History) */}
+                    {isAuthenticated && AUTH_NAV_ITEMS.map((item) => (
                       <Link
                         key={item.href}
                         href={item.href}

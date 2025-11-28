@@ -55,6 +55,18 @@ export async function submitQuizToSupabase(
       }
     })
 
+    // Build full question data for history storage
+    const questions = session.quiz.questions.map((q) => ({
+      id: q.id,
+      type: q.type,
+      category: q.category,
+      difficulty: q.difficulty,
+      prompt: q.prompt,
+      choices: q.choices,
+      answer: q.answer,
+      explanation: q.explanation,
+    }))
+
     // Determine if this is a daily challenge based on gameMode (most reliable)
     const isDaily = session.gameMode === 'daily'
 
@@ -75,6 +87,7 @@ export async function submitQuizToSupabase(
       session_id: sessionId,
       game_mode: session.gameMode || 'practice', // Default to practice if not set
       submissions, // Include individual submissions for validation
+      questions, // Include full question data for history review
     }
 
     const response = await fetch('/api/quiz/submit', {

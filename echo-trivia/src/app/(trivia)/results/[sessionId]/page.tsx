@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,9 @@ import { useEcho } from "@merit-systems/echo-react-sdk";
 export default function ResultsPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const sessionId = params.sessionId as string;
+  const isCloudSession = searchParams.get('cloud') === 'true';
   const echo = useEcho();
 
   const [session, setSession] = useState<Session | null>(null);
@@ -29,7 +31,8 @@ export default function ResultsPage() {
   const [quizResults, setQuizResults] = useState<any>(null);
   const [isLoadingUsername, setIsLoadingUsername] = useState(true);
   const [showStatsDialog, setShowStatsDialog] = useState(false);
-  const [showFlurp, setShowFlurp] = useState(true);
+  // Only show flurp for freshly completed quizzes, not when viewing from history
+  const [showFlurp, setShowFlurp] = useState(!isCloudSession);
 
   // Faceoff sharing state
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -70,7 +73,26 @@ export default function ResultsPage() {
 
   useEffect(() => {
     const loadSession = async () => {
-      const loadedSession = await storage.getSession(sessionId);
+      let loadedSession: Session | null = null;
+
+      // Try to load from cloud if cloud=true and user is authenticated
+      if (isCloudSession && echo.user?.id) {
+        try {
+          const response = await fetch(`/api/quiz/history/${sessionId}?echo_user_id=${echo.user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            loadedSession = data.session;
+          }
+        } catch (error) {
+          console.error("Failed to load cloud session:", error);
+        }
+      }
+
+      // Fall back to local storage
+      if (!loadedSession) {
+        loadedSession = await storage.getSession(sessionId);
+      }
+
       if (loadedSession) {
         setSession(loadedSession);
 
@@ -103,18 +125,24 @@ export default function ResultsPage() {
           setIsLoadingUsername(false);
         }
       } else {
-        router.push("/");
+        router.push("/history");
       }
     };
     loadSession();
-  }, [sessionId, echo.user?.id]);
+  }, [sessionId, echo.user?.id, isCloudSession]);
 
   if (!session) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
-  const score = session.submissions.filter((s) => s.correct).length;
-  const percentage = Math.round((score / session.quiz.questions.length) * 100);
+  const questionsCount = session.quiz.questions?.length || (session as any).totalQuestions || 0;
+  const score = session.score !== undefined ? session.score : session.submissions.filter((s) => s.correct).length;
+  // Handle cases where questions array is empty (cloud sessions without question data)
+  const percentage = (session as any).scorePercentage !== undefined
+    ? Math.round((session as any).scorePercentage)
+    : questionsCount > 0
+      ? Math.round((score / questionsCount) * 100)
+      : 0;
 
   // Use saved title from session (should always exist from handleFinish)
   // Only generate as fallback for old sessions without saved title
@@ -138,17 +166,18 @@ export default function ResultsPage() {
     }
 
     // For practice quizzes, try to reconstruct the original settings
-    const numQuestions = session.quiz.questions.length;
+    const numQuestions = questionsCount;
+    const questions = session.quiz.questions || [];
 
     // Infer difficulty from questions
-    const difficulties = session.quiz.questions.map(q => q.difficulty);
+    const difficulties = questions.map(q => q.difficulty);
     const uniqueDifficulties = [...new Set(difficulties)];
-    const difficulty = uniqueDifficulties.length > 1 ? "mixed" : difficulties[0];
+    const difficulty = uniqueDifficulties.length > 1 ? "mixed" : (difficulties[0] || "mixed");
 
     // Infer question type from questions
-    const types = session.quiz.questions.map(q => q.type);
+    const types = questions.map(q => q.type);
     const uniqueTypes = [...new Set(types)];
-    const type = uniqueTypes.length > 1 ? "mixed" : types[0];
+    const type = uniqueTypes.length > 1 ? "mixed" : (types[0] || "mixed");
 
     // Build URL with all settings
     const params = new URLSearchParams({
@@ -211,7 +240,8 @@ export default function ResultsPage() {
 
   const handleShare = async () => {
     // Generate difficulty symbols (row 1) and correct/incorrect (row 2)
-    const difficultyRow = session.quiz.questions
+    const questions = session.quiz.questions || [];
+    const difficultyRow = questions
       .map((q) => {
         if (q.difficulty === 'easy') return '🟢';
         if (q.difficulty === 'medium') return '🟦';
@@ -220,7 +250,7 @@ export default function ResultsPage() {
       })
       .join('');
 
-    const resultRow = session.quiz.questions
+    const resultRow = questions
       .map((q) => {
         const submission = session.submissions.find(s => s.questionId === q.id);
         return submission?.correct ? '✅' : '❌';
@@ -239,7 +269,7 @@ export default function ResultsPage() {
 Category: ${session.quiz.category}
 ${difficultyRow}
 ${resultRow}
-Score: ${score}/${session.quiz.questions.length} (${percentage}%)
+Score: ${score}/${questionsCount} (${percentage}%)
 
 ${shareUrl}`;
 
@@ -333,7 +363,7 @@ ${shareUrl}`;
           {/* Score Banner */}
           <ScoreBanner
             score={score}
-            totalQuestions={session.quiz.questions.length}
+            totalQuestions={questionsCount}
             timeElapsed={totalTime}
           />
 
@@ -365,7 +395,7 @@ ${shareUrl}`;
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">{session.quiz.category}</Badge>
                 <Badge variant="outline">
-                  {session.quiz.questions.length} questions
+                  {questionsCount} questions
                 </Badge>
               </div>
             </CardContent>
@@ -377,56 +407,62 @@ ${shareUrl}`;
               <CardTitle>Review Answers</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {session.quiz.questions.map((question, idx) => {
-                const submission = session.submissions.find(
-                  (s) => s.questionId === question.id
-                );
-                const isCorrect = submission?.correct || false;
+              {(session.quiz.questions?.length || 0) === 0 ? (
+                <p className="text-muted-foreground text-center py-4">
+                  Question details are not available for this older session.
+                </p>
+              ) : (
+                session.quiz.questions.map((question, idx) => {
+                  const submission = session.submissions.find(
+                    (s) => s.questionId === question.id
+                  );
+                  const isCorrect = submission?.correct || false;
 
-                return (
-                  <div
-                    key={question.id}
-                    className={`p-3 sm:p-4 rounded-lg border ${
-                      isCorrect
-                        ? "border-green-500 bg-green-50 dark:bg-green-950/20"
-                        : "border-red-500 bg-red-50 dark:bg-red-950/20"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between mb-2 sm:mb-3">
-                      <div className="flex items-start space-x-3 flex-1">
-                        {isCorrect ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
-                        ) : (
-                          <XCircle className="h-5 w-5 text-red-600 mt-1 flex-shrink-0" />
-                        )}
-                        <div className="flex-1">
-                          <div className="font-semibold mb-1">
-                            {idx + 1}. {question.prompt}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            <div>
-                              <span className="font-medium">Response:</span>{" "}
-                              {submission?.response || "No answer"}
+                  return (
+                    <div
+                      key={question.id}
+                      className={`p-3 sm:p-4 rounded-lg border ${
+                        isCorrect
+                          ? "border-green-500 bg-green-50 dark:bg-green-950/20"
+                          : "border-red-500 bg-red-50 dark:bg-red-950/20"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-2 sm:mb-3">
+                        <div className="flex items-start space-x-3 flex-1">
+                          {isCorrect ? (
+                            <CheckCircle2 className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
+                          ) : (
+                            <XCircle className="h-5 w-5 text-red-600 mt-1 flex-shrink-0" />
+                          )}
+                          <div className="flex-1">
+                            <div className="font-semibold mb-1">
+                              {idx + 1}. {question.prompt}
                             </div>
-                            <div>
-                              <span className="font-medium">Correct Answer:</span>{" "}
-                              {question.answer}
-                            </div>
-                            {question.explanation && (
-                              <div className="mt-2 text-foreground">
-                                {question.explanation}
+                            <div className="text-sm text-muted-foreground">
+                              <div>
+                                <span className="font-medium">Response:</span>{" "}
+                                {submission?.response || "No answer"}
                               </div>
-                            )}
+                              <div>
+                                <span className="font-medium">Correct Answer:</span>{" "}
+                                {question.answer}
+                              </div>
+                              {question.explanation && (
+                                <div className="mt-2 text-foreground">
+                                  {question.explanation}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
+                        <Badge variant={isCorrect ? "default" : "destructive"}>
+                          {question.difficulty}
+                        </Badge>
                       </div>
-                      <Badge variant={isCorrect ? "default" : "destructive"}>
-                        {question.difficulty}
-                      </Badge>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </CardContent>
           </Card>
 
@@ -472,7 +508,7 @@ ${shareUrl}`;
                 </div>
 
                 <p className="text-center text-sm text-muted-foreground mt-4">
-                  Out of {session.quiz.questions.length} questions
+                  Out of {questionsCount} questions
                 </p>
               </CardContent>
             </Card>
@@ -647,7 +683,7 @@ ${shareUrl}`;
           onOpenChange={setShowStatsDialog}
           quizStats={{
             score,
-            totalQuestions: session.quiz.questions.length,
+            totalQuestions: questionsCount,
             percentage,
             earnedTitle,
             earnedTier,

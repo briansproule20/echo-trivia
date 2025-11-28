@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
       session_id,
       game_mode,
       submissions,
+      questions,
     } = body
 
     // Validate required fields
@@ -217,6 +218,31 @@ export async function POST(request: NextRequest) {
         console.error('Error saving quiz submissions:', submissionsError)
         // Don't fail the whole request, but log the error
         // The session is already saved at this point
+      }
+    }
+
+    // 5b. Save full question data for history review
+    if (questions && questions.length > 0 && session?.id) {
+      const questionRecords = questions.map((q, index) => ({
+        session_id: session.id,
+        question_id: q.id,
+        question_type: q.type,
+        category: q.category,
+        difficulty: q.difficulty || null,
+        prompt: q.prompt,
+        choices: q.choices || null,
+        correct_answer: q.answer,
+        explanation: q.explanation || null,
+        question_order: index,
+      }))
+
+      const { error: questionsError } = await supabase
+        .from('quiz_questions')
+        .insert(questionRecords)
+
+      if (questionsError) {
+        console.error('Error saving quiz questions:', questionsError)
+        // Don't fail the whole request, but log the error
       }
     }
 

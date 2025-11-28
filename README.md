@@ -5,7 +5,7 @@ An AI-powered trivia platform built with Next.js, Echo billing integration, and 
 ## Features
 
 - **Daily Quiz** - One deterministic daily challenge per day with category rotation (EST timezone)
-- **Practice Mode** - Unlimited AI-powered quizzes with 20 preset categories or custom topics
+- **Practice Mode** - Unlimited AI-powered quizzes with infinite categories
 - **Quiz History** - Review up to 20 past quiz sessions with full answer details
 - **Results & Ranking** - Earn performance titles (120+ unique ranks across 6 tiers) and share your results
 - **Answer Review** - Detailed explanations for every question with correct answer display
@@ -161,8 +161,8 @@ Get the deterministic daily quiz for a given date.
 
 ## Categories
 
-### Preset Categories (20)
-History, Science, Geography, Literature, Art & Culture, Music, Movies & TV, Sports, Technology, Food & Drink, Mythology, Politics, Nature & Animals, Mathematics, Philosophy, Video Games, Space & Astronomy, Medicine & Health, Economics, Language & Linguistics
+### Preset Categories (164)
+History, Science, Geography, Literature, Art & Culture, Music, Movies & TV, Sports, Technology, Food & Drink, Mythology, Politics, Nature & Animals, Mathematics, Philosophy, Video Games, Space & Astronomy, Medicine & Health, Economics, Language & Linguistics & More!
 
 **Note:** Custom categories can be anything you want!
 
@@ -295,7 +295,6 @@ Future enhancements being considered:
 - [ ] Timed speedrun mode
 - [ ] Quiz templates & presets
 - [ ] Export/Import quiz JSON
-- [ ] Multiplayer competitive mode
 - [ ] Leveling Sytem
 
 Adaptive Difficulty Engine
@@ -358,10 +357,6 @@ Expert Packs (Paid or Referral Unlocks)
 
 Curriculum Mode:
 - AP/IB-style structured practice sets (English, History, Bio)
-
-UI/UX & App Polish
-UI Themes:
-- Paperwhite theme for UI... other themes being considered
   
 Offline Mode
 - Caches recipes and quizzes for offline play in PWA mode.

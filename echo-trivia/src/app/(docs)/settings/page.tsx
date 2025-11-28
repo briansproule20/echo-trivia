@@ -53,6 +53,7 @@ const THEMES = [
   { id: 'light', name: 'Light', icon: Sun, description: 'Classic light mode' },
   { id: 'dark', name: 'Dark', icon: Moon, description: 'Easy on the eyes' },
   { id: 'paperwhite', name: 'Paperwhite', icon: null, description: 'Kindle-inspired e-ink look', image: '/triviawizard_favicon_paperwhite_stippled.png' },
+  { id: 'dullform', name: 'Dullform', icon: null, description: 'Parshendi warform aesthetic', image: '/triviawizard_favicon_paperwhite_stippled_detail.png' },
 ] as const
 
 export default function SettingsPage() {

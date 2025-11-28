@@ -1,102 +1,120 @@
-# Echo Trivia / Trivia Wizard 🧙‍♂️
+# Trivia Wizard 🧙‍♂️
 
-An AI-powered trivia game built with Next.js 15, featuring dynamic question generation, performance rankings, achievements, and metered LLM billing through Echo.
+An AI-powered trivia platform with unlimited categories, cloud-synced history, and pay-per-use billing.
+
+**[Play Now](https://trivwiz.com)** | **[Developer](https://www.fishmug.dev)**
+
+---
 
 ## Features
 
-### 🎮 Core Gameplay
-- **AI-Generated Questions**: Dynamic trivia questions across 20+ categories
-- **Multiple Question Types**: Multiple choice, true/false, and short answer
-- **Difficulty Levels**: Easy, medium, and hard questions
-- **Daily Challenges**: Seeded daily quizzes with shareable results
-- **Performance Rankings**: 120+ unique titles across 6 tiers (Novice → Legendary)
+### Core Gameplay
+- **AI-Generated Questions** - Unlimited trivia on 150+ preset categories or any custom topic
+- **Multiple Question Types** - Multiple choice, true/false, and short answer with fuzzy matching
+- **Difficulty Levels** - Easy, medium, hard, or mixed
+- **Performance Rankings** - 120+ unique titles across 6 tiers based on your score
 
-### 👤 User Profiles & Progression
-- **User Profiles**: Customizable username and comprehensive stats tracking
-- **Dashboard**: Visual analytics with charts showing accuracy, category breakdown, and achievement progress
-- **Achievements System**: 10 unique achievements across 4 tiers (Bronze → Platinum)
-  - First Steps, Daily Devotee, Perfect Score, Streak Master, Century Club
-  - Hard Mode Master, Quiz Marathon, Speed Demon, Knowledge Seeker, Perfectionist
-- **Daily Streaks**: Track consecutive daily quiz completions
-- **Global Leaderboard**: Top 25 players ranked by average quiz score
+### Game Modes
+- **Daily Challenge** - One deterministic quiz per day with category rotation (same questions for everyone)
+- **Practice Mode** - Unlimited custom quizzes with full control over settings
+- **Faceoff Mode** - Challenge friends with shareable quiz links
 
-### 🎯 Quiz Modes
+### Progression System
+- **Achievements** - 11 achievements across 4 tiers (Bronze → Platinum)
+- **Daily Streaks** - Track consecutive daily completions (up to 30-day Streak Legend)
+- **Skill Index (ELO)** - Competitive ranking based on performance and difficulty
+- **Global Leaderboards** - Daily, all-time, and skill-based rankings
 
-#### Recipe Mode (Daily Challenges)
-- Deterministic quiz generation using seed-based variety
-- Same questions for all users on a given day
-- Shareable results with difficulty indicators and score breakdown
-- Two-row emoji format: 🟢🟦⬛ (difficulty) + ✅❌ (results)
+### Cloud Sync
+- **Cross-Device History** - Quiz history syncs across all your devices
+- **Full Question Review** - Review every question, answer, and explanation from past quizzes
+- **Persistent Progress** - Achievements, streaks, and stats never lost
 
-#### Practice Mode
-- Customizable quiz settings:
-  - Category selection (20 preset categories + custom)
-  - Number of questions (5-25)
-  - Difficulty level (easy, medium, hard, or mixed)
-  - Question type (multiple choice, true/false, short answer, or mixed)
-- Instant feedback on answers
-- Performance title awarded based on score
-
-### 📊 Data & Analytics
-- **Local Storage**: IndexedDB for fast access to recent sessions, favorites, and stats
-- **Cloud Backend**: Supabase PostgreSQL for persistent user data
-- **Real-time Stats**: Quizzes played, accuracy percentage, category breakdown
-- **Session History**: Review past quiz results and answers
-
-### 💰 Metered Billing
-- Powered by [Echo](https://www.merit.systems) for pay-per-use LLM access
-- No subscription required - only pay for what you use
-- Built-in referral system with shareable links
+---
 
 ## Tech Stack
 
-- **Frontend**: Next.js 15 (App Router), React, TypeScript, Tailwind CSS
-- **UI Components**: shadcn/ui (Radix primitives)
-- **Backend**: Supabase (PostgreSQL + Row Level Security)
-- **AI**: Vercel AI SDK + Anthropic Claude
-- **State Management**: Zustand
-- **Charts**: Recharts
-- **Storage**: IndexedDB (client) + Supabase (server)
-- **Authentication**: Echo SDK
-- **Deployment**: Vercel
+| Layer | Technology |
+|-------|------------|
+| **Framework** | Next.js 15 (App Router) |
+| **Styling** | Tailwind CSS + shadcn/ui |
+| **AI** | Vercel AI SDK + Anthropic Claude |
+| **Database** | Supabase (PostgreSQL + Row Level Security) |
+| **Auth & Billing** | Echo (Merit Systems) |
+| **Hosting** | Vercel |
 
-## Categories
+---
 
-Science, History, Geography, Literature, Movies, Music, Sports, Technology, Art, Food, Animals, Space, Medicine, Politics, Mathematics, Philosophy, Mythology, Video Games, Fashion, Architecture, and more.
+## Quiz Generation
 
-Custom categories can be created on-the-fly using the practice mode.
+Trivia Wizard uses a **Recipe System** for deterministic, reproducible quizzes:
 
-## Performance Tiers
+### How It Works
+1. **Seed Generation** - Daily quizzes use `SHA256(date + category)`, practice uses random seeds
+2. **Recipe Building** - Seed determines tone, category mix, question types, difficulty curve
+3. **LLM Generation** - Claude fills content based on the deterministic recipe
+4. **Validation** - JSON schema validation with automatic repair
 
-Your quiz results earn you a rank from one of 120+ unique titles:
+### Recipe Components
+- **Tone** (6 options): scholarly, playful, cinematic, pub_quiz, deadpan, sports_banter
+- **Difficulty Curve** (3 patterns): ramp, wave, valley
+- **Question Types**: multiple_choice, true_false, fill_blank, ordering
 
-- **Novice** (0-20%): Getting Started
-- **Apprentice** (21-40%): Learning the Ropes
-- **Adept** (41-60%): Competent Knowledge
-- **Expert** (61-80%): Strong Performance
-- **Master** (81-95%): Exceptional Mastery
-- **Legendary** (96-100%): Perfect Execution
+**Result:** 10M+ possible recipe combinations = infinite variety with reproducibility.
 
-## Database Schema
+---
 
-### Tables
-- **users**: User profiles with customizable usernames
-- **quiz_sessions**: Completed quiz history with scores and metadata
-- **achievements**: 10 achievement definitions with tiers
-- **user_achievements**: Earned achievements per user
-- **daily_streaks**: Consecutive daily quiz completion tracking
+## Storage Architecture
 
-### Automatic Features
-- Achievement awarding happens automatically after every quiz
-- Daily streak updates on daily challenge completion
-- Retroactive achievement grants based on existing quiz history
+### Cloud-First Design (Supabase)
+All user data syncs to the cloud when signed in:
+
+| Table | Purpose |
+|-------|---------|
+| `users` | Profiles with usernames and preferences |
+| `quiz_sessions` | Complete quiz history with scores and metadata |
+| `quiz_questions` | Full question data for history review |
+| `quiz_submissions` | User answers for each question |
+| `achievements` | 11 achievement definitions |
+| `user_achievements` | Earned achievements per user |
+| `daily_streaks` | Consecutive completion tracking |
+
+**Security:** Row Level Security ensures users only access their own data.
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── (trivia)/           # Quiz pages (daily, practice, play, results, history)
+│   ├── (docs)/             # Documentation pages (settings, getting-started, faqs)
+│   └── api/
+│       ├── quiz/           # Generation, submission, history endpoints
+│       ├── leaderboard/    # Rankings (daily, all-time, ELO)
+│       ├── achievements/   # Achievement endpoints
+│       └── user/           # Profile management
+├── components/
+│   ├── trivia/             # Quiz-specific components
+│   └── ui/                 # shadcn/ui components
+├── lib/
+│   ├── storage.ts          # Storage API
+│   ├── quiz-utils.ts       # Quiz helpers, title generation
+│   ├── recipe.ts           # Recipe system
+│   └── types.ts            # TypeScript types
+└── supabase/
+    └── migrations/         # Database schema
+```
+
+---
 
 ## Getting Started
 
 ### Prerequisites
 - Node.js 18+
-- Supabase account (for backend features)
-- Echo API key (for metered billing)
+- Supabase account
+- Echo API credentials
 
 ### Installation
 
@@ -104,97 +122,94 @@ Your quiz results earn you a rank from one of 120+ unique titles:
 # Install dependencies
 npm install
 
-# Set up environment variables
+# Configure environment
 cp .env.example .env.local
 
-# Add your credentials to .env.local:
-# - NEXT_PUBLIC_SUPABASE_URL
-# - NEXT_PUBLIC_SUPABASE_ANON_KEY
-# - SUPABASE_SERVICE_ROLE_KEY
-# - POSTGRES_URL
-# - NEXT_PUBLIC_ECHO_CLIENT_ID
+# Required variables:
+# NEXT_PUBLIC_SUPABASE_URL
+# NEXT_PUBLIC_SUPABASE_ANON_KEY
+# SUPABASE_SERVICE_ROLE_KEY
+# NEXT_PUBLIC_ECHO_CLIENT_ID
 
-# Run database migrations (see supabase/SAFE_TO_RUN_ANYTIME.sql)
+# Run migrations
+npx supabase db push
 
-# Start development server
+# Start dev server
 npm run dev
 ```
 
-### Database Setup
+---
 
-1. Create a new Supabase project
-2. Run the initial schema: `supabase/migrations/001_initial_schema.sql`
-3. Add achievements: `supabase/SAFE_TO_RUN_ANYTIME.sql` (safe to run multiple times)
+## API Reference
 
-## Architecture
+### Quiz Endpoints
 
-### Client-Side Storage (IndexedDB)
-- **20 most recent sessions**: Fast access to recent quiz results
-- **10 daily quizzes**: Cached daily challenges
-- **50 favorite categories**: Quick category access
-- **User stats**: Aggregated performance metrics
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/quiz/generate` | Generate quiz questions |
+| POST | `/api/quiz/submit` | Submit completed quiz |
+| GET | `/api/quiz/history` | Get user's quiz history |
+| GET | `/api/quiz/history/[id]` | Get specific session with questions |
 
-### Server-Side Storage (Supabase)
-- **Persistent user data**: Profiles, achievements, streaks
-- **Global leaderboard**: Cross-user rankings
-- **Quiz history**: Complete session records for analytics
-- **Row Level Security**: Users can only access their own data
+### Leaderboard Endpoints
 
-### Quiz Generation Flow
-1. User configures quiz settings (category, difficulty, count, type)
-2. Settings sent to AI model with system prompts
-3. Claude generates questions in structured format
-4. Questions validated and formatted
-5. Quiz presented to user with interactive UI
-6. Results saved to both IndexedDB and Supabase
-7. Achievements automatically checked and awarded
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/leaderboard` | All-time rankings |
+| GET | `/api/leaderboard/daily` | Daily rankings |
+| GET | `/api/leaderboard/elo` | Skill Index rankings |
 
-## Project Structure
+---
 
-```
-src/
-├── app/                    # Next.js app router pages
-│   ├── (trivia)/          # Quiz-related pages
-│   │   ├── daily/         # Daily challenge
-│   │   ├── practice/      # Practice mode
-│   │   ├── play/          # Quiz gameplay
-│   │   ├── results/       # Results review
-│   │   ├── dashboard/     # User dashboard
-│   │   ├── leaderboard/   # Global rankings
-│   │   └── profile/       # User profile
-│   └── api/               # API routes
-│       ├── quiz/          # Quiz generation & submission
-│       ├── achievements/  # Achievement endpoints
-│       ├── leaderboard/   # Leaderboard data
-│       └── users/         # User management
-├── components/            # React components
-│   ├── trivia/           # Quiz-specific components
-│   └── ui/               # shadcn/ui components
-├── lib/                  # Utilities and helpers
-│   ├── storage.ts        # IndexedDB wrapper
-│   ├── types.ts          # TypeScript types
-│   ├── quiz-utils.ts     # Quiz generation logic
-│   └── supabase-types.ts # Database types
-├── utils/                # Third-party integrations
-│   └── supabase/         # Supabase client configs
-└── store/                # Zustand state stores
+## Performance Tiers
 
-supabase/
-├── migrations/           # SQL schema migrations
-└── SAFE_TO_RUN_ANYTIME.sql  # Idempotent achievement setup
-```
+| Tier | Score | Example Titles |
+|------|-------|----------------|
+| **Disaster Zone** | 0-19% | "Complete Catastrophe", "Absolute Trainwreck" |
+| **Needs Work** | 20-49% | "Rough Start", "Room for Improvement" |
+| **Not Bad** | 50-69% | "Decent Effort", "Getting There" |
+| **Pretty Good** | 70-84% | "Well Done", "Impressive Performance" |
+| **Excellent** | 85-99% | "Outstanding", "Near Perfect" |
+| **Perfection** | 100% | "Flawless Victory", "Perfect Score" |
 
-## Contributing
+---
 
-This is a personal project, but suggestions and feedback are welcome! Feel free to open an issue.
+## Echo Integration
+
+Powered by **[Echo](https://www.merit.systems)** for authentication and metered AI billing:
+
+- **Pay-Per-Use** - No subscriptions, only pay for what you use (~$0.02 per quiz)
+- **Transparent Billing** - Real-time balance tracking
+- **Referral Program** - Earn 10% from users you refer
+
+---
+
+## Roadmap
+
+### In Progress
+- [ ] Image-based questions
+- [ ] Timed speedrun mode
+- [ ] Category mastery paths
+
+### Planned
+- [ ] Boss questions (bonus XP challenges)
+- [ ] Progressive hint system
+- [ ] Community quiz packs
+- [ ] PWA with offline mode
+- [ ] Accessibility improvements (large text, dyslexia font, colorblind palette)
+
+---
 
 ## License
 
 MIT
 
+---
+
 ## Acknowledgments
 
-- Powered by [Echo](https://www.merit.systems) for metered AI billing
-- UI components from [shadcn/ui](https://ui.shadcn.com)
-- AI models from [Anthropic](https://www.anthropic.com)
-- Backend by [Supabase](https://supabase.com)
+- **[Echo](https://www.merit.systems)** - Metered AI billing
+- **[shadcn/ui](https://ui.shadcn.com)** - UI components
+- **[Anthropic](https://www.anthropic.com)** - Claude AI
+- **[Supabase](https://supabase.com)** - Database & auth
+- **[Vercel](https://vercel.com)** - Hosting

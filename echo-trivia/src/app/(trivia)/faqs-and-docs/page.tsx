@@ -129,19 +129,21 @@ export default function FaqsAndDocsPage() {
               <AccordionContent className="text-muted-foreground pb-4">
                 <div className="space-y-3">
                   <p>
-                    Trivia Wizard uses a hybrid storage approach to give you the best experience while protecting your privacy:
+                    Trivia Wizard uses cloud storage to sync your data across all your devices:
                   </p>
                   <p>
-                    <strong>Local Storage (IndexedDB):</strong> Your quiz history and detailed session data are stored locally in your browser
-                    using IndexedDB, a secure client-side storage system. This means your quiz data stays on your device and is not sent to
-                    external servers. You have complete control and can clear your data at any time through your browser settings.
+                    <strong>Cloud Database (Supabase):</strong> When you're signed in, your complete quiz history, questions, answers,
+                    achievements, daily streaks, and profile data are securely stored in Supabase (a PostgreSQL database). This means
+                    you can access your quiz history from any device, compete on leaderboards, and never lose your progress. All cloud
+                    data is protected with Row Level Security (RLS) policies and encrypted in transit and at rest.
                   </p>
                   <p>
-                    <strong>Cloud Database (Supabase):</strong> For features like leaderboards, achievements, daily streaks, and cross-device
-                    profile syncing, we securely store your user profile, quiz session metadata, achievement progress, and streak data in
-                    Supabase (a PostgreSQL database). This allows you to compete on leaderboards, track your achievements, and maintain
-                    streaks across devices. All cloud data is protected with Row Level Security (RLS) policies and encrypted in transit
-                    and at rest.
+                    <strong>Cross-Device Sync:</strong> Your quiz history automatically syncs across all devices where you're signed in.
+                    Complete a quiz on your phone and review it later on your computer - it's all connected to your account.
+                  </p>
+                  <p>
+                    <strong>Privacy First:</strong> Your quiz data is only accessible to you. We collect only essential information
+                    needed to provide the service, and you can view your complete history anytime from the History page.
                   </p>
                 </div>
               </AccordionContent>
@@ -186,7 +188,7 @@ export default function FaqsAndDocsPage() {
                   Built on Echo's secure infrastructure with industry-standard encryption for all data transmission and storage.
                 </p>
                 <p>
-                  We collect only essential information needed to provide the service. Your quiz history and preferences stay private.
+                  Your quiz history syncs securely to the cloud, protected by Row Level Security policies ensuring only you can access your data.
                 </p>
                 <p>
                   Authentication is handled securely through Echo, supporting Google, GitHub, and email sign-in options.

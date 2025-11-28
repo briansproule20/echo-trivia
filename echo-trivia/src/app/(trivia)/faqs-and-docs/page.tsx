@@ -310,7 +310,7 @@ export default function FaqsAndDocsPage() {
               want with no subscription fees.
             </p>
             <p>
-              The money you spend on Trivia Wizard goes to the independent developer of the app (me, a real human),
+              The money you spend on Trivia Wizard goes to the independent developer of the app (<Link href="https://www.fishmug.dev/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">me, a real human</Link>),
               not a large corporation. This allows me to maintain fair pricing and keep improving the service based
               on what users want and need.
             </p>

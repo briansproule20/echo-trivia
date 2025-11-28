@@ -38,6 +38,7 @@ import {
 } from "recharts";
 import { Trophy, Target, Flame, Clock, Award, Edit2, Check, X, HelpCircle, Shuffle } from "lucide-react";
 import type { UserStats, UserAchievement, DailyStreak, QuizSession, Achievement } from "@/lib/supabase-types";
+import { CATEGORIES } from "@/lib/types";
 import {
   Dialog,
   DialogContent,
@@ -1178,19 +1179,55 @@ export default function DashboardPage() {
                       {stats?.perfect_scores || 0}
                     </p>
                   </div>
+                  <div className="space-y-1">
+                    <p className="text-xs sm:text-sm text-muted-foreground">Daily Quizzes</p>
+                    <p className="text-xl sm:text-2xl font-bold text-purple-600">
+                      {stats?.daily_quizzes_completed || 0}
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs sm:text-sm text-muted-foreground">Longest Streak</p>
+                    <p className="text-xl sm:text-2xl font-bold text-orange-500">
+                      {streak?.longest_streak || 0} days
+                    </p>
+                  </div>
                 </div>
                 <div className="pt-4 border-t">
                   <div className="space-y-2">
-                    <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
-                      <span className="text-xs sm:text-sm">Favorite Category</span>
-                      <Badge variant="secondary" className="text-xs w-fit">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-muted-foreground">Favorite Category</span>
+                      <Badge variant="secondary" className="text-xs">
                         {stats?.favorite_category || 'None yet'}
                       </Badge>
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
-                      <span className="text-xs sm:text-sm">Best Category</span>
-                      <Badge variant="default" className="text-xs w-fit">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-muted-foreground">Best Category</span>
+                      <Badge variant="default" className="text-xs">
                         {stats?.best_category || 'None yet'}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-muted-foreground">Best Day</span>
+                      <Badge variant="outline" className="text-xs">
+                        {(() => {
+                          const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                          const bestDay = Object.entries(dayOfWeekActivity)
+                            .filter(([_, data]) => data.count > 0)
+                            .sort((a, b) => b[1].avgScore - a[1].avgScore)[0];
+                          return bestDay ? days[parseInt(bestDay[0])] : 'None yet';
+                        })()}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-muted-foreground">Categories Explored</span>
+                      <Badge variant="secondary" className="text-xs">
+                        {stats?.categories_played.filter(cat => CATEGORIES.includes(cat as typeof CATEGORIES[number])).length || 0} / {CATEGORIES.length}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-muted-foreground">Custom Categories</span>
+                      <Badge variant="outline" className="text-xs">
+                        {stats?.categories_played.filter(cat => !CATEGORIES.includes(cat as typeof CATEGORIES[number])).length || 0}
                       </Badge>
                     </div>
                   </div>

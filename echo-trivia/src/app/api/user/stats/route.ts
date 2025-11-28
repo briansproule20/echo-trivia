@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
         total_time_played: 0,
         favorite_category: null,
         best_category: null,
+        daily_quizzes_completed: 0,
       }
       return NextResponse.json({ stats: emptyStats })
     }
@@ -59,6 +60,9 @@ export async function GET(request: NextRequest) {
       sessions.reduce((sum, s) => sum + s.score_percentage, 0) / totalQuizzes
     const perfectScores = sessions.filter(
       (s) => s.score_percentage === 100
+    ).length
+    const dailyQuizzesCompleted = sessions.filter(
+      (s) => s.is_daily === true
     ).length
     const totalTimePlayed = sessions.reduce(
       (sum, s) => sum + (s.time_taken || 0),
@@ -197,6 +201,7 @@ export async function GET(request: NextRequest) {
       total_time_played: totalTimePlayed,
       favorite_category: favoriteCategory,
       best_category: bestCategory,
+      daily_quizzes_completed: dailyQuizzesCompleted,
     }
 
     return NextResponse.json({

@@ -82,6 +82,7 @@ export interface UserStats {
   total_time_played: number // in seconds
   favorite_category: string | null
   best_category: string | null
+  daily_quizzes_completed: number
 }
 
 // Leaderboard entry

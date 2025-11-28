@@ -47,7 +47,7 @@ This means:
 - Dashboard: `src/app/(trivia)/dashboard/page.tsx`
 - Profile: `src/app/(trivia)/profile/page.tsx`
 
-## All Achievements (10 Total)
+## All Achievements (11 Total)
 
 Ordered by tier from Bronze to Platinum:
 
@@ -71,11 +71,12 @@ Ordered by tier from Bronze to Platinum:
 | `speed_demon` | Speed Demon | Complete a 10-question quiz in under 2 minutes | ⚡ | Complete 10-question quiz in < 120 seconds |
 | `knowledge_seeker` | Knowledge Seeker | Complete quizzes in 10 different categories | 📚 | Play 10 unique categories |
 
-### 💎 Platinum Tier (2)
+### 💎 Platinum Tier (3)
 | ID | Name | Description | Icon | Criteria |
 |---|---|---|---|---|
 | `century_club` | Century Club | Complete 100 quizzes | 💯 | Complete 100 total quizzes |
 | `perfectionist` | Perfectionist | Achieve 3 perfect scores | ✨ | Score 100% on 3 different quizzes |
+| `streak_legend` | Streak Legend | Maintain a 30-day streak | 👑 | Have current_streak >= 30 |
 
 ## Technical Implementation
 

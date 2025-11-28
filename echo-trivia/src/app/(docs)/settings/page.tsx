@@ -297,7 +297,7 @@ export default function SettingsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-center gap-3">
+              <div className="grid grid-cols-2 sm:flex sm:justify-center gap-3">
                 {THEMES.map((t) => {
                   const isSelected = theme === t.id
                   const Icon = t.icon
@@ -328,7 +328,7 @@ export default function SettingsPage() {
                           )
                         })
                       }}
-                      className={`relative flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all w-28 ${
+                      className={`relative flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all w-full sm:w-28 ${
                         isSelected
                           ? 'border-primary bg-primary/5'
                           : 'border-border hover:border-primary/50 hover:bg-accent'

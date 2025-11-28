@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, BookOpen, FileQuestion, BarChart3, Trophy, User, Sparkles, Users } from "lucide-react";
+import { Menu, BookOpen, FileQuestion, BarChart3, Trophy, User, Sparkles, Users, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { EchoAccount } from "@/components/echo-account-next";
@@ -190,6 +190,21 @@ export function Navbar() {
                       <BookOpen className="h-4 w-4" />
                       Lore
                     </Link>
+
+                    {/* Settings - Only show when signed in */}
+                    {isAuthenticated && (
+                      <Link
+                        href="/settings"
+                        className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
+                          pathname === "/settings"
+                            ? "text-primary bg-primary/10"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        <Settings className="h-4 w-4" />
+                        Settings
+                      </Link>
+                    )}
                   </div>
                 </div>
               </SheetContent>

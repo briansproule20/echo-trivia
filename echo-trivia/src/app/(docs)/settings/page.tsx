@@ -23,7 +23,7 @@ function ProviderLogo({ provider, className }: { provider: string; className?: s
   return (
     <img
       alt={`${provider} logo`}
-      className={className || 'size-4'}
+      className={`${className || 'size-4'} dark:invert [.reaper_&]:invert`}
       height={16}
       width={16}
       src={`https://models.dev/logos/${provider}.svg`}
@@ -53,7 +53,9 @@ const THEMES = [
   { id: 'light', name: 'Light', icon: Sun, description: 'Classic light mode' },
   { id: 'dark', name: 'Dark', icon: Moon, description: 'Easy on the eyes' },
   { id: 'paperwhite', name: 'Paperwhite', icon: null, description: 'Kindle-inspired e-ink look', image: '/triviawizard_favicon_paperwhite_stippled.png' },
-  { id: 'dullform', name: 'Dullform', icon: null, description: 'Parshendi warform aesthetic', image: '/triviawizard_favicon_paperwhite_stippled_detail.png' },
+  { id: 'dullform', name: 'Dullform', icon: null, description: 'Parshendi dullform aesthetic', image: '/triviawizard_favicon_paperwhite_stippled_detail.png' },
+  { id: 'reaper', name: 'Reaper', icon: null, description: 'Hail Libertas, hail Reaper', image: '/reaper.png' },
+  { id: 'rivendell', name: 'Rivendell', icon: null, description: 'The last homely house east of the sea', image: '/rivendell.png' },
 ] as const
 
 export default function SettingsPage() {

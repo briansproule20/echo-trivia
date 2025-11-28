@@ -10,7 +10,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         attribute="class"
         defaultTheme="system"
         enableSystem
-        themes={['light', 'dark', 'paperwhite', 'dullform']}
+        themes={['light', 'dark', 'paperwhite', 'dullform', 'reaper', 'rivendell']}
         disableTransitionOnChange
       >
         {children}

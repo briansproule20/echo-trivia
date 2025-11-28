@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 interface DotBackgroundProps {
   children?: React.ReactNode;
@@ -27,6 +27,14 @@ const themeConfig = {
     bg: "rgb(90 95 105)",
     dots: "rgb(70 75 85)",
   },
+  reaper: {
+    bg: "rgb(25 25 25)",
+    dots: "rgb(60 45 45)",
+  },
+  rivendell: {
+    bg: "rgb(235 230 215)",
+    dots: "rgb(180 190 160)",
+  },
 };
 
 export function DotBackground({
@@ -34,8 +42,15 @@ export function DotBackground({
   className,
   dotSize = "20px",
 }: DotBackgroundProps) {
-  const { theme } = useTheme();
-  const config = themeConfig[(theme as keyof typeof themeConfig)] || themeConfig.light;
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const currentTheme = mounted ? (resolvedTheme || theme) : 'light';
+  const config = themeConfig[(currentTheme as keyof typeof themeConfig)] || themeConfig.light;
 
   return (
     <div className={cn("relative w-full", className)}>

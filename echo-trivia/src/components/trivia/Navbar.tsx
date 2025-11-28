@@ -34,6 +34,10 @@ export function Navbar() {
     ? '/triviawizard_favicon_paperwhite_stippled.png'
     : theme === 'dullform'
     ? '/triviawizard_favicon_paperwhite_stippled_detail.png'
+    : theme === 'reaper'
+    ? '/reaper.png'
+    : theme === 'rivendell'
+    ? '/rivendell.png'
     : '/trivia-wizard-logo.png';
 
   return (

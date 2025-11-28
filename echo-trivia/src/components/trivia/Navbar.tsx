@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 import { EchoAccount } from "@/components/echo-account-next";
 import EchoBalance from "@/components/balance";
 import { useEcho } from "@merit-systems/echo-react-sdk";
+import { useTheme } from "next-themes";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ReferralBanner } from "@/components/ReferralBanner";
 
@@ -26,7 +27,12 @@ const EXTRA_NAV_ITEMS = [
 export function Navbar() {
   const pathname = usePathname();
   const echo = useEcho();
+  const { theme } = useTheme();
   const isAuthenticated = !!echo.user;
+
+  const logoSrc = theme === 'paperwhite'
+    ? '/triviawizard_favicon_paperwhite_stippled.png'
+    : '/trivia-wizard-logo.png';
 
   return (
     <>
@@ -36,7 +42,7 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <img
-              src="/trivia-wizard-logo.png"
+              src={logoSrc}
               alt="Trivia Wizard"
               className="h-8 w-8 object-contain"
             />
@@ -75,7 +81,7 @@ export function Navbar() {
                 <SheetHeader className="shrink-0">
                   <SheetTitle className="flex items-center space-x-2">
                     <img
-                      src="/trivia-wizard-logo.png"
+                      src={logoSrc}
                       alt="Trivia Wizard"
                       className="h-6 w-6 object-contain"
                     />

@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Edit2, Check, X, Settings, Sparkles } from 'lucide-react'
+import { Edit2, Check, X, Settings, Sparkles, Palette, Accessibility, SlidersHorizontal, Monitor, Sun, Moon } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import {
   Select,
   SelectContent,
@@ -48,8 +49,15 @@ const AI_MODELS = [
   { id: 'llama-4', name: 'Llama 4', provider: 'llama', available: false },
 ] as const
 
+const THEMES = [
+  { id: 'light', name: 'Light', icon: Sun, description: 'Classic light mode' },
+  { id: 'dark', name: 'Dark', icon: Moon, description: 'Easy on the eyes' },
+  { id: 'paperwhite', name: 'Paperwhite', icon: null, description: 'Kindle-inspired e-ink look', image: '/triviawizard_favicon_paperwhite_stippled.png' },
+] as const
+
 export default function SettingsPage() {
   const echo = useEcho()
+  const { theme, setTheme } = useTheme()
   const [loading, setLoading] = useState(true)
   const [editingUsername, setEditingUsername] = useState(false)
   const [newUsername, setNewUsername] = useState('')
@@ -276,6 +284,107 @@ export default function SettingsPage() {
                   Choose the AI model used to generate trivia questions. More models coming soon.
                 </p>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* UI Themes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Palette className="h-5 w-5" />
+                UI Themes
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-center gap-3">
+                {THEMES.map((t) => {
+                  const isSelected = theme === t.id
+                  const Icon = t.icon
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={(e) => {
+                        if (theme === t.id) return
+                        const button = e.currentTarget
+                        if (!document.startViewTransition) {
+                          setTheme(t.id)
+                          return
+                        }
+                        const { top, left, width, height } = button.getBoundingClientRect()
+                        const x = left + width / 2
+                        const y = top + height / 2
+                        const right = window.innerWidth - left
+                        const bottom = window.innerHeight - top
+                        const maxRad = Math.hypot(Math.max(left, right), Math.max(top, bottom))
+                        const clipPathSmall = `circle(0px at ${x}px ${y}px)`
+                        const clipPathFull = `circle(${maxRad}px at ${x}px ${y}px)`
+                        document.startViewTransition(() => {
+                          setTheme(t.id)
+                        }).ready.then(() => {
+                          document.documentElement.animate(
+                            { clipPath: [clipPathSmall, clipPathFull] },
+                            { duration: 700, easing: 'ease-in-out', pseudoElement: '::view-transition-new(root)' }
+                          )
+                        })
+                      }}
+                      className={`relative flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all w-28 ${
+                        isSelected
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:border-primary/50 hover:bg-accent'
+                      }`}
+                    >
+                      {isSelected && (
+                        <div className="absolute top-2 right-2">
+                          <Check className="h-4 w-4 text-primary" />
+                        </div>
+                      )}
+                      {Icon ? (
+                        <Icon className="h-6 w-6" />
+                      ) : t.image ? (
+                        <img
+                          src={t.image}
+                          alt={t.name}
+                          className="h-6 w-6 object-contain"
+                        />
+                      ) : null}
+                      <span className="text-sm font-medium">{t.name}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="text-sm text-muted-foreground text-center">
+                {THEMES.find((t) => t.id === theme)?.description || 'Choose your preferred appearance'}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Quiz Preferences */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <SlidersHorizontal className="h-5 w-5" />
+                Quiz Preferences
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Coming soon...
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Accessibility */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Accessibility className="h-5 w-5" />
+                Accessibility
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Coming soon...
+              </p>
             </CardContent>
           </Card>
         </div>

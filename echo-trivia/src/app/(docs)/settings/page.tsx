@@ -265,7 +265,7 @@ export default function SettingsPage() {
                         <div className="flex items-center gap-2">
                           <ProviderLogo provider={model.provider} />
                           <span>{model.name}</span>
-                          {model.isDefault && (
+                          {'isDefault' in model && model.isDefault && (
                             <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">
                               Default
                             </span>

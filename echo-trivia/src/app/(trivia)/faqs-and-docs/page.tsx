@@ -154,7 +154,7 @@ export default function FaqsAndDocsPage() {
                 <span className="font-semibold">Where does my money go?</span>
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground pb-4">
-                Your payments support an independent developer (a real human!), not a large corporation. The revenue covers
+                Your payments support an independent developer (<Link href="https://www.fishmug.dev/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">a real human!</Link>), not a large corporation. The revenue covers
                 AI usage costs and supports ongoing development of Trivia Wizard. This open-source project is built to provide
                 a service people actually want to use, with fair and transparent pricing.
               </AccordionContent>

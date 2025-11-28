@@ -161,7 +161,7 @@ Get the deterministic daily quiz for a given date.
 
 ## Categories
 
-### Preset Categories (164)
+### Preset Categories (151)
 History, Science, Geography, Literature, Art & Culture, Music, Movies & TV, Sports, Technology, Food & Drink, Mythology, Politics, Nature & Animals, Mathematics, Philosophy, Video Games, Space & Astronomy, Medicine & Health, Economics, Language & Linguistics & More!
 
 **Note:** Custom categories can be anything you want!

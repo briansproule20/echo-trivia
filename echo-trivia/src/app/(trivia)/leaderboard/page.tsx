@@ -7,8 +7,18 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Trophy, Medal, Award, User, HelpCircle } from "lucide-react";
+import { Trophy, Medal, Award, User, HelpCircle, Zap } from "lucide-react";
 import type { LeaderboardEntry } from "@/lib/supabase-types";
+
+interface EloEntry {
+  echo_user_id: string
+  username: string | null
+  avatar_url: string | null
+  skill_rating: number
+  total_quizzes: number
+  avg_score: number
+  rank: number
+}
 
 export default function LeaderboardPage() {
   const echo = useEcho();
@@ -17,10 +27,35 @@ export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [userPosition, setUserPosition] = useState<LeaderboardEntry | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'leaderboard' | 'elo'>('leaderboard');
+  const [eloLeaderboard, setEloLeaderboard] = useState<EloEntry[]>([]);
+  const [eloUserPosition, setEloUserPosition] = useState<EloEntry | null>(null);
+  const [eloLoading, setEloLoading] = useState(false);
 
   useEffect(() => {
-    fetchLeaderboard();
-  }, [period, rankBy, echo.user?.id]);
+    if (activeTab === 'leaderboard') {
+      fetchLeaderboard();
+    } else {
+      fetchEloLeaderboard();
+    }
+  }, [period, rankBy, echo.user?.id, activeTab]);
+
+  const fetchEloLeaderboard = async () => {
+    setEloLoading(true);
+    try {
+      const echoUserIdParam = echo.user?.id ? `&echo_user_id=${echo.user.id}` : '';
+      const response = await fetch(`/api/leaderboard/elo?limit=25${echoUserIdParam}`);
+      if (!response.ok) throw new Error('Failed to fetch ELO leaderboard');
+
+      const data = await response.json();
+      setEloLeaderboard(data.leaderboard || []);
+      setEloUserPosition(data.userPosition || null);
+    } catch (error) {
+      console.error('Error fetching ELO leaderboard:', error);
+    } finally {
+      setEloLoading(false);
+    }
+  };
 
   const fetchLeaderboard = async () => {
     setLoading(true);
@@ -63,36 +98,57 @@ export default function LeaderboardPage() {
               <Trophy className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
               <h1 className="text-3xl sm:text-4xl font-bold">Leaderboard</h1>
             </div>
-            {period !== 'daily' && (
+            {activeTab === 'leaderboard' && period !== 'daily' && (
               <p className="text-xs sm:text-sm text-muted-foreground/80">
                 Not seeing yourself? Ensure you have played 5 quizzes to appear on the global leaderboards.
               </p>
             )}
+            {activeTab === 'elo' && (
+              <p className="text-xs sm:text-sm text-muted-foreground/80">
+                Skill Index based on quiz difficulty and performance. 5 quizzes minimum to qualify.
+              </p>
+            )}
           </div>
 
-          {/* Ranking Method Selector */}
-          <div className="flex items-center justify-center gap-3">
-            <span className="text-sm font-medium text-muted-foreground">Rank by:</span>
-            <Select value={rankBy} onValueChange={(value) => setRankBy(value as typeof rankBy)}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="avg_score">Average Score</SelectItem>
-                <SelectItem value="total_correct">Total Correct</SelectItem>
-                <SelectItem value="total_quizzes">Total Quizzes</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Period Tabs */}
-          <Tabs value={period} onValueChange={(v) => setPeriod(v as typeof period)}>
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="all">All Time</TabsTrigger>
-              <TabsTrigger value="monthly">Monthly</TabsTrigger>
-              <TabsTrigger value="weekly">Weekly</TabsTrigger>
-              <TabsTrigger value="daily">Daily</TabsTrigger>
+          {/* Main Tab Switcher */}
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
+            <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto h-auto p-1">
+              <TabsTrigger value="leaderboard" className="gap-1.5 sm:gap-2 text-xs sm:text-sm py-2 sm:py-2.5">
+                <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                Leaderboard
+              </TabsTrigger>
+              <TabsTrigger value="elo" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 sm:py-2.5">
+                <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span>Skill Index</span>
+                <Badge variant="secondary" className="text-[8px] sm:text-[10px] px-1 sm:px-1.5 py-0">BETA</Badge>
+              </TabsTrigger>
             </TabsList>
+
+            {/* Standard Leaderboard Tab */}
+            <TabsContent value="leaderboard" className="mt-6 space-y-6">
+              {/* Ranking Method Selector */}
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-sm font-medium text-muted-foreground">Rank by:</span>
+                <Select value={rankBy} onValueChange={(value) => setRankBy(value as typeof rankBy)}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="avg_score">Average Score</SelectItem>
+                    <SelectItem value="total_correct">Total Correct</SelectItem>
+                    <SelectItem value="total_quizzes">Total Quizzes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Period Tabs */}
+              <Tabs value={period} onValueChange={(v) => setPeriod(v as typeof period)}>
+                <TabsList className="grid w-full grid-cols-4 h-auto p-1">
+                  <TabsTrigger value="all" className="text-xs sm:text-sm py-1.5 sm:py-2">All Time</TabsTrigger>
+                  <TabsTrigger value="monthly" className="text-xs sm:text-sm py-1.5 sm:py-2">Monthly</TabsTrigger>
+                  <TabsTrigger value="weekly" className="text-xs sm:text-sm py-1.5 sm:py-2">Weekly</TabsTrigger>
+                  <TabsTrigger value="daily" className="text-xs sm:text-sm py-1.5 sm:py-2">Daily</TabsTrigger>
+                </TabsList>
 
             <TabsContent value={period} className="mt-4 sm:mt-6">
               <Card>
@@ -279,6 +335,173 @@ export default function LeaderboardPage() {
                                   {userPosition.score.toFixed(1)}% avg
                                 </span>
                               )}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+              </Tabs>
+            </TabsContent>
+
+            {/* Skill Index (ELO) Tab */}
+            <TabsContent value="elo" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                        Skill Index Rankings
+                        <Badge variant="outline" className="text-xs">All Time</Badge>
+                      </CardTitle>
+                    </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          className="text-muted-foreground hover:text-foreground transition-colors shrink-0 p-1 hover:bg-muted rounded-full"
+                          aria-label="How Skill Index works"
+                        >
+                          <HelpCircle className="h-5 w-5" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" className="w-[320px] sm:w-[400px]">
+                        <div className="space-y-3">
+                          <div className="space-y-1">
+                            <h4 className="font-semibold text-base leading-none">Skill Index Algorithm</h4>
+                            <p className="text-sm text-muted-foreground">
+                              An ELO-inspired rating system for trivia
+                            </p>
+                          </div>
+                          <div className="space-y-2.5 text-sm">
+                            <div className="flex gap-2">
+                              <Zap className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                              <div>
+                                <p className="font-medium">Starting Rating: 1000</p>
+                                <p className="text-xs text-muted-foreground">Everyone begins at 1000 points</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Award className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                              <div>
+                                <p className="font-medium">Difficulty Matters</p>
+                                <p className="text-xs text-muted-foreground">Hard quizzes: expected 45% (more points for beating it). Medium: 60%. Easy: 75%</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Trophy className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                              <div>
+                                <p className="font-medium">Performance vs Expected</p>
+                                <p className="text-xs text-muted-foreground">Beat expectations = gain points. Underperform = lose points</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <User className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                              <div>
+                                <p className="font-medium">All Quizzes Count</p>
+                                <p className="text-xs text-muted-foreground">Unlike the leaderboard, practice and daily quizzes both affect your Skill Index</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {eloLoading ? (
+                    <div className="text-center py-8 text-sm sm:text-base text-muted-foreground">
+                      Loading Skill Index...
+                    </div>
+                  ) : eloLeaderboard.length === 0 ? (
+                    <div className="text-center py-8 text-sm sm:text-base text-muted-foreground">
+                      No entries yet. Complete 5 quizzes to appear!
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {eloLeaderboard.map((entry) => {
+                        const isCurrentUser = echo.user?.id === entry.echo_user_id;
+                        return (
+                          <div
+                            key={entry.echo_user_id}
+                            className={`flex items-center justify-between p-3 sm:p-4 rounded-lg border ${getRankColor(entry.rank)} ${isCurrentUser && 'ring-2 ring-primary'}`}
+                          >
+                            <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                              <div className="flex items-center gap-1 sm:gap-2 min-w-[2.5rem] sm:min-w-[3rem] shrink-0">
+                                {getRankIcon(entry.rank)}
+                                {!getRankIcon(entry.rank) && (
+                                  <span className="text-base sm:text-lg font-bold text-muted-foreground">
+                                    #{entry.rank}
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-sm sm:text-base flex items-center gap-2">
+                                  <span className="truncate">
+                                    {entry.username || `User ${entry.echo_user_id.slice(0, 8)}`}
+                                  </span>
+                                  {isCurrentUser && (
+                                    <Badge variant="default" className="text-xs shrink-0">You</Badge>
+                                  )}
+                                </div>
+                                <div className="text-xs sm:text-sm text-muted-foreground">
+                                  {entry.total_quizzes} quizzes · {entry.avg_score.toFixed(1)}% avg
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col items-end gap-0.5 shrink-0">
+                              <Badge variant="secondary" className="text-sm sm:text-lg font-bold font-mono">
+                                {entry.skill_rating}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                skill rating
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {/* User Position if not in top 25 */}
+                      {eloUserPosition && (
+                        <>
+                          <div className="flex items-center justify-center py-2">
+                            <div className="text-sm text-muted-foreground">• • •</div>
+                          </div>
+                          <div
+                            className={`flex items-center justify-between p-3 sm:p-4 rounded-lg border ring-2 ring-primary bg-primary/5`}
+                          >
+                            <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                              <div className="flex items-center gap-1 sm:gap-2 min-w-[2.5rem] sm:min-w-[3rem] shrink-0">
+                                <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                                <span className="text-base sm:text-lg font-bold text-primary">
+                                  #{eloUserPosition.rank}
+                                </span>
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-sm sm:text-base flex items-center gap-2">
+                                  <span className="truncate">
+                                    {eloUserPosition.username || `User ${eloUserPosition.echo_user_id.slice(0, 8)}`}
+                                  </span>
+                                  <Badge variant="default" className="text-xs shrink-0">You</Badge>
+                                </div>
+                                <div className="text-xs sm:text-sm text-muted-foreground">
+                                  {eloUserPosition.total_quizzes} quizzes · {eloUserPosition.avg_score.toFixed(1)}% avg
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col items-end gap-0.5 shrink-0">
+                              <Badge variant="secondary" className="text-sm sm:text-lg font-bold font-mono">
+                                {eloUserPosition.skill_rating}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                skill rating
+                              </span>
                             </div>
                           </div>
                         </>

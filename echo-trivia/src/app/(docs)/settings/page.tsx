@@ -8,7 +8,45 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Edit2, Check, X, Settings } from 'lucide-react'
+import { Edit2, Check, X, Settings, Sparkles } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+
+// Provider logo component using models.dev CDN
+function ProviderLogo({ provider, className }: { provider: string; className?: string }) {
+  return (
+    <img
+      alt={`${provider} logo`}
+      className={className || 'size-4'}
+      height={16}
+      width={16}
+      src={`https://models.dev/logos/${provider}.svg`}
+    />
+  )
+}
+
+const AI_MODELS = [
+  { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', provider: 'anthropic', isDefault: true, available: true },
+  { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', provider: 'anthropic', available: false },
+  { id: 'claude-sonnet-4-5-20250929', name: 'Claude Sonnet 4.5', provider: 'anthropic', available: false },
+  { id: 'claude-opus-4-20250514', name: 'Claude Opus 4', provider: 'anthropic', available: false },
+  { id: 'claude-opus-4-1-20250805', name: 'Claude Opus 4.1', provider: 'anthropic', available: false },
+  { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai', available: false },
+  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai', available: false },
+  { id: 'gpt-5-pro', name: 'GPT-5 Pro', provider: 'openai', available: false },
+  { id: 'gpt-5-nano', name: 'GPT-5 Nano', provider: 'openai', available: false },
+  { id: 'gemini-3', name: 'Gemini 3', provider: 'google', available: false },
+  { id: 'grok-3', name: 'Grok 3', provider: 'xai', available: false },
+  { id: 'grok-3-mini', name: 'Grok 3 Mini', provider: 'xai', available: false },
+  { id: 'grok-4', name: 'Grok 4', provider: 'xai', available: false },
+  { id: 'grok-4.1-mini', name: 'Grok 4.1 Mini', provider: 'xai', available: false },
+  { id: 'llama-4', name: 'Llama 4', provider: 'llama', available: false },
+] as const
 
 export default function SettingsPage() {
   const echo = useEcho()
@@ -17,6 +55,7 @@ export default function SettingsPage() {
   const [newUsername, setNewUsername] = useState('')
   const [currentUsername, setCurrentUsername] = useState('')
   const [saving, setSaving] = useState(false)
+  const [selectedModel, setSelectedModel] = useState('claude-sonnet-4-20250514')
 
   useEffect(() => {
     if (echo.user?.id) {
@@ -187,6 +226,54 @@ export default function SettingsPage() {
                 )}
                 <p className="text-sm text-muted-foreground">
                   This is your display name shown on leaderboards and in games.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Model Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5" />
+                Model Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="model">AI Model</Label>
+                <Select value={selectedModel} onValueChange={setSelectedModel}>
+                  <SelectTrigger className="max-w-xs">
+                    <SelectValue placeholder="Select a model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AI_MODELS.map((model) => (
+                      <SelectItem
+                        key={model.id}
+                        value={model.id}
+                        disabled={!model.available}
+                        className={!model.available ? 'opacity-50' : ''}
+                      >
+                        <div className="flex items-center gap-2">
+                          <ProviderLogo provider={model.provider} />
+                          <span>{model.name}</span>
+                          {model.isDefault && (
+                            <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                              Default
+                            </span>
+                          )}
+                          {!model.available && (
+                            <span className="text-xs text-muted-foreground">
+                              Coming soon
+                            </span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground">
+                  Choose the AI model used to generate trivia questions. More models coming soon.
                 </p>
               </div>
             </CardContent>

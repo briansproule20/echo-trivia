@@ -327,22 +327,8 @@ Explain-Like-I’m-5 Mode
 Trivia Tutor
 - Chat mode where the AI can drill you on weak areas or generate follow-ups.
 
-Model Swapping
-- Allow users to pick “Fast (cheap)” vs. “Deep (expensive)” LLM generation modes.
-
 Full Player Profile System
 - XP, levels, ranks, badges, and category mastery metrics.
-
-Insights Dashboard Enhancement
-Visualizations:
-- heatmap of accuracy by category
-- “knowledge gaps” chart
-- accuracy over time
-- best/worst topics
-- streaks + milestones
-
-Skill Index Leaderboard
-- A global ELO-like score based on quiz difficulty + performance.
 
 Pack Store (Free)
 - Add thematic quiz packs:
@@ -373,8 +359,6 @@ Accessibility Improvements
 Authentication & Account Enhancements
 Supabase Profile Sync
 - Sync history, favorites, stats, and settings across devices. This will require a rework of the current hybrid storage model...
-Referral Dashboard
-- View total referrals, credit earned, and revenue stats (This can be seen on Echo, direct there)
 
 ## License
 

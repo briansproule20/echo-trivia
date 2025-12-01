@@ -19,6 +19,7 @@ interface QuestionCardProps {
   submitted?: boolean;
   isCorrect?: boolean;
   explanation?: string;
+  correctAnswer?: string; // The correct answer, only available after submission
 }
 
 export function QuestionCard({
@@ -30,6 +31,7 @@ export function QuestionCard({
   submitted = false,
   isCorrect,
   explanation,
+  correctAnswer,
 }: QuestionCardProps) {
   const [selectedChoice, setSelectedChoice] = useState<string>("");
   const [shortAnswer, setShortAnswer] = useState("");
@@ -87,12 +89,16 @@ export function QuestionCard({
                 variant={selectedChoice === choice.id ? "default" : "outline"}
                 className={cn(
                   "w-full justify-start text-left h-auto py-3 px-4 whitespace-normal",
+                  // Highlight correct answer (from server) after submission
                   submitted &&
-                    choice.id === question.answer &&
+                    correctAnswer &&
+                    choice.id === correctAnswer &&
                     "border-green-500 bg-green-50 dark:bg-green-950",
+                  // Highlight user's incorrect selection
                   submitted &&
+                    correctAnswer &&
                     choice.id === selectedChoice &&
-                    choice.id !== question.answer &&
+                    choice.id !== correctAnswer &&
                     "border-red-500 bg-red-50 dark:bg-red-950"
                 )}
                 onClick={() => !disabled && setSelectedChoice(choice.id)}
@@ -112,12 +118,15 @@ export function QuestionCard({
               variant={selectedChoice === "true" ? "default" : "outline"}
               className={cn(
                 "flex-1 h-20 text-lg",
+                // Highlight correct answer (from server) after submission
                 submitted &&
-                  question.answer === "true" &&
+                  correctAnswer &&
+                  correctAnswer.toLowerCase() === "true" &&
                   "border-green-500 bg-green-50 dark:bg-green-950",
                 submitted &&
+                  correctAnswer &&
                   selectedChoice === "true" &&
-                  question.answer !== "true" &&
+                  correctAnswer.toLowerCase() !== "true" &&
                   "border-red-500 bg-red-50 dark:bg-red-950"
               )}
               onClick={() => !disabled && setSelectedChoice("true")}
@@ -129,12 +138,15 @@ export function QuestionCard({
               variant={selectedChoice === "false" ? "default" : "outline"}
               className={cn(
                 "flex-1 h-20 text-lg",
+                // Highlight correct answer (from server) after submission
                 submitted &&
-                  question.answer === "false" &&
+                  correctAnswer &&
+                  correctAnswer.toLowerCase() === "false" &&
                   "border-green-500 bg-green-50 dark:bg-green-950",
                 submitted &&
+                  correctAnswer &&
                   selectedChoice === "false" &&
-                  question.answer !== "false" &&
+                  correctAnswer.toLowerCase() !== "false" &&
                   "border-red-500 bg-red-50 dark:bg-red-950"
               )}
               onClick={() => !disabled && setSelectedChoice("false")}

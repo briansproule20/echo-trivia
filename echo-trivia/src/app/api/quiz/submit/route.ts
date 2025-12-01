@@ -200,31 +200,40 @@ export async function POST(request: NextRequest) {
       )
     } else if (submissions && submissions.length > 0) {
       // Fallback: No server evaluations found (maybe old quiz before security update)
-      // In this case, we'll still validate but log a warning
       console.warn(
-        `⚠️ No server evaluations found for quiz ${session_id}. Using client submissions with validation.`
+        `⚠️ No server evaluations found for quiz ${session_id}. Using client submissions.`
       )
 
-      // For backwards compatibility, do basic validation on client submissions
-      const answerKeyMap = new Map(answerKeys.map((k) => [k.question_id, k]))
+      // For backwards compatibility with quizzes played before the security update,
+      // trust the client submissions since we have no server-side data to validate against
+      if (answerKeys.length > 0) {
+        // We have answer keys but no evaluations - re-validate
+        const answerKeyMap = new Map(answerKeys.map((k) => [k.question_id, k]))
 
-      validatedSubmissions = submissions.map((sub) => {
-        const answerKey = answerKeyMap.get(sub.question_id)
-        if (answerKey) {
-          // Re-validate using server-stored answer
-          const userAnswer = sub.user_response.trim().toLowerCase()
-          const correctAnswer = answerKey.answer.trim().toLowerCase()
-          const isCorrect = userAnswer === correctAnswer
+        validatedSubmissions = submissions.map((sub) => {
+          const answerKey = answerKeyMap.get(sub.question_id)
+          if (answerKey) {
+            // Re-validate using server-stored answer
+            const userAnswer = sub.user_response.trim().toLowerCase()
+            const correctAnswer = answerKey.answer.trim().toLowerCase()
+            const isCorrect = userAnswer === correctAnswer
 
-          return {
-            ...sub,
-            correct_answer: answerKey.answer,
-            is_correct: isCorrect,
+            return {
+              ...sub,
+              correct_answer: answerKey.answer,
+              is_correct: isCorrect,
+            }
           }
-        }
-        // No answer key found - can't validate, mark as incorrect for safety
-        return { ...sub, is_correct: false }
-      })
+          // No answer key for this question - trust client's is_correct
+          return sub
+        })
+      } else {
+        // No answer keys at all - this is an old quiz, trust client submissions entirely
+        console.warn(
+          `⚠️ No answer keys found for quiz ${session_id}. Trusting client submissions (legacy quiz).`
+        )
+        validatedSubmissions = submissions
+      }
     }
 
     // Calculate score from SERVER-VALIDATED data only

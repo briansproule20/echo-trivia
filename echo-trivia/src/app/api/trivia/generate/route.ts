@@ -7,6 +7,61 @@ import { generateId, shuffleChoices, getDailySeed, hashString } from "@/lib/quiz
 import { NextResponse } from "next/server";
 import { generateSeed } from "@/lib/rand";
 import { buildRecipeFromSeed, DIFFICULTY_CURVES, Labels, categoryEnumToString, categoryStringToEnum } from "@/lib/recipe";
+import { createServiceClient } from "@/utils/supabase/service";
+import type { Quiz, Question } from "@/lib/types";
+
+// Type for answer key storage
+interface AnswerKey {
+  question_id: string;
+  answer: string;
+  type: string;
+  explanation: string;
+}
+
+// Strip answers from quiz before sending to client
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function stripAnswersFromQuiz(quiz: any): Quiz {
+  return {
+    id: quiz.id,
+    title: quiz.title,
+    description: quiz.description,
+    category: quiz.category,
+    createdAt: quiz.createdAt,
+    seeded: quiz.seeded,
+    questions: quiz.questions.map((q: Question) => ({
+      ...q,
+      answer: "", // Remove answer
+      explanation: "", // Remove explanation until after answer is submitted
+    })),
+  };
+}
+
+// Store answer keys server-side
+async function storeAnswerKeys(quizId: string, questions: Question[]): Promise<void> {
+  const supabase = createServiceClient();
+
+  const answerKeys: AnswerKey[] = questions.map((q) => ({
+    question_id: q.id,
+    answer: q.answer,
+    type: q.type,
+    explanation: q.explanation || "",
+  }));
+
+  const { error } = await supabase
+    .from("quiz_answer_keys")
+    .upsert({
+      quiz_id: quizId,
+      answers: answerKeys,
+      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+    }, {
+      onConflict: "quiz_id",
+    });
+
+  if (error) {
+    console.error("Failed to store answer keys:", error);
+    throw new Error("Failed to securely store quiz answers");
+  }
+}
 
 const GENERATION_SYSTEM_PROMPT = `You are a professional trivia author. Produce high-quality, factual, diverse questions.
 
@@ -172,7 +227,12 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
       category: settings.category,
     }));
 
-    return NextResponse.json(quiz);
+    // SECURITY: Store answers server-side and strip from client response
+    // quiz.id is always set by generateId() above
+    await storeAnswerKeys(quiz.id!, quiz.questions);
+    const clientQuiz = stripAnswersFromQuiz(quiz);
+
+    return NextResponse.json(clientQuiz);
   } catch (error) {
     console.error("Generate custom category quiz error:", error);
     return NextResponse.json(
@@ -360,7 +420,12 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
       category: settings.category,
     }));
 
-    return NextResponse.json(quiz);
+    // SECURITY: Store answers server-side and strip from client response
+    // quiz.id is always set by generateId() above
+    await storeAnswerKeys(quiz.id!, quiz.questions);
+    const clientQuiz = stripAnswersFromQuiz(quiz);
+
+    return NextResponse.json(clientQuiz);
   } catch (error) {
     console.error("Generate error:", error);
     return NextResponse.json(

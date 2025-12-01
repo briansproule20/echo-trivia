@@ -1,7 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
+import { createServiceClient } from '@/utils/supabase/service'
 import { isSignedIn } from '@/echo'
 import type { SaveQuizSessionRequest } from '@/lib/supabase-types'
+
+// Type for server-side evaluation record
+interface ServerEvaluation {
+  question_id: string
+  user_response: string
+  is_correct: boolean
+}
+
+// Type for answer key from database
+interface AnswerKey {
+  question_id: string
+  answer: string
+  type: string
+  explanation: string
+}
+
+// Get server-side evaluations for a quiz
+async function getServerEvaluations(quizId: string): Promise<ServerEvaluation[]> {
+  const supabase = createServiceClient()
+
+  const { data, error } = await supabase
+    .from('quiz_evaluations')
+    .select('question_id, user_response, is_correct')
+    .eq('quiz_id', quizId)
+
+  if (error) {
+    console.error('Failed to fetch server evaluations:', error)
+    return []
+  }
+
+  return data || []
+}
+
+// Get answer keys for storing question data
+async function getAnswerKeys(quizId: string): Promise<AnswerKey[]> {
+  const supabase = createServiceClient()
+
+  const { data, error } = await supabase
+    .from('quiz_answer_keys')
+    .select('answers')
+    .eq('quiz_id', quizId)
+    .single()
+
+  if (error || !data) {
+    console.error('Failed to fetch answer keys:', error)
+    return []
+  }
+
+  return data.answers as AnswerKey[]
+}
 
 // POST /api/quiz/submit - Save a completed quiz session
 export async function POST(request: NextRequest) {
@@ -111,65 +162,87 @@ export async function POST(request: NextRequest) {
       throw userError
     }
 
-    // 3. Validate submissions if provided - RE-VALIDATE ON SERVER
-    let validatedCorrectAnswers = correct_answers
-    let validatedScorePercentage = score_percentage
-    let validatedSubmissions = submissions
+    // 3. SECURITY: Get score from SERVER-SIDE evaluations only
+    // We do NOT trust any scores or is_correct flags from the client
+    const serverEvaluations = await getServerEvaluations(session_id || '')
+    const answerKeys = await getAnswerKeys(session_id || '')
 
-    if (submissions && submissions.length > 0) {
-      // CRITICAL: Trust the client's is_correct flag from the evaluate endpoint
-      // The evaluate endpoint already did proper validation (including LLM fuzzy matching for short answers)
-      // We're just storing what was already evaluated during the quiz
+    // Build validated submissions from SERVER data
+    let validatedSubmissions: Array<{
+      question_id: string
+      user_response: string
+      correct_answer: string
+      is_correct: boolean
+      time_ms?: number
+    }> = []
 
-      // However, we'll do a sanity check for obvious tampering
-      validatedSubmissions = submissions.map((sub) => {
-        // Normalize both answers for comparison (trim, lowercase)
-        const userAnswer = sub.user_response.trim().toLowerCase()
-        const correctAnswer = sub.correct_answer.trim().toLowerCase()
+    if (serverEvaluations.length > 0) {
+      // Create a map of answer keys for quick lookup
+      const answerKeyMap = new Map(answerKeys.map((k) => [k.question_id, k]))
 
-        // For multiple choice and exact matches, we can verify
-        // But for short answers, the LLM already evaluated it during quiz play
-        const exactMatch = userAnswer === correctAnswer
+      // Build submissions from server evaluations (the source of truth)
+      validatedSubmissions = serverEvaluations.map((evalResult) => {
+        const answerKey = answerKeyMap.get(evalResult.question_id)
+        // Find client submission for time_ms only (optional data)
+        const clientSub = submissions?.find((s) => s.question_id === evalResult.question_id)
 
-        // If client said correct but exact match shows false, log it but trust the client
-        // (because LLM fuzzy matching during evaluate might have accepted it)
-        if (sub.is_correct && !exactMatch) {
-          console.log(
-            `📝 Fuzzy match accepted for question ${sub.question_id}:`,
-            `User: "${userAnswer}" vs Correct: "${correctAnswer}"`
-          )
+        return {
+          question_id: evalResult.question_id,
+          user_response: evalResult.user_response,
+          correct_answer: answerKey?.answer || '',
+          is_correct: evalResult.is_correct, // FROM SERVER, not client
+          time_ms: clientSub?.time_ms, // Time is non-critical, can use client value
         }
-
-        // If client said incorrect but exact match shows true, that's suspicious
-        if (!sub.is_correct && exactMatch) {
-          console.warn(
-            `⚠️ Suspicious: Client said incorrect but answers match exactly`,
-            `Question ${sub.question_id}: "${userAnswer}"`
-          )
-          // Override - this is definitely correct
-          return { ...sub, is_correct: true }
-        }
-
-        // Otherwise trust the evaluate endpoint's judgment
-        return sub
       })
 
-      // Recalculate score from SERVER-VALIDATED submissions
-      const actualCorrectCount = validatedSubmissions.filter((s) => s.is_correct).length
-      const actualScorePercentage = Math.round(
-        (actualCorrectCount / total_questions) * 100
+      console.log(
+        `📊 Server evaluations found: ${serverEvaluations.length} questions evaluated`
+      )
+    } else if (submissions && submissions.length > 0) {
+      // Fallback: No server evaluations found (maybe old quiz before security update)
+      // In this case, we'll still validate but log a warning
+      console.warn(
+        `⚠️ No server evaluations found for quiz ${session_id}. Using client submissions with validation.`
       )
 
-      // Log discrepancies
-      if (actualCorrectCount !== correct_answers) {
-        console.warn(
-          `Score mismatch detected! Client reported ${correct_answers} correct, but server validation shows ${actualCorrectCount} correct`
-        )
-      }
+      // For backwards compatibility, do basic validation on client submissions
+      const answerKeyMap = new Map(answerKeys.map((k) => [k.question_id, k]))
 
-      // Use server-validated values
-      validatedCorrectAnswers = actualCorrectCount
-      validatedScorePercentage = actualScorePercentage
+      validatedSubmissions = submissions.map((sub) => {
+        const answerKey = answerKeyMap.get(sub.question_id)
+        if (answerKey) {
+          // Re-validate using server-stored answer
+          const userAnswer = sub.user_response.trim().toLowerCase()
+          const correctAnswer = answerKey.answer.trim().toLowerCase()
+          const isCorrect = userAnswer === correctAnswer
+
+          return {
+            ...sub,
+            correct_answer: answerKey.answer,
+            is_correct: isCorrect,
+          }
+        }
+        // No answer key found - can't validate, mark as incorrect for safety
+        return { ...sub, is_correct: false }
+      })
+    }
+
+    // Calculate score from SERVER-VALIDATED data only
+    const validatedCorrectAnswers = validatedSubmissions.filter((s) => s.is_correct).length
+    const validatedScorePercentage = total_questions > 0
+      ? Math.round((validatedCorrectAnswers / total_questions) * 100)
+      : 0
+
+    // Log discrepancies between client-reported and server-calculated scores
+    if (validatedCorrectAnswers !== correct_answers) {
+      console.warn(
+        `🚨 Score discrepancy! Client reported ${correct_answers} correct, server calculated ${validatedCorrectAnswers} correct`
+      )
+    }
+    if (validatedScorePercentage !== score_percentage) {
+      console.warn(
+        `🚨 Score percentage discrepancy! Client: ${score_percentage}%, Server: ${validatedScorePercentage}%`
+      )
     }
 
     // 4. Save quiz session
@@ -222,19 +295,27 @@ export async function POST(request: NextRequest) {
     }
 
     // 5b. Save full question data for history review
+    // Use SERVER-SIDE answer keys for correct answers, not client-provided data
     if (questions && questions.length > 0 && session?.id) {
-      const questionRecords = questions.map((q, index) => ({
-        session_id: session.id,
-        question_id: q.id,
-        question_type: q.type,
-        category: q.category,
-        difficulty: q.difficulty || null,
-        prompt: q.prompt,
-        choices: q.choices || null,
-        correct_answer: q.answer,
-        explanation: q.explanation || null,
-        question_order: index,
-      }))
+      // Create a map of answer keys for correct answers
+      const answerKeyMap = new Map(answerKeys.map((k) => [k.question_id, k]))
+
+      const questionRecords = questions.map((q, index) => {
+        const answerKey = answerKeyMap.get(q.id)
+        return {
+          session_id: session.id,
+          question_id: q.id,
+          question_type: q.type,
+          category: q.category,
+          difficulty: q.difficulty || null,
+          prompt: q.prompt,
+          choices: q.choices || null,
+          // SECURITY: Use server-stored answer, not client-provided
+          correct_answer: answerKey?.answer || q.answer || '',
+          explanation: answerKey?.explanation || q.explanation || null,
+          question_order: index,
+        }
+      })
 
       const { error: questionsError } = await supabase
         .from('quiz_questions')

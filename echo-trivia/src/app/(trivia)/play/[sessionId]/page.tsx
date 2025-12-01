@@ -55,9 +55,11 @@ export default function PlayPage() {
   }, [sessionId, currentSession]);
 
   useEffect(() => {
-    // Reset timer when question changes
+    // Reset timer, explanation, and correct answer when question changes
     setStartTime(Date.now());
     setCurrentSubmission(null);
+    setCurrentExplanation("");
+    setCurrentCorrectAnswer("");
   }, [currentQuestionIndex]);
 
   if (!currentSession) {
@@ -69,27 +71,39 @@ export default function PlayPage() {
   const hasTimeLimit = currentSession.quiz.questions[0]?.type && currentSession.quiz.questions.length > 0;
   const timePerQuestion = 20; // Default for speedrun
 
+  // State to store the explanation and correct answer returned from server after evaluation
+  const [currentExplanation, setCurrentExplanation] = useState<string>("");
+  const [currentCorrectAnswer, setCurrentCorrectAnswer] = useState<string>("");
+
   const handleSubmit = async (response: string) => {
     setIsEvaluating(true);
 
     try {
+      // SECURITY: Send only quiz_id, question_id, and response
+      // Server looks up the correct answer from secure storage
       const evalResponse = await fetch("/api/trivia/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          question: currentQuestion,
+          quiz_id: currentSession.quiz.id,
+          question_id: currentQuestion.id,
           response,
-          // Pass auth state - use session's isAuthenticated flag, or check current echo user
+          question_prompt: currentQuestion.prompt, // For LLM fuzzy matching context
           isAuthenticated: currentSession.isAuthenticated ?? !!echo.user,
         }),
       });
 
       if (!evalResponse.ok) {
-        throw new Error("Failed to evaluate answer");
+        const errorData = await evalResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to evaluate answer");
       }
 
       const result = await evalResponse.json();
       const timeMs = Date.now() - startTime;
+
+      // Store the explanation and correct answer from server
+      setCurrentExplanation(result.explanation || "");
+      setCurrentCorrectAnswer(result.canonicalAnswer || "");
 
       const submission: Submission = {
         questionId: currentQuestion.id,
@@ -101,15 +115,31 @@ export default function PlayPage() {
       addSubmission(submission);
       setCurrentSubmission(submission);
 
-      // Update storage
+      // Update the question in the session with the correct answer and explanation
+      // This allows the results page to display the correct answers
+      const updatedQuestions = currentSession.quiz.questions.map((q) =>
+        q.id === currentQuestion.id
+          ? {
+              ...q,
+              answer: result.canonicalAnswer || "",
+              explanation: result.explanation || "",
+            }
+          : q
+      );
+
+      // Update storage with both the submission and the updated question data
       const updatedSession = {
         ...currentSession,
+        quiz: {
+          ...currentSession.quiz,
+          questions: updatedQuestions,
+        },
         submissions: [...currentSession.submissions, submission],
       };
       await storage.saveSession(updatedSession);
     } catch (error) {
       console.error("Evaluation error:", error);
-      alert("Failed to evaluate answer. Please try again.");
+      alert(error instanceof Error ? error.message : "Failed to evaluate answer. Please try again.");
     } finally {
       setIsEvaluating(false);
     }
@@ -234,7 +264,8 @@ export default function PlayPage() {
             disabled={isEvaluating || isPaused || !!currentSubmission}
             submitted={!!currentSubmission}
             isCorrect={currentSubmission?.correct}
-            explanation={currentQuestion.explanation}
+            explanation={currentExplanation} // Use server-returned explanation
+            correctAnswer={currentCorrectAnswer} // Use server-returned correct answer
           />
 
           {/* Navigation */}

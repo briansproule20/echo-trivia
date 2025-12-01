@@ -1,7 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
+import { createServiceClient } from '@/utils/supabase/service'
 import { isSignedIn } from '@/echo'
 import type { Quiz, Session } from '@/lib/types'
+
+// Type for answer key from database
+interface AnswerKey {
+  question_id: string
+  answer: string
+  type: string
+  explanation: string
+}
+
+// Get answer keys to reconstruct full quiz for storage
+async function getAnswerKeys(quizId: string): Promise<AnswerKey[]> {
+  const supabase = createServiceClient()
+
+  const { data, error } = await supabase
+    .from('quiz_answer_keys')
+    .select('answers')
+    .eq('quiz_id', quizId)
+    .single()
+
+  if (error || !data) {
+    console.error('Failed to fetch answer keys:', error)
+    return []
+  }
+
+  return data.answers as AnswerKey[]
+}
 
 // POST /api/faceoff/create - Save a completed quiz as a shareable challenge
 export async function POST(request: NextRequest) {
@@ -23,6 +50,24 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
+
+    // SECURITY: Restore answers from server-side storage for the challenge
+    // Client quiz doesn't have answers anymore, we need to get them from the server
+    const answerKeys = await getAnswerKeys(session.quiz.id)
+    const answerKeyMap = new Map(answerKeys.map((k) => [k.question_id, k]))
+
+    // Reconstruct quiz with answers for storage
+    const quizWithAnswers: Quiz = {
+      ...session.quiz,
+      questions: session.quiz.questions.map((q) => {
+        const answerKey = answerKeyMap.get(q.id)
+        return {
+          ...q,
+          answer: answerKey?.answer || q.answer || '',
+          explanation: answerKey?.explanation || q.explanation || '',
+        }
+      }),
+    }
 
     // Generate unique share code
     const { data: shareCodeData, error: shareCodeError } = await supabase
@@ -47,13 +92,13 @@ export async function POST(request: NextRequest) {
     const creatorScore = session.submissions.filter(s => s.correct).length
     const creatorTitle = session.earnedTitle || null
 
-    // Save challenge to database
+    // Save challenge to database with full quiz (including answers from server)
     const { data: challenge, error: challengeError } = await supabase
       .from('faceoff_challenges')
       .insert({
         creator_echo_user_id: echo_user_id,
         creator_username: echo_user_name || null,
-        quiz_data: session.quiz, // Store entire quiz as JSON
+        quiz_data: quizWithAnswers, // Store quiz with server-verified answers
         settings,
         share_code: shareCode,
         creator_score: creatorScore,

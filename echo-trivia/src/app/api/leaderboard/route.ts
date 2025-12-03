@@ -28,21 +28,27 @@ export async function GET(request: NextRequest) {
     // Filter by time period (using America/New_York timezone to match daily challenge reset)
     const now = new Date()
     if (period === 'daily') {
-      // Get start of day in EST/EDT, then convert to ISO for database query
-      const estDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }))
-      estDate.setHours(0, 0, 0, 0)
-      const startOfDay = estDate.toISOString()
-      query = query.gte('completed_at', startOfDay)
+      // Get today's date string in EST (YYYY-MM-DD format)
+      const estDateStr = now.toLocaleDateString('en-CA', { timeZone: 'America/New_York' }) // en-CA gives YYYY-MM-DD
+      // Filter by daily_date column which stores the EST date the quiz was for
+      query = query.eq('daily_date', estDateStr)
     } else if (period === 'weekly') {
-      // Get date 7 days ago in EST/EDT, then convert to ISO
-      const estDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }))
-      const weekAgo = new Date(estDate.getTime() - 7 * 24 * 60 * 60 * 1000)
-      query = query.gte('completed_at', weekAgo.toISOString())
+      // Get date 7 days ago in EST/EDT
+      // Calculate the EST date string for 7 days ago
+      const dates: string[] = []
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000)
+        dates.push(date.toLocaleDateString('en-CA', { timeZone: 'America/New_York' }))
+      }
+      query = query.in('daily_date', dates)
     } else if (period === 'monthly') {
-      // Get date 30 days ago in EST/EDT, then convert to ISO
-      const estDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }))
-      const monthAgo = new Date(estDate.getTime() - 30 * 24 * 60 * 60 * 1000)
-      query = query.gte('completed_at', monthAgo.toISOString())
+      // Get date 30 days ago in EST/EDT
+      const dates: string[] = []
+      for (let i = 0; i < 30; i++) {
+        const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000)
+        dates.push(date.toLocaleDateString('en-CA', { timeZone: 'America/New_York' }))
+      }
+      query = query.in('daily_date', dates)
     }
 
     const { data: sessions, error: sessionsError } = await query

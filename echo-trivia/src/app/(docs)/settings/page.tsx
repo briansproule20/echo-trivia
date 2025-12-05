@@ -5,12 +5,14 @@ import { useEcho } from '@merit-systems/echo-react-sdk'
 import { Badge } from '@/components/ui/badge'
 import { DotBackground } from '@/components/ui/dot-background'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Edit2, Check, X, Settings, Sparkles, Palette, Accessibility, SlidersHorizontal, Monitor, Sun, Moon } from 'lucide-react'
+import { Edit2, Check, X, Settings, Sparkles, Palette, Accessibility, SlidersHorizontal, Monitor, Sun, Moon, Skull, Ghost, Cat, Swords, Shield, Target, Glasses, TreePine, Flame, Zap, Crown, Anchor, Bird, Bug, Snowflake, Cherry } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useFontStore, useQuizPreferencesStore, type FontFamily } from '@/lib/store'
+import { useFontStore, useQuizPreferencesStore, type FontFamily, type AvatarId } from '@/lib/store'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   Select,
   SelectContent,
@@ -66,6 +68,44 @@ const FONTS = [
   { id: 'tech' as FontFamily, name: 'Tech', description: 'Futuristic and robotic (Orbitron)', preview: 'Aa' },
 ] as const
 
+const AVATAR_ICONS = {
+  skull: Skull,
+  ghost: Ghost,
+  cat: Cat,
+  swords: Swords,
+  shield: Shield,
+  target: Target,
+  glasses: Glasses,
+  tree: TreePine,
+  flame: Flame,
+  zap: Zap,
+  crown: Crown,
+  anchor: Anchor,
+  bird: Bird,
+  bug: Bug,
+  snowflake: Snowflake,
+  cherry: Cherry,
+} as const
+
+const AVATARS = [
+  { id: 'skull' as AvatarId, name: 'Skull' },
+  { id: 'ghost' as AvatarId, name: 'Ghost' },
+  { id: 'cat' as AvatarId, name: 'Cat' },
+  { id: 'swords' as AvatarId, name: 'Swords' },
+  { id: 'shield' as AvatarId, name: 'Shield' },
+  { id: 'target' as AvatarId, name: 'Target' },
+  { id: 'glasses' as AvatarId, name: 'Glasses' },
+  { id: 'tree' as AvatarId, name: 'Tree' },
+  { id: 'flame' as AvatarId, name: 'Flame' },
+  { id: 'zap' as AvatarId, name: 'Zap' },
+  { id: 'crown' as AvatarId, name: 'Crown' },
+  { id: 'anchor' as AvatarId, name: 'Anchor' },
+  { id: 'bird' as AvatarId, name: 'Bird' },
+  { id: 'bug' as AvatarId, name: 'Bug' },
+  { id: 'snowflake' as AvatarId, name: 'Snowflake' },
+  { id: 'cherry' as AvatarId, name: 'Cherry' },
+] as const
+
 const DIFFICULTIES = [
   { id: 'easy', name: 'Easy' },
   { id: 'medium', name: 'Medium' },
@@ -105,9 +145,10 @@ export default function SettingsPage() {
   const font = useFontStore((state) => state.font)
   const setFont = useFontStore((state) => state.setFont)
 
-  // Quiz preferences
+  // Quiz preferences (includes avatar)
   const quizPrefs = useQuizPreferencesStore()
 
+  const [avatarOpen, setAvatarOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [editingUsername, setEditingUsername] = useState(false)
   const [newUsername, setNewUsername] = useState('')
@@ -237,54 +278,100 @@ export default function SettingsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                {editingUsername ? (
-                  <div className="flex items-center gap-2">
-                    <Input
-                      id="username"
-                      value={newUsername}
-                      onChange={(e) => setNewUsername(e.target.value)}
-                      placeholder="Enter username"
-                      className="max-w-xs"
-                      disabled={saving}
-                    />
-                    <Button
-                      size="sm"
-                      onClick={handleUsernameUpdate}
-                      disabled={saving || !newUsername.trim()}
-                    >
-                      <Check className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setEditingUsername(false)
-                        setNewUsername(currentUsername)
-                      }}
-                      disabled={saving}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <div className="px-3 py-2 rounded-md border bg-muted/50 min-w-[200px]">
-                      {currentUsername || 'No username set'}
+              {/* Avatar */}
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                <Popover open={avatarOpen} onOpenChange={setAvatarOpen}>
+                  <PopoverTrigger asChild>
+                    <button className="group relative">
+                      <Avatar className="h-16 w-16 sm:h-20 sm:w-20 transition-transform group-hover:scale-105">
+                        <AvatarFallback className="bg-primary/10">
+                          {(() => {
+                            const Icon = AVATAR_ICONS[quizPrefs.avatarId as keyof typeof AVATAR_ICONS] || Ghost
+                            return <Icon className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+                          })()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                        <Edit2 className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-3">
+                    <div className="grid grid-cols-4 gap-2">
+                      {AVATARS.map((a) => {
+                        const Icon = AVATAR_ICONS[a.id]
+                        const isSelected = quizPrefs.avatarId === a.id
+                        return (
+                          <button
+                            key={a.id}
+                            onClick={() => {
+                              quizPrefs.setAvatarId(a.id)
+                              setAvatarOpen(false)
+                            }}
+                            className={`p-3 rounded-lg transition-all ${
+                              isSelected
+                                ? 'bg-primary/10 ring-2 ring-primary'
+                                : 'hover:bg-muted'
+                            }`}
+                          >
+                            <Icon className={`h-6 w-6 mx-auto ${isSelected ? 'text-primary' : 'text-foreground'}`} />
+                          </button>
+                        )
+                      })}
                     </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setEditingUsername(true)}
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-                <p className="text-sm text-muted-foreground">
-                  This is your display name shown on leaderboards and in games.
-                </p>
+                  </PopoverContent>
+                </Popover>
+
+                {/* Username */}
+                <div className="flex-1 w-full space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  {editingUsername ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="username"
+                        value={newUsername}
+                        onChange={(e) => setNewUsername(e.target.value)}
+                        placeholder="Enter username"
+                        className="flex-1"
+                        disabled={saving}
+                      />
+                      <Button
+                        size="sm"
+                        onClick={handleUsernameUpdate}
+                        disabled={saving || !newUsername.trim()}
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditingUsername(false)
+                          setNewUsername(currentUsername)
+                        }}
+                        disabled={saving}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="px-3 py-2 rounded-md border bg-muted/50 flex-1 sm:flex-none sm:min-w-[200px]">
+                        {currentUsername || 'No username set'}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setEditingUsername(true)}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                  <p className="text-sm text-muted-foreground">
+                    Shown on leaderboards and in games.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>

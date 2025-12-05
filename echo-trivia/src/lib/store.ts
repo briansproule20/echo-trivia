@@ -107,6 +107,9 @@ export const useUIStore = create<UIState>((set) => ({
     })),
 }));
 
+// Avatar type (used in quiz preferences)
+export type AvatarId = "skull" | "ghost" | "cat" | "swords" | "shield" | "target" | "glasses" | "tree" | "flame" | "zap" | "crown" | "anchor" | "bird" | "bug" | "snowflake" | "cherry";
+
 // Font preferences
 export type FontFamily = "sans" | "serif" | "dyslexic" | "tech";
 
@@ -141,12 +144,14 @@ interface QuizPreferencesState {
   autoAdvance: boolean;
   preferredTone: Tone | null;
   explanationStyle: ExplanationStyle | null;
+  avatarId: AvatarId;
   setDifficulty: (difficulty: Difficulty) => void;
   setQuestionCount: (count: QuestionCount) => void;
   setExplanationTiming: (timing: ExplanationTiming) => void;
   setAutoAdvance: (auto: boolean) => void;
   setPreferredTone: (tone: Tone | null) => void;
   setExplanationStyle: (style: ExplanationStyle | null) => void;
+  setAvatarId: (id: AvatarId) => void;
 }
 
 export const useQuizPreferencesStore = create<QuizPreferencesState>()(
@@ -158,12 +163,14 @@ export const useQuizPreferencesStore = create<QuizPreferencesState>()(
       autoAdvance: false,
       preferredTone: null,
       explanationStyle: null,
+      avatarId: "ghost",
       setDifficulty: (difficulty) => set({ difficulty }),
       setQuestionCount: (questionCount) => set({ questionCount }),
       setExplanationTiming: (explanationTiming) => set({ explanationTiming }),
       setAutoAdvance: (autoAdvance) => set({ autoAdvance }),
       setPreferredTone: (preferredTone) => set({ preferredTone }),
       setExplanationStyle: (explanationStyle) => set({ explanationStyle }),
+      setAvatarId: (avatarId) => set({ avatarId }),
     }),
     {
       name: "trivia-wizard-quiz-preferences",

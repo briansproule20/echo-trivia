@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { useEcho } from '@merit-systems/echo-react-sdk'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Send, Loader2, X, Maximize2, Skull, Ghost, Cat, Swords, Shield, Target, Glasses, TreePine, Flame, Zap, Crown, Anchor, Bird, Bug, Snowflake, Cherry } from 'lucide-react'
+import { Send, Loader2, X, Maximize2, Skull, Ghost, Cat, Swords, Shield, Target, Glasses, TreePine, Flame, Zap, Crown, Anchor, Bird, Bug, Snowflake, Cherry, LogIn } from 'lucide-react'
 import { WizardsHat } from '@/components/icons/WizardsHat'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -167,105 +167,128 @@ export function ChatWidget() {
               </div>
             </div>
 
-            {/* Messages */}
-            <div
-              ref={scrollRef}
-              className="flex-1 overflow-y-auto p-4 space-y-3"
-            >
-              {displayMessages.map((message) => (
-                <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={cn(
-                    "flex gap-2",
-                    message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
-                  )}
-                >
-                  {/* Avatar */}
-                  <div className={cn(
-                    "shrink-0 h-7 w-7 rounded-full flex items-center justify-center border border-border",
-                    message.role === 'user'
-                      ? "bg-primary/10"
-                      : "bg-muted"
-                  )}>
-                    {message.role === 'user' ? (
-                      <UserAvatarIcon className="h-3.5 w-3.5 text-primary" />
-                    ) : (
-                      <WizardsHat className="h-3.5 w-3.5 text-foreground" />
-                    )}
-                  </div>
-
-                  {/* Message */}
-                  <div className={cn(
-                    "max-w-[75%] rounded-xl px-3 py-2 text-xs leading-relaxed",
-                    message.role === 'user'
-                      ? "bg-primary text-primary-foreground rounded-tr-sm"
-                      : "bg-muted rounded-tl-sm"
-                  )}>
-                    {message.role === 'user' ? (
-                      message.text
-                    ) : (
-                      <Response className="text-xs prose prose-sm dark:prose-invert max-w-none">
-                        {message.text}
-                      </Response>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-
-              {/* Loading */}
-              {isLoading && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex gap-2"
-                >
-                  <div className="h-7 w-7 rounded-full bg-muted border border-border flex items-center justify-center">
-                    <WizardsHat className="h-3.5 w-3.5 text-foreground" />
-                  </div>
-                  <div className="bg-muted rounded-xl rounded-tl-sm px-3 py-2">
-                    <div className="flex gap-1">
-                      {[0, 1, 2].map((i) => (
-                        <motion.span
-                          key={i}
-                          className="h-1.5 w-1.5 rounded-full bg-primary/60"
-                          animate={{ y: [0, -4, 0] }}
-                          transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </div>
-
-            {/* Input */}
-            <form onSubmit={onSubmit} className="p-3 border-t border-border/50 shrink-0">
-              <div className="flex items-end gap-2">
-                <Textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ask the Hat..."
-                  className="flex-1 min-h-[40px] max-h-[100px] resize-none text-xs bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary/30 rounded-xl"
-                  rows={1}
-                />
+            {/* Sign in required */}
+            {!echo.user ? (
+              <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <WizardsHat className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-sm font-semibold mb-2">Sign in to Chat</h3>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Connect with Echo to speak with the Wizard's Hat
+                </p>
                 <Button
-                  type="submit"
-                  size="icon"
-                  disabled={!input.trim() || isLoading}
-                  className="shrink-0 h-10 w-10 rounded-xl"
+                  onClick={() => echo.signIn()}
+                  className="gap-2"
+                  size="sm"
                 >
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
+                  <LogIn className="h-4 w-4" />
+                  Sign in with Echo
                 </Button>
               </div>
-            </form>
+            ) : (
+              <>
+                {/* Messages */}
+                <div
+                  ref={scrollRef}
+                  className="flex-1 overflow-y-auto p-4 space-y-3"
+                >
+                  {displayMessages.map((message) => (
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={cn(
+                        "flex gap-2",
+                        message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
+                      )}
+                    >
+                      {/* Avatar */}
+                      <div className={cn(
+                        "shrink-0 h-7 w-7 rounded-full flex items-center justify-center border border-border",
+                        message.role === 'user'
+                          ? "bg-primary/10"
+                          : "bg-muted"
+                      )}>
+                        {message.role === 'user' ? (
+                          <UserAvatarIcon className="h-3.5 w-3.5 text-primary" />
+                        ) : (
+                          <WizardsHat className="h-3.5 w-3.5 text-foreground" />
+                        )}
+                      </div>
+
+                      {/* Message */}
+                      <div className={cn(
+                        "max-w-[75%] rounded-xl px-3 py-2 text-xs leading-relaxed",
+                        message.role === 'user'
+                          ? "bg-primary text-primary-foreground rounded-tr-sm"
+                          : "bg-muted rounded-tl-sm"
+                      )}>
+                        {message.role === 'user' ? (
+                          message.text
+                        ) : (
+                          <Response className="text-xs prose prose-sm dark:prose-invert max-w-none">
+                            {message.text}
+                          </Response>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+
+                  {/* Loading */}
+                  {isLoading && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex gap-2"
+                    >
+                      <div className="h-7 w-7 rounded-full bg-muted border border-border flex items-center justify-center">
+                        <WizardsHat className="h-3.5 w-3.5 text-foreground" />
+                      </div>
+                      <div className="bg-muted rounded-xl rounded-tl-sm px-3 py-2">
+                        <div className="flex gap-1">
+                          {[0, 1, 2].map((i) => (
+                            <motion.span
+                              key={i}
+                              className="h-1.5 w-1.5 rounded-full bg-primary/60"
+                              animate={{ y: [0, -4, 0] }}
+                              transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Input */}
+                <form onSubmit={onSubmit} className="p-3 border-t border-border/50 shrink-0">
+                  <div className="flex items-end gap-2">
+                    <Textarea
+                      ref={inputRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Ask the Hat..."
+                      className="flex-1 min-h-[40px] max-h-[100px] resize-none text-xs bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary/30 rounded-xl"
+                      rows={1}
+                    />
+                    <Button
+                      type="submit"
+                      size="icon"
+                      disabled={!input.trim() || isLoading}
+                      className="shrink-0 h-10 w-10 rounded-xl"
+                    >
+                      {isLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

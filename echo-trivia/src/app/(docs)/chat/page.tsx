@@ -135,13 +135,34 @@ export default function ChatPage() {
           </div>
         </motion.header>
 
-        {/* Messages */}
-        <div
-          ref={scrollRef}
-          className="flex-1 overflow-y-auto space-y-4 pb-4 scroll-smooth"
-        >
-          <AnimatePresence mode="popLayout">
-            {displayMessages.map((message, index) => (
+        {/* Sign in required */}
+        {!echo.user ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-center">
+            <div className="h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+              <WizardsHat className="h-12 w-12 text-primary" />
+            </div>
+            <h2 className="text-xl font-bold mb-2">Sign in to Chat</h2>
+            <p className="text-sm text-muted-foreground mb-6 max-w-md">
+              Connect with Echo to speak with the Wizard's Hat and unlock the Tower's ancient wisdom.
+            </p>
+            <Button
+              onClick={() => echo.signIn()}
+              className="gap-2"
+              size="lg"
+            >
+              <LogIn className="h-5 w-5" />
+              Sign in with Echo
+            </Button>
+          </div>
+        ) : (
+          <>
+            {/* Messages */}
+            <div
+              ref={scrollRef}
+              className="flex-1 overflow-y-auto space-y-4 pb-4 scroll-smooth"
+            >
+              <AnimatePresence mode="popLayout">
+                {displayMessages.map((message, index) => (
               <motion.div
                 key={message.id}
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -225,49 +246,51 @@ export default function ChatPage() {
                 </div>
               </div>
             </motion.div>
-          )}
-        </div>
-
-
-      </div>
-
-      {/* Input - Fixed at bottom */}
-      <div className="relative z-10 shrink-0 border-t bg-background/95 backdrop-blur-sm">
-        <motion.form
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          onSubmit={onSubmit}
-          className="container mx-auto px-4 py-4 max-w-4xl"
-        >
-          <div className="relative flex items-end gap-2 bg-card/60 backdrop-blur-sm border border-border/50 rounded-2xl p-2 focus-within:border-primary/30 transition-colors">
-            <Textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask the Hat anything..."
-              className="flex-1 min-h-[44px] max-h-[200px] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm placeholder:text-muted-foreground/60"
-              rows={1}
-            />
-            <Button
-              type="submit"
-              size="icon"
-              disabled={!input.trim() || isLoading}
-              className="shrink-0 h-10 w-10 rounded-xl"
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-            </Button>
+            )}
           </div>
-          <p className="text-[10px] text-muted-foreground/60 text-center mt-2">
-            The Hat may occasionally hallucinate. Verify important information.
-          </p>
-        </motion.form>
+          </>
+        )}
       </div>
+
+      {/* Input - Fixed at bottom (only show when signed in) */}
+      {echo.user && (
+        <div className="relative z-10 shrink-0 border-t bg-background/95 backdrop-blur-sm">
+          <motion.form
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            onSubmit={onSubmit}
+            className="container mx-auto px-4 py-4 max-w-4xl"
+          >
+            <div className="relative flex items-end gap-2 bg-card/60 backdrop-blur-sm border border-border/50 rounded-2xl p-2 focus-within:border-primary/30 transition-colors">
+              <Textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask the Hat anything..."
+                className="flex-1 min-h-[44px] max-h-[200px] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm placeholder:text-muted-foreground/60"
+                rows={1}
+              />
+              <Button
+                type="submit"
+                size="icon"
+                disabled={!input.trim() || isLoading}
+                className="shrink-0 h-10 w-10 rounded-xl"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            <p className="text-[10px] text-muted-foreground/60 text-center mt-2">
+              The Hat may occasionally hallucinate. Verify important information.
+            </p>
+          </motion.form>
+        </div>
+      )}
     </div>
   )
 }

@@ -15,6 +15,7 @@ import { CommunityLoreSection } from "@/components/trivia/CommunityLoreSection";
 import { Footer } from "@/components/Footer";
 import { FlipText } from "@/components/ui/flip-text";
 import { FinishQuizFlurp } from "@/components/trivia/FinishQuizFlurp";
+import { ChatWidget } from "@/components/ChatWidget";
 
 export default function HomePage() {
   const router = useRouter();
@@ -44,6 +45,7 @@ export default function HomePage() {
   return (
     <>
     <FinishQuizFlurp isVisible={showFlurp} onExpanded={handleFlurpComplete} />
+    <ChatWidget />
     <DotBackground className="min-h-screen">
       <div className="container mx-auto px-3 py-6 sm:px-4 sm:py-12">
         {/* Hero Section */}

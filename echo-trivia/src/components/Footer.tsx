@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ExternalLink, Sparkles, Trophy, BookOpen, Zap } from "lucide-react";
+import { ExternalLink, Sparkles, Trophy, BookOpen, Zap, MessageCircle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 export function Footer() {
@@ -158,6 +158,15 @@ export function Footer() {
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   FAQs & Docs
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/chat"
+                  className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
+                >
+                  <MessageCircle className="h-3 w-3" />
+                  The Wizard's Hat
                 </Link>
               </li>
               <li>

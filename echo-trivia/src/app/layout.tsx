@@ -4,7 +4,7 @@ import { ReferralDetector } from '@/components/ReferralDetector';
 import { SyncQueueProcessor } from '@/components/SyncQueueProcessor';
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono, EB_Garamond, Orbitron } from 'next/font/google';
 import { Suspense } from 'react';
 import './globals.css';
 
@@ -15,6 +15,16 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
+  subsets: ['latin'],
+});
+
+const ebGaramond = EB_Garamond({
+  variable: '--font-eb-garamond',
+  subsets: ['latin'],
+});
+
+const orbitron = Orbitron({
+  variable: '--font-orbitron',
   subsets: ['latin'],
 });
 
@@ -35,7 +45,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${ebGaramond.variable} ${orbitron.variable} antialiased`}
       >
         <Providers>
           <Suspense fallback={null}>

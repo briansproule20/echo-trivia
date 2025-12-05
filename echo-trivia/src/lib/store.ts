@@ -1,6 +1,7 @@
 // Zustand store for Trivia Wizard
 
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type { PlaySettings, Session, Quiz } from "./types";
 
 interface BuilderState {
@@ -105,4 +106,24 @@ export const useUIStore = create<UIState>((set) => ({
       toasts: state.toasts.filter((t) => t.id !== id),
     })),
 }));
+
+// Font preferences
+export type FontFamily = "sans" | "serif" | "dyslexic" | "tech";
+
+interface FontState {
+  font: FontFamily;
+  setFont: (font: FontFamily) => void;
+}
+
+export const useFontStore = create<FontState>()(
+  persist(
+    (set) => ({
+      font: "sans",
+      setFont: (font) => set({ font }),
+    }),
+    {
+      name: "trivia-wizard-font",
+    }
+  )
+);
 

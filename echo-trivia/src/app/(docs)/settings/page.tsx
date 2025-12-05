@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Edit2, Check, X, Settings, Sparkles, Palette, Accessibility, SlidersHorizontal, Monitor, Sun, Moon } from 'lucide-react'
 import { useTheme } from 'next-themes'
+import { useFontStore, type FontFamily } from '@/lib/store'
 import {
   Select,
   SelectContent,
@@ -58,9 +59,18 @@ const THEMES = [
   { id: 'rivendell', name: 'Rivendell', icon: null, description: 'The last homely house east of the sea', image: '/rivendell.png' },
 ] as const
 
+const FONTS = [
+  { id: 'sans' as FontFamily, name: 'Sans Serif', description: 'Clean and modern (Geist)', preview: 'Aa' },
+  { id: 'serif' as FontFamily, name: 'Serif', description: 'Classic and elegant (Garamond)', preview: 'Aa' },
+  { id: 'dyslexic' as FontFamily, name: 'Dyslexic', description: 'Easier reading (OpenDyslexic)', preview: 'Aa' },
+  { id: 'tech' as FontFamily, name: 'Tech', description: 'Futuristic and robotic (Orbitron)', preview: 'Aa' },
+] as const
+
 export default function SettingsPage() {
   const echo = useEcho()
   const { theme, setTheme } = useTheme()
+  const font = useFontStore((state) => state.font)
+  const setFont = useFontStore((state) => state.setFont)
   const [loading, setLoading] = useState(true)
   const [editingUsername, setEditingUsername] = useState(false)
   const [newUsername, setNewUsername] = useState('')
@@ -384,9 +394,36 @@ export default function SettingsPage() {
                 Accessibility
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Coming soon...
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 sm:flex sm:justify-center gap-3">
+                {FONTS.map((f) => {
+                  const isSelected = font === f.id
+                  const fontClass = f.id === 'serif' ? 'font-serif' : f.id === 'dyslexic' ? 'font-dyslexic' : f.id === 'tech' ? 'font-tech' : ''
+                  return (
+                    <button
+                      key={f.id}
+                      onClick={() => setFont(f.id)}
+                      className={`relative flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all w-full sm:w-28 ${
+                        isSelected
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:border-primary/50 hover:bg-accent'
+                      }`}
+                    >
+                      {isSelected && (
+                        <div className="absolute top-2 right-2">
+                          <Check className="h-4 w-4 text-primary" />
+                        </div>
+                      )}
+                      <span className={`text-2xl font-medium ${fontClass}`} style={f.id === 'dyslexic' ? { fontSize: '1.5rem' } : undefined}>
+                        {f.preview}
+                      </span>
+                      <span className="text-sm font-medium">{f.name}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="text-sm text-muted-foreground text-center">
+                {FONTS.find((f) => f.id === font)?.description || 'Choose your preferred font'}
               </p>
             </CardContent>
           </Card>

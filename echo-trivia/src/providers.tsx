@@ -2,6 +2,7 @@
 
 import { EchoProvider } from '@merit-systems/echo-next-sdk/client';
 import { ThemeProvider } from '@/components/theme-provider';
+import { FontProvider } from '@/components/font-provider';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -13,7 +14,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         themes={['light', 'dark', 'paperwhite', 'dullform', 'reaper', 'rivendell']}
         disableTransitionOnChange
       >
-        {children}
+        <FontProvider>
+          {children}
+        </FontProvider>
       </ThemeProvider>
     </EchoProvider>
   );

@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Sparkles, Loader2, Zap, Lock } from "lucide-react";
 import { CATEGORIES, type Category, type Difficulty, type QuestionType, type Quiz, type Session } from "@/lib/types";
-import { usePlayStore } from "@/lib/store";
+import { usePlayStore, useQuizPreferencesStore } from "@/lib/store";
 import { storage } from "@/lib/storage";
 import { generateId } from "@/lib/quiz-utils";
 import { useEcho } from "@merit-systems/echo-react-sdk";
@@ -22,11 +22,14 @@ function PracticeContent() {
   const { setSession } = usePlayStore();
   const { user, signIn, isLoading: echoLoading } = useEcho();
 
-  // Form state
+  // Get user preferences for defaults
+  const quizPrefs = useQuizPreferencesStore();
+
+  // Form state - initialized from user preferences
   const [category, setCategory] = useState<Category | "custom">("General Knowledge");
   const [customCategory, setCustomCategory] = useState<string>("");
-  const [numQuestions, setNumQuestions] = useState<number>(5);
-  const [difficulty, setDifficulty] = useState<Difficulty | "mixed">("mixed");
+  const [numQuestions, setNumQuestions] = useState<number>(quizPrefs.questionCount);
+  const [difficulty, setDifficulty] = useState<Difficulty | "mixed">(quizPrefs.difficulty);
   const [questionType, setQuestionType] = useState<QuestionType | "mixed">("mixed");
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,6 +102,9 @@ function PracticeContent() {
             type: questionType,
             style: "classic",
           },
+          // Pass user preferences for tone and explanation style
+          preferredTone: quizPrefs.preferredTone,
+          explanationStyle: quizPrefs.explanationStyle,
         }),
       });
 

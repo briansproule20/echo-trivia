@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Edit2, Check, X, Settings, Sparkles, Palette, Accessibility, SlidersHorizontal, Monitor, Sun, Moon } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useFontStore, type FontFamily } from '@/lib/store'
+import { useFontStore, useQuizPreferencesStore, type FontFamily } from '@/lib/store'
 import {
   Select,
   SelectContent,
@@ -66,11 +66,48 @@ const FONTS = [
   { id: 'tech' as FontFamily, name: 'Tech', description: 'Futuristic and robotic (Orbitron)', preview: 'Aa' },
 ] as const
 
+const DIFFICULTIES = [
+  { id: 'easy', name: 'Easy' },
+  { id: 'medium', name: 'Medium' },
+  { id: 'hard', name: 'Hard' },
+  { id: 'mixed', name: 'Mixed' },
+] as const
+
+const QUESTION_COUNTS = [
+  { id: 5, name: '5 Questions' },
+  { id: 10, name: '10 Questions' },
+] as const
+
+const EXPLANATION_TIMINGS = [
+  { id: 'after_each', name: 'After each question' },
+  { id: 'at_end', name: 'All at the end' },
+] as const
+
+const TONES = [
+  { id: 'scholarly', name: 'Scholarly', description: 'Academic and informative' },
+  { id: 'playful', name: 'Playful', description: 'Fun and lighthearted' },
+  { id: 'cinematic', name: 'Cinematic', description: 'Dramatic and storytelling' },
+  { id: 'pub_quiz', name: 'Pub Quiz', description: 'Casual and social' },
+  { id: 'deadpan', name: 'Deadpan', description: 'Dry and witty' },
+  { id: 'sports_banter', name: 'Sports Banter', description: 'Energetic commentary' },
+] as const
+
+const EXPLANATION_STYLES = [
+  { id: 'one_line_fact', name: 'Quick Fact', description: 'Brief one-liner' },
+  { id: 'compare_contrast', name: 'Compare', description: 'Why right vs wrong' },
+  { id: 'mini_story', name: 'Mini Story', description: 'Short narrative' },
+  { id: 'why_wrong', name: 'Why Wrong', description: 'Explains incorrect options' },
+] as const
+
 export default function SettingsPage() {
   const echo = useEcho()
   const { theme, setTheme } = useTheme()
   const font = useFontStore((state) => state.font)
   const setFont = useFontStore((state) => state.setFont)
+
+  // Quiz preferences
+  const quizPrefs = useQuizPreferencesStore()
+
   const [loading, setLoading] = useState(true)
   const [editingUsername, setEditingUsername] = useState(false)
   const [newUsername, setNewUsername] = useState('')
@@ -377,12 +414,141 @@ export default function SettingsPage() {
               <CardTitle className="flex items-center gap-2">
                 <SlidersHorizontal className="h-5 w-5" />
                 Quiz Preferences
+                <span className="text-sm font-normal text-muted-foreground">(Practice)</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Coming soon...
-              </p>
+            <CardContent className="space-y-6">
+              {/* Default Difficulty */}
+              <div className="space-y-2">
+                <Label>Default Difficulty</Label>
+                <div className="flex flex-wrap gap-2">
+                  {DIFFICULTIES.map((d) => (
+                    <button
+                      key={d.id}
+                      onClick={() => quizPrefs.setDifficulty(d.id)}
+                      className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
+                        quizPrefs.difficulty === d.id
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      {d.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Default Question Count */}
+              <div className="space-y-2">
+                <Label>Default Question Count</Label>
+                <div className="flex flex-wrap gap-2">
+                  {QUESTION_COUNTS.map((q) => (
+                    <button
+                      key={q.id}
+                      onClick={() => quizPrefs.setQuestionCount(q.id)}
+                      className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
+                        quizPrefs.questionCount === q.id
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      {q.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Explanation Timing */}
+              <div className="space-y-2">
+                <Label>Show Explanations</Label>
+                <div className="flex flex-wrap gap-2">
+                  {EXPLANATION_TIMINGS.map((e) => (
+                    <button
+                      key={e.id}
+                      onClick={() => quizPrefs.setExplanationTiming(e.id)}
+                      className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
+                        quizPrefs.explanationTiming === e.id
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      {e.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Auto-advance */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5 min-w-0 flex-1">
+                  <Label>Auto-advance</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Move to next question automatically
+                  </p>
+                </div>
+                <button
+                  onClick={() => quizPrefs.setAutoAdvance(!quizPrefs.autoAdvance)}
+                  className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${
+                    quizPrefs.autoAdvance ? 'bg-primary' : 'bg-muted'
+                  }`}
+                >
+                  <div
+                    className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-transform ${
+                      quizPrefs.autoAdvance ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* Preferred Tone */}
+              <div className="space-y-2">
+                <Label>Preferred Tone</Label>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Sets the vibe for how questions are written
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {TONES.map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => quizPrefs.setPreferredTone(quizPrefs.preferredTone === t.id ? null : t.id)}
+                      className={`px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all text-left ${
+                        quizPrefs.preferredTone === t.id
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div>{t.name}</div>
+                      <div className="text-xs text-muted-foreground font-normal">{t.description}</div>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">Click again to clear preference</p>
+              </div>
+
+              {/* Explanation Style */}
+              <div className="space-y-2">
+                <Label>Explanation Style</Label>
+                <p className="text-sm text-muted-foreground mb-2">
+                  How detailed explanations should be
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {EXPLANATION_STYLES.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => quizPrefs.setExplanationStyle(quizPrefs.explanationStyle === s.id ? null : s.id)}
+                      className={`px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all text-left ${
+                        quizPrefs.explanationStyle === s.id
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div>{s.name}</div>
+                      <div className="text-xs text-muted-foreground font-normal">{s.description}</div>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">Click again to clear preference</p>
+              </div>
             </CardContent>
           </Card>
 

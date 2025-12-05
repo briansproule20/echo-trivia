@@ -121,7 +121,7 @@ const SCHEMA_TEMPLATE = `{
 }`;
 
 // Simple non-seeded generation for custom categories
-async function generateCustomCategoryQuiz(settings: any) {
+async function generateCustomCategoryQuiz(settings: any, preferredTone?: string, explanationStyle?: string) {
   try {
     const typeInstruction =
       settings.type === "mixed"
@@ -136,6 +136,10 @@ async function generateCustomCategoryQuiz(settings: any) {
       settings.difficulty === "mixed"
         ? "Mix easy, medium, and hard questions"
         : `All questions should be ${settings.difficulty} difficulty`;
+
+    // Build tone and style instructions if preferences are set
+    const toneInstruction = preferredTone ? `- Apply a "${preferredTone}" tone throughout` : '';
+    const styleInstruction = explanationStyle ? `- Write explanations in the "${explanationStyle}" style` : '';
 
     const prompt = `Generate ${settings.numQuestions} trivia questions about ${settings.category}.
 
@@ -153,6 +157,8 @@ INSTRUCTIONS:
 - HARD questions: unique and challenging with lesser-known facts
 - Include concise explanations (1-2 sentences) for each question
 - Make each question feel distinct and original
+${toneInstruction}
+${styleInstruction}
 
 Return ONLY valid JSON matching this schema:
 ${SCHEMA_TEMPLATE}
@@ -246,7 +252,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const settings = PlaySettingsSchema.parse(body.settings);
-    const { dailyDate } = body; // Optional: for daily quizzes
+    const { dailyDate, preferredTone, explanationStyle } = body; // Optional: for daily quizzes and user preferences
 
     // Map category string to enum (if it exists in our predefined categories)
     const categoryEnum = categoryStringToEnum(settings.category);
@@ -254,7 +260,7 @@ export async function POST(req: Request) {
 
     // For custom categories: skip recipe system and use simple generation
     if (isCustomCategory && !dailyDate) {
-      return generateCustomCategoryQuiz(settings);
+      return generateCustomCategoryQuiz(settings, preferredTone, explanationStyle);
     }
 
     // For daily quizzes and established categories: use seeded recipe system
@@ -312,12 +318,16 @@ export async function POST(req: Request) {
     // Helper to convert enum arrays to label arrays
     const toLabel = (arr: number[], labels: readonly string[]) => arr.map(i => labels[i]);
 
+    // Use user preferences if provided, otherwise fall back to recipe
+    const finalTone = preferredTone || Labels.Tone[recipe.tone];
+    const finalExplanationStyle = explanationStyle || Labels.ExplanationStyle[recipe.explanation];
+
     const prompt = `Generate ${recipe.numQuestions} trivia questions about ${primaryCategory}.
 
 RECIPE CONSTRAINTS:
-- tone: ${Labels.Tone[recipe.tone]}
+- tone: ${finalTone}
 - era: ${Labels.Era[recipe.era]}
-- explanation_style: ${Labels.ExplanationStyle[recipe.explanation]}
+- explanation_style: ${finalExplanationStyle}
 
 ${typeInstruction}.
 
@@ -333,8 +343,8 @@ INSTRUCTIONS:
 - CRITICAL: Set the "difficulty" field for each question EXACTLY as specified above (question 1 = "${difficultyLabels[0]}", question 2 = "${difficultyLabels[1]}", etc.)
 - For multiple_choice, include exactly 4 options with exactly 1 correct
 - For wrong answer choices: make them plausible but clearly distinct from the correct answer (avoid trick questions and confusingly similar options)
-- Write explanations in the "${Labels.ExplanationStyle[recipe.explanation]}" style
-- Apply the "${Labels.Tone[recipe.tone]}" tone throughout
+- Write explanations in the "${finalExplanationStyle}" style
+- Apply the "${finalTone}" tone throughout
 - Focus on the "${Labels.Era[recipe.era]}" era when relevant
 - EASY questions: Should be accessible but NOT obvious or trivial - avoid the most famous facts everyone already knows
 - MEDIUM questions: Should explore more specific topics and interesting angles

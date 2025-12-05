@@ -127,3 +127,47 @@ export const useFontStore = create<FontState>()(
   )
 );
 
+// Quiz preferences
+export type Difficulty = "easy" | "medium" | "hard" | "mixed";
+export type QuestionCount = 5 | 10;
+export type ExplanationTiming = "after_each" | "at_end";
+export type Tone = "scholarly" | "playful" | "cinematic" | "pub_quiz" | "deadpan" | "sports_banter";
+export type ExplanationStyle = "one_line_fact" | "compare_contrast" | "mini_story" | "why_wrong";
+
+interface QuizPreferencesState {
+  difficulty: Difficulty;
+  questionCount: QuestionCount;
+  explanationTiming: ExplanationTiming;
+  autoAdvance: boolean;
+  preferredTone: Tone | null;
+  explanationStyle: ExplanationStyle | null;
+  setDifficulty: (difficulty: Difficulty) => void;
+  setQuestionCount: (count: QuestionCount) => void;
+  setExplanationTiming: (timing: ExplanationTiming) => void;
+  setAutoAdvance: (auto: boolean) => void;
+  setPreferredTone: (tone: Tone | null) => void;
+  setExplanationStyle: (style: ExplanationStyle | null) => void;
+}
+
+export const useQuizPreferencesStore = create<QuizPreferencesState>()(
+  persist(
+    (set) => ({
+      difficulty: "mixed",
+      questionCount: 5,
+      explanationTiming: "after_each",
+      autoAdvance: false,
+      preferredTone: null,
+      explanationStyle: null,
+      setDifficulty: (difficulty) => set({ difficulty }),
+      setQuestionCount: (questionCount) => set({ questionCount }),
+      setExplanationTiming: (explanationTiming) => set({ explanationTiming }),
+      setAutoAdvance: (autoAdvance) => set({ autoAdvance }),
+      setPreferredTone: (preferredTone) => set({ preferredTone }),
+      setExplanationStyle: (explanationStyle) => set({ explanationStyle }),
+    }),
+    {
+      name: "trivia-wizard-quiz-preferences",
+    }
+  )
+);
+

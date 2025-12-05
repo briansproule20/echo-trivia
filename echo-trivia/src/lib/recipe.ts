@@ -44,7 +44,6 @@ export enum QuestionType {
   MULTIPLE_CHOICE = 0,
   TRUE_FALSE = 1,
   FILL_BLANK = 2,
-  ORDERING = 3,
 }
 const QT = Object.values(QuestionType).filter(v => typeof v === "number") as QuestionType[];
 
@@ -120,7 +119,7 @@ export function buildRecipeFromSeed(seedHex: string, opts?: { fixedNumQuestions?
 // Label mappers for prompt readability
 export const Labels = {
   Category: CATEGORY_STRINGS,
-  QuestionType: ["multiple_choice", "true_false", "fill_blank", "ordering"],
+  QuestionType: ["multiple_choice", "true_false", "fill_blank"],
   Tone: ["scholarly", "playful", "cinematic", "pub_quiz", "deadpan", "sports_banter"],
   Era: ["ancient", "medieval", "early_modern", "modern", "contemporary", "mixed"],
   ExplanationStyle: ["one_line_fact", "compare_contrast", "mini_story", "why_wrong"],

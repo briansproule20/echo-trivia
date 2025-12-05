@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
     const userIds = topN.map((e) => e.echo_user_id)
     const { data: users, error: usersError } = await supabase
       .from('users')
-      .select('echo_user_id, username, avatar_url')
+      .select('echo_user_id, username, avatar_url, avatar_id')
       .in('echo_user_id', userIds)
 
     if (usersError) {
@@ -140,6 +140,7 @@ export async function GET(request: NextRequest) {
         echo_user_id: entry.echo_user_id,
         username: user?.username || null,
         avatar_url: user?.avatar_url || null,
+        avatar_id: user?.avatar_id || null,
         score: Math.round(entry.score * 100) / 100,
         rank: entry.rank,
         total_quizzes: entry.total_quizzes,
@@ -155,7 +156,7 @@ export async function GET(request: NextRequest) {
         const userRank = leaderboardData.findIndex(e => e.echo_user_id === echoUserId) + 1
         const { data: userData } = await supabase
           .from('users')
-          .select('echo_user_id, username, avatar_url')
+          .select('echo_user_id, username, avatar_url, avatar_id')
           .eq('echo_user_id', echoUserId)
           .single()
 
@@ -163,6 +164,7 @@ export async function GET(request: NextRequest) {
           echo_user_id: echoUserId,
           username: userData?.username || null,
           avatar_url: userData?.avatar_url || null,
+          avatar_id: userData?.avatar_id || null,
           score: Math.round(userEntry.score * 100) / 100,
           rank: userRank,
           total_quizzes: userEntry.total_quizzes,

@@ -5,6 +5,7 @@ export interface User {
   echo_user_id: string
   username: string | null
   avatar_url: string | null
+  avatar_id: string | null
   created_at: string
   updated_at: string
 }
@@ -105,6 +106,7 @@ export interface LeaderboardEntry {
   echo_user_id: string
   username: string | null
   avatar_url: string | null
+  avatar_id: string | null
   score: number
   rank: number
   total_quizzes?: number

@@ -175,12 +175,37 @@ export default function SettingsPage() {
         if (data.user) {
           setCurrentUsername(data.user.username || '')
           setNewUsername(data.user.username || '')
+          // Sync avatar from DB to localStorage
+          if (data.user.avatar_id) {
+            quizPrefs.setAvatarId(data.user.avatar_id)
+          }
         }
       }
     } catch (error) {
       console.error('Error fetching user profile:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleAvatarUpdate = async (avatarId: AvatarId) => {
+    // Update localStorage immediately
+    quizPrefs.setAvatarId(avatarId)
+    setAvatarOpen(false)
+
+    // Sync to database
+    if (!echo.user?.id) return
+    try {
+      await fetch('/api/user/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          echo_user_id: echo.user.id,
+          avatar_id: avatarId,
+        }),
+      })
+    } catch (error) {
+      console.error('Error updating avatar:', error)
     }
   }
 
@@ -304,10 +329,7 @@ export default function SettingsPage() {
                         return (
                           <button
                             key={a.id}
-                            onClick={() => {
-                              quizPrefs.setAvatarId(a.id)
-                              setAvatarOpen(false)
-                            }}
+                            onClick={() => handleAvatarUpdate(a.id)}
                             className={`p-3 rounded-lg transition-all ${
                               isSelected
                                 ? 'bg-primary/10 ring-2 ring-primary'

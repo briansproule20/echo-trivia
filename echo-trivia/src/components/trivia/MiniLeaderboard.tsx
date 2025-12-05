@@ -5,9 +5,28 @@ import { useEcho } from "@merit-systems/echo-react-sdk";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Trophy, Medal, Award, TrendingUp, HelpCircle, User } from "lucide-react";
+import { Trophy, Medal, Award, TrendingUp, HelpCircle, User, Skull, Ghost, Cat, Swords, Shield, Target, Glasses, TreePine, Flame, Zap, Crown, Anchor, Bird, Bug, Snowflake, Cherry } from "lucide-react";
 import type { LeaderboardEntry } from "@/lib/supabase-types";
 import Link from "next/link";
+
+const AVATAR_ICONS: Record<string, typeof Ghost> = {
+  skull: Skull,
+  ghost: Ghost,
+  cat: Cat,
+  swords: Swords,
+  shield: Shield,
+  target: Target,
+  glasses: Glasses,
+  tree: TreePine,
+  flame: Flame,
+  zap: Zap,
+  crown: Crown,
+  anchor: Anchor,
+  bird: Bird,
+  bug: Bug,
+  snowflake: Snowflake,
+  cherry: Cherry,
+};
 
 export function MiniLeaderboard() {
   const echo = useEcho();
@@ -160,20 +179,30 @@ export function MiniLeaderboard() {
                     )}
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm flex items-center gap-1.5">
-                      <span className="truncate">
-                        {entry.username || `User ${entry.echo_user_id.slice(0, 8)}`}
-                      </span>
-                      {isCurrentUser && (
-                        <Badge variant="default" className="text-xs shrink-0 h-4 px-1">You</Badge>
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {(() => {
+                      const Icon = entry.avatar_id ? AVATAR_ICONS[entry.avatar_id] || Ghost : Ghost;
+                      return (
+                        <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          <Icon className="h-3.5 w-3.5 text-primary" />
+                        </div>
+                      );
+                    })()}
+                    <div className="min-w-0">
+                      <div className="font-medium text-sm flex items-center gap-1.5">
+                        <span className="truncate">
+                          {entry.username || `User ${entry.echo_user_id.slice(0, 8)}`}
+                        </span>
+                        {isCurrentUser && (
+                          <Badge variant="default" className="text-xs shrink-0 h-4 px-1">You</Badge>
+                        )}
+                      </div>
+                      {entry.total_quizzes && (
+                        <div className="text-xs text-muted-foreground">
+                          {entry.total_quizzes} {entry.total_quizzes === 1 ? 'quiz' : 'quizzes'}
+                        </div>
                       )}
                     </div>
-                    {entry.total_quizzes && (
-                      <div className="text-xs text-muted-foreground">
-                        {entry.total_quizzes} {entry.total_quizzes === 1 ? 'quiz' : 'quizzes'}
-                      </div>
-                    )}
                   </div>
                 </div>
 

@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { echo_user_id, username, avatar_url } = body
+    const { echo_user_id, username, avatar_url, avatar_id } = body
 
     if (!echo_user_id) {
       return NextResponse.json(
@@ -72,11 +72,12 @@ export async function POST(request: NextRequest) {
 
     if (functionError) throw functionError
 
-    // If username or avatar_url provided, update the user
-    if (username || avatar_url) {
+    // If username, avatar_url, or avatar_id provided, update the user
+    if (username || avatar_url || avatar_id) {
       const updateData: any = { updated_at: new Date().toISOString() }
       if (username) updateData.username = username
       if (avatar_url) updateData.avatar_url = avatar_url
+      if (avatar_id) updateData.avatar_id = avatar_id
 
       const { error: updateError } = await supabase
         .from('users')

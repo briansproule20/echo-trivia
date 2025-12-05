@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, BookOpen, FileQuestion, BarChart3, Trophy, User, Sparkles, Users, Settings } from "lucide-react";
@@ -30,16 +31,24 @@ const EXTRA_NAV_ITEMS = [
 export function Navbar() {
   const pathname = usePathname();
   const echo = useEcho();
-  const { theme } = useTheme();
+  const { theme, resolvedTheme } = useTheme();
   const isAuthenticated = !!echo.user;
+  const [mounted, setMounted] = useState(false);
 
-  const logoSrc = theme === 'paperwhite'
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Use the actual theme value (not 'system') for custom themes
+  const currentTheme = mounted ? theme : undefined;
+
+  const logoSrc = currentTheme === 'paperwhite'
     ? '/triviawizard_favicon_paperwhite_stippled.png'
-    : theme === 'dullform'
+    : currentTheme === 'dullform'
     ? '/triviawizard_favicon_paperwhite_stippled_detail.png'
-    : theme === 'reaper'
+    : currentTheme === 'reaper'
     ? '/reaper.png'
-    : theme === 'rivendell'
+    : currentTheme === 'rivendell'
     ? '/rivendell.png'
     : '/trivia-wizard-logo.png';
 

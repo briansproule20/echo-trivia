@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/server'
 // Base rating: 1000
 // K-factor varies by experience level
 // Expected score based on difficulty
-// Rating change = K * (actual - expected)
+// Rating change = K * (actual - expected) + participation bonus
 
 interface EloEntry {
   echo_user_id: string
@@ -26,37 +26,45 @@ function calculateSkillRating(sessions: Array<{
 
   let rating = 1000
 
+  // Expected scores by difficulty (what an "average" player should get)
+  const difficultyExpected: Record<string, number> = {
+    'easy': 0.75,
+    'medium': 0.60,
+    'hard': 0.45,
+  }
+
   // Sort sessions by some consistent order (we'll process them in sequence)
   sessions.forEach((session, index) => {
     // K-factor decreases as you play more (more stable rating)
     // Start at 40, decrease to 16 after 30 games
     const k = Math.max(16, 40 - (index * 0.8))
 
-    // Difficulty multiplier for expected score
-    // Easy: expected 75%, Medium: expected 60%, Hard: expected 45%
-    const difficultyExpected: Record<string, number> = {
-      'easy': 0.75,
-      'medium': 0.60,
-      'hard': 0.45,
-    }
     const difficulty = session.difficulty || 'medium'
     const expected = difficultyExpected[difficulty] || 0.60
 
     // Actual performance (0-1 scale)
     const actual = session.score_percentage / 100
 
-    // Rating change
-    // If you beat expected, you gain points
-    // If you underperform, you lose points
     // Difficulty bonus: harder quizzes give more points for the same performance
     const difficultyMultiplier = difficulty === 'hard' ? 1.3 : difficulty === 'easy' ? 0.8 : 1.0
 
-    const change = k * (actual - expected) * difficultyMultiplier
+    // Base performance change
+    const performanceChange = k * (actual - expected) * difficultyMultiplier
 
     // Question count bonus (more questions = more reliable score)
     const questionBonus = session.num_questions >= 10 ? 1.1 : session.num_questions >= 5 ? 1.0 : 0.9
 
-    rating += change * questionBonus
+    // Participation bonus: small reward for each quiz played
+    // This ensures ratings differentiate even when scoring at expected level
+    // Bonus decreases as you play more (diminishing returns)
+    // First few games: ~2 points, later games: ~0.5 points
+    const participationBonus = Math.max(0.5, 3 - (index * 0.1))
+
+    // Performance bonus for doing well (above 50%)
+    // This rewards consistent good play beyond just beating expected
+    const performanceBonus = actual >= 0.70 ? 1.5 : actual >= 0.50 ? 0.5 : 0
+
+    rating += (performanceChange * questionBonus) + participationBonus + performanceBonus
   })
 
   // Floor at 100, no ceiling

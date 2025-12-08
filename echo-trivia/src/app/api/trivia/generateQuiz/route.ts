@@ -1,12 +1,14 @@
-// New seed-based deterministic quiz generation endpoint
+// Seed-based deterministic quiz generation endpoint (simplified)
+// Uses streamlined recipe: difficulty curve, tone, explanation style
 
 import { NextRequest, NextResponse } from "next/server";
 import { anthropic } from "@/echo";
 import { generateText } from "ai";
 import { generateSeed } from "@/lib/rand";
-import { buildRecipeFromSeed, DIFFICULTY_CURVES, Labels, categoryEnumToString } from "@/lib/recipe";
+import { buildRecipeFromSeed, DIFFICULTY_CURVES, Labels } from "@/lib/recipe";
 import { QuizSchema } from "@/lib/schemas";
 import { generateId } from "@/lib/quiz-utils";
+import { CATEGORIES } from "@/lib/types";
 
 const SYSTEM_PROMPT = `You are a professional trivia generator. Follow the provided RECIPE exactly.
 
@@ -35,17 +37,19 @@ CRITICAL RULES:
 - NEVER include the answer within the question prompt itself
 - Use clear phrasing; avoid double negatives
 - All questions must be factually accurate
-- Distribute categories across questions; avoid consecutive questions with the same category when possible
 - Follow the difficulty curve progression provided in the recipe`;
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { fixedNumQuestions } = body;
+    const { fixedNumQuestions, category } = body;
 
     // Generate one 32-byte seed per quiz
     const seedHex = generateSeed();
     const recipe = buildRecipeFromSeed(seedHex, { fixedNumQuestions });
+
+    // Use provided category or pick random one
+    const selectedCategory = category || CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
 
     // Get the difficulty curve for this recipe
     const curve = DIFFICULTY_CURVES[recipe.difficultyCurveId].slice(0, recipe.numQuestions);
@@ -57,45 +61,33 @@ export async function POST(req: NextRequest) {
       return "hard";
     });
 
-    // Helper to convert enum arrays to label arrays
-    const toLabel = (arr: number[], labels: readonly string[]) => arr.map(i => labels[i]);
-
-    // Convert category enums to strings
-    const categoryStrings = recipe.categoryMix.map(cat => categoryEnumToString(cat));
-
     // Build user prompt with recipe details
     const userPrompt = `
 RECIPE:
+- category: ${selectedCategory}
 - num_questions: ${recipe.numQuestions}
 - difficulty_curve: [${curve.map(n => n.toFixed(2)).join(", ")}]
 - difficulty_labels: [${difficultyLabels.map(d => `"${d}"`).join(", ")}]
-- category_mix: ${categoryStrings.join(", ")}
-- question_types: ${toLabel(recipe.questionTypes as unknown as number[], Labels.QuestionType).join(", ")}
 - tone: ${Labels.Tone[recipe.tone]}
-- era: ${Labels.Era[recipe.era]}
 - explanation_style: ${Labels.ExplanationStyle[recipe.explanation]}
 
 INSTRUCTIONS:
-- Create ${recipe.numQuestions} questions matching the recipe
-- Use the categories from category_mix, distributing them across questions
-- Avoid asking the same category twice in a row if possible
+- Create ${recipe.numQuestions} questions about "${selectedCategory}"
 - Match each question's difficulty to the corresponding difficulty_label
 - For multiple_choice, include exactly 4 options with exactly 1 correct
-- Wrong answers must be plausible but clearly distinct from the correct answer (avoid trick questions or tiny numeric/date differences)
+- Wrong answers must be plausible but clearly distinct from the correct answer
 - Write explanations in the "${Labels.ExplanationStyle[recipe.explanation]}" style
 - Apply the "${Labels.Tone[recipe.tone]}" tone throughout
-- Focus on the "${Labels.Era[recipe.era]}" era when relevant
-- Use question types: ${toLabel(recipe.questionTypes as unknown as number[], Labels.QuestionType).join(", ")}
 
-Generate a creative title and description for this quiz based on the recipe.
+Generate a creative title and description for this quiz.
   `.trim();
 
-    // Generate with Echo LLM using existing temperature
+    // Generate with Echo LLM
     const result = await generateText({
       model: anthropic("claude-sonnet-4-20250514"),
       system: SYSTEM_PROMPT,
       prompt: userPrompt,
-      temperature: 0.8, // Keep existing temperature
+      temperature: 0.8,
     });
 
     // Parse and validate response
@@ -112,10 +104,10 @@ Generate a creative title and description for this quiz based on the recipe.
         ...parsed,
         id: generateId(),
         createdAt: new Date().toISOString(),
-        category: categoryStrings[0], // Primary category
+        category: selectedCategory,
       });
     } catch (error) {
-      // Try to repair JSON with LLM (retry with same recipe - idempotent)
+      // Try to repair JSON with LLM
       console.error("JSON parsing failed, attempting repair:", error);
 
       const SCHEMA_TEMPLATE = `{
@@ -152,7 +144,7 @@ Generate a creative title and description for this quiz based on the recipe.
         ...parsed,
         id: generateId(),
         createdAt: new Date().toISOString(),
-        category: categoryStrings[0],
+        category: selectedCategory,
       });
     }
 
@@ -172,6 +164,12 @@ Generate a creative title and description for this quiz based on the recipe.
       }
       return q;
     });
+
+    // Force category on all questions
+    quiz.questions = quiz.questions.map((q) => ({
+      ...q,
+      category: selectedCategory,
+    }));
 
     return NextResponse.json({ recipe, quiz });
   } catch (error) {

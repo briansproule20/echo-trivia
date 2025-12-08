@@ -38,10 +38,8 @@ function testDifferentSeeds() {
   // At least one field should be different
   const isDifferent =
     recipeA.tone !== recipeB.tone ||
-    recipeA.era !== recipeB.era ||
-    recipeA.region !== recipeB.region ||
-    recipeA.difficultyCurveId !== recipeB.difficultyCurveId ||
-    JSON.stringify(recipeA.categoryMix) !== JSON.stringify(recipeB.categoryMix);
+    recipeA.explanation !== recipeB.explanation ||
+    recipeA.difficultyCurveId !== recipeB.difficultyCurveId;
 
   assert(isDifferent, "Different seeds should produce different configs in at least one field");
   console.log("✓ Different seeds test passed");
@@ -64,15 +62,15 @@ function testEnumSafety() {
     "difficultyCurveId must be 0, 1, or 2"
   );
 
-  // Check all arrays are non-empty
-  assert(recipe.categoryMix.length > 0, "categoryMix must not be empty");
-  assert(recipe.questionTypes.length > 0, "questionTypes must not be empty");
-  assert(recipe.distractors.length === 2, "distractors must have exactly 2 elements");
-
-  // Check tone, era, explanation are numbers (enum values)
+  // Check tone and explanation are numbers (enum values)
   assert(typeof recipe.tone === "number", "tone must be an enum number");
-  assert(typeof recipe.era === "number", "era must be an enum number");
   assert(typeof recipe.explanation === "number", "explanation must be an enum number");
+
+  // Check tone is in valid range (0-5 for 6 tones)
+  assert(recipe.tone >= 0 && recipe.tone <= 5, "tone must be in valid enum range");
+
+  // Check explanation is in valid range (0-3 for 4 explanation styles)
+  assert(recipe.explanation >= 0 && recipe.explanation <= 3, "explanation must be in valid enum range");
 
   console.log("✓ Enum safety test passed");
 }
@@ -90,36 +88,20 @@ function testDifficultyCurveLength() {
   console.log("✓ Difficulty curve length test passed");
 }
 
-function testCategoryMixSize() {
-  console.log("Testing category mix size is between 4-6...");
+function testRecipeStructure() {
+  console.log("Testing recipe has correct structure...");
 
-  for (let i = 0; i < 10; i++) {
-    const seed = generateSeed();
-    const recipe = buildRecipeFromSeed(seed);
+  const seed = generateSeed();
+  const recipe = buildRecipeFromSeed(seed);
 
-    assert(
-      recipe.categoryMix.length >= 4 && recipe.categoryMix.length <= 6,
-      `categoryMix length should be 4-6, got ${recipe.categoryMix.length}`
-    );
-  }
+  // Recipe should only have these fields
+  const expectedKeys = ["seedHex", "numQuestions", "difficultyCurveId", "tone", "explanation"];
+  const actualKeys = Object.keys(recipe).sort();
+  const expected = expectedKeys.sort();
 
-  console.log("✓ Category mix size test passed");
-}
+  assertEqual(actualKeys, expected, "Recipe should have exactly the expected fields");
 
-function testQuestionTypesSize() {
-  console.log("Testing question types size is between 2-3...");
-
-  for (let i = 0; i < 10; i++) {
-    const seed = generateSeed();
-    const recipe = buildRecipeFromSeed(seed);
-
-    assert(
-      recipe.questionTypes.length >= 2 && recipe.questionTypes.length <= 3,
-      `questionTypes length should be 2-3, got ${recipe.questionTypes.length}`
-    );
-  }
-
-  console.log("✓ Question types size test passed");
+  console.log("✓ Recipe structure test passed");
 }
 
 function runAllTests() {
@@ -130,8 +112,7 @@ function runAllTests() {
     testDifferentSeeds();
     testEnumSafety();
     testDifficultyCurveLength();
-    testCategoryMixSize();
-    testQuestionTypesSize();
+    testRecipeStructure();
 
     console.log("\n✅ All tests passed!");
   } catch (error) {

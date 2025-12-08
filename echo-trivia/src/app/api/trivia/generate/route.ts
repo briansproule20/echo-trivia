@@ -288,9 +288,6 @@ export async function POST(req: Request) {
     }
     const primaryCategory = categoryEnumToString(categoryEnum);
 
-    // Get categories to include in the quiz (only the specified category)
-    const categoryStrings = [primaryCategory];
-
     // Get the difficulty curve for this recipe
     const curve = DIFFICULTY_CURVES[recipe.difficultyCurveId].slice(0, recipe.numQuestions);
 
@@ -315,9 +312,6 @@ export async function POST(req: Request) {
         ? "All questions should be true/false"
         : "All questions should be short answer";
 
-    // Helper to convert enum arrays to label arrays
-    const toLabel = (arr: number[], labels: readonly string[]) => arr.map(i => labels[i]);
-
     // Use user preferences if provided, otherwise fall back to recipe
     const finalTone = preferredTone || Labels.Tone[recipe.tone];
     const finalExplanationStyle = explanationStyle || Labels.ExplanationStyle[recipe.explanation];
@@ -326,7 +320,6 @@ export async function POST(req: Request) {
 
 RECIPE CONSTRAINTS:
 - tone: ${finalTone}
-- era: ${Labels.Era[recipe.era]}
 - explanation_style: ${finalExplanationStyle}
 
 ${typeInstruction}.
@@ -345,7 +338,6 @@ INSTRUCTIONS:
 - For wrong answer choices: make them plausible but clearly distinct from the correct answer (avoid trick questions and confusingly similar options)
 - Write explanations in the "${finalExplanationStyle}" style
 - Apply the "${finalTone}" tone throughout
-- Focus on the "${Labels.Era[recipe.era]}" era when relevant
 - EASY questions: Should be accessible but NOT obvious or trivial - avoid the most famous facts everyone already knows
 - MEDIUM questions: Should explore more specific topics and interesting angles
 - HARD questions: Must be unique and challenging with lesser-known facts

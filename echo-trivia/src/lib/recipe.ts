@@ -1,4 +1,4 @@
-import { rollFrom, rollSample, rollIndex } from "./rand";
+import { rollFrom, rollIndex } from "./rand";
 import { CATEGORIES as EXISTING_CATEGORIES } from "./types";
 
 // Map existing category strings to enum indices
@@ -40,12 +40,7 @@ export function categoryStringToEnum(str: string): Category | undefined {
   return idx >= 0 ? idx as Category : undefined;
 }
 
-export enum QuestionType {
-  MULTIPLE_CHOICE = 0,
-  TRUE_FALSE = 1,
-  FILL_BLANK = 2,
-}
-const QT = Object.values(QuestionType).filter(v => typeof v === "number") as QuestionType[];
+// QuestionType enum removed - question types come from user settings, not recipe
 
 export enum Tone {
   SCHOLARLY = 0,
@@ -57,15 +52,7 @@ export enum Tone {
 }
 const TONES = Object.values(Tone).filter(v => typeof v === "number") as Tone[];
 
-export enum Era {
-  ANCIENT = 0,
-  MEDIEVAL = 1,
-  EARLY_MODERN = 2,
-  MODERN = 3,
-  CONTEMPORARY = 4,
-  MIXED = 5,
-}
-const ERAS = Object.values(Era).filter(v => typeof v === "number") as Era[];
+// Era enum removed - was causing conflicts with diverse category topics
 
 export enum ExplanationStyle {
   ONE_LINE_FACT = 0,
@@ -85,22 +72,14 @@ export interface Recipe {
   seedHex: string;
   numQuestions: 5 | 10;
   difficultyCurveId: 0 | 1 | 2;
-  categoryMix: Category[];
-  questionTypes: QuestionType[];
   tone: Tone;
-  era: Era;
   explanation: ExplanationStyle;
 }
 
 export function buildRecipeFromSeed(seedHex: string, opts?: { fixedNumQuestions?: 5 | 10 }): Recipe {
   const numQuestions = opts?.fixedNumQuestions ?? (rollIndex(seedHex, "numQuestions", 2) === 0 ? 10 : 5);
-  const kCats = 4 + rollIndex(seedHex, "kCats", 3); // 4..6
-  const kQTypes = 2 + rollIndex(seedHex, "kQTypes", 2); // 2..3
 
   const tone = rollFrom(seedHex, "tone", TONES);
-  const era = rollFrom(seedHex, "era", ERAS);
-  const categoryMix = rollSample(seedHex, "categories", CATEGORIES, kCats);
-  const questionTypes = rollSample(seedHex, "qtypes", QT, kQTypes);
   const explanation = rollFrom(seedHex, "explanation", EXPL);
   const difficultyCurveId = rollIndex(seedHex, "curve", 3) as 0 | 1 | 2;
 
@@ -108,10 +87,7 @@ export function buildRecipeFromSeed(seedHex: string, opts?: { fixedNumQuestions?
     seedHex,
     numQuestions,
     difficultyCurveId,
-    categoryMix,
-    questionTypes,
     tone,
-    era,
     explanation,
   };
 }
@@ -121,6 +97,5 @@ export const Labels = {
   Category: CATEGORY_STRINGS,
   QuestionType: ["multiple_choice", "true_false", "fill_blank"],
   Tone: ["scholarly", "playful", "cinematic", "pub_quiz", "deadpan", "sports_banter"],
-  Era: ["ancient", "medieval", "early_modern", "modern", "contemporary", "mixed"],
   ExplanationStyle: ["one_line_fact", "compare_contrast", "mini_story", "why_wrong"],
 } as const;

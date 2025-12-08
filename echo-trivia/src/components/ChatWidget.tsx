@@ -100,32 +100,45 @@ export function ChatWidget() {
       {/* Floating button */}
       <AnimatePresence>
         {!isOpen && (
-          <motion.button
+          <motion.div
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
             exit={{ scale: 0, rotate: 180, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-            onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 left-6 z-50 group"
-            aria-label="Open chat"
+            className="fixed bottom-4 left-4 z-50"
           >
-            <motion.div
-              className="relative h-14 w-14 rounded-full bg-primary flex items-center justify-center shadow-lg transition-shadow group-hover:shadow-xl"
+            {/* Pulse ring for attention - CSS animation for smooth performance */}
+            {!hasInteracted && (
+              <span
+                className="absolute inset-0 h-11 w-11 sm:h-12 sm:w-12 rounded-full border-2 border-primary/50 pointer-events-none"
+                style={{
+                  animation: 'slow-ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite',
+                }}
+              />
+            )}
+            <style jsx>{`
+              @keyframes slow-ping {
+                0% {
+                  transform: scale(1);
+                  opacity: 0.6;
+                }
+                100% {
+                  transform: scale(1.6);
+                  opacity: 0;
+                }
+              }
+            `}</style>
+
+            <motion.button
+              onClick={() => setIsOpen(true)}
+              className="relative h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-primary flex items-center justify-center shadow-lg group"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
+              aria-label="Open chat"
             >
-              <WizardsHat className="h-7 w-7 text-primary-foreground" />
-
-              {/* Pulse ring for attention */}
-              {!hasInteracted && (
-                <motion.div
-                  className="absolute inset-0 rounded-full border-2 border-primary"
-                  animate={{ scale: [1, 1.4], opacity: [0.6, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeOut' }}
-                />
-              )}
-            </motion.div>
-          </motion.button>
+              <WizardsHat className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
+            </motion.button>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -137,7 +150,7 @@ export function ChatWidget() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="fixed bottom-6 left-6 z-50 w-[360px] h-[500px] max-h-[80vh] bg-background/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-4 left-4 z-50 w-[340px] sm:w-[360px] h-[480px] max-h-[80vh] bg-background/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">

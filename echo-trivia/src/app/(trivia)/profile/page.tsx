@@ -49,6 +49,7 @@ export default function ProfilePage() {
       if (statsRes.ok) {
         const data = await statsRes.json();
         setStats(data.stats);
+        setFaceoffStats({ played: data.faceoffCount || 0 });
       }
 
       // Fetch achievements
@@ -63,14 +64,6 @@ export default function ProfilePage() {
       if (streakRes.ok) {
         const data = await streakRes.json();
         setStreak(data.streak);
-      }
-
-      // Fetch faceoff stats - count sessions with game_mode = 'faceoff'
-      const sessionsRes = await fetch(`/api/user/sessions?echo_user_id=${echo.user.id}`);
-      if (sessionsRes.ok) {
-        const data = await sessionsRes.json();
-        const faceoffCount = data.sessions?.filter((s: any) => s.game_mode === 'faceoff').length || 0;
-        setFaceoffStats({ played: faceoffCount });
       }
     } catch (error) {
       console.error('Error fetching user data:', error);

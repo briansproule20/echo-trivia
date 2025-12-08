@@ -64,6 +64,9 @@ export async function GET(request: NextRequest) {
     const dailyQuizzesCompleted = sessions.filter(
       (s) => s.is_daily === true
     ).length
+    const faceoffCount = sessions.filter(
+      (s) => s.game_mode === 'faceoff'
+    ).length
     const totalTimePlayed = sessions.reduce(
       (sum, s) => sum + (s.time_taken || 0),
       0
@@ -212,7 +215,8 @@ export async function GET(request: NextRequest) {
       dayOfWeekActivity,
       radarData,
       scoreTrend,
-      difficultyPerformance
+      difficultyPerformance,
+      faceoffCount
     })
   } catch (error) {
     console.error('Error fetching user stats:', error)

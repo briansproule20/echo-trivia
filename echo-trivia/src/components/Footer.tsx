@@ -178,6 +178,14 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/categories"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Categories
+                </Link>
+              </li>
+              <li>
                 <a
                   href="https://echo.merit.systems/dashboard"
                   target="_blank"

@@ -28,6 +28,7 @@ export interface QuizSession {
   time_taken: number | null
   created_at: string
   game_mode: 'daily' | 'freeplay' | 'endless' | 'jeopardy' | 'campaign' | 'faceoff' | null
+  faceoff_share_code: string | null
 }
 
 export interface Achievement {
@@ -131,6 +132,7 @@ export interface SaveQuizSessionRequest {
   time_taken?: number
   session_id?: string
   game_mode?: 'daily' | 'freeplay' | 'endless' | 'jeopardy' | 'campaign' | 'faceoff'
+  faceoff_share_code?: string
   // Individual submissions for validation
   submissions?: Array<{
     question_id: string

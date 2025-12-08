@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
       time_taken,
       session_id,
       game_mode,
+      faceoff_share_code,
       submissions,
       questions,
     } = body
@@ -272,6 +273,7 @@ export async function POST(request: NextRequest) {
         title: title || null,
         time_taken: time_taken || null,
         game_mode: game_mode || (is_daily ? 'daily' : 'freeplay'),
+        faceoff_share_code: faceoff_share_code || null,
       })
       .select()
       .single()

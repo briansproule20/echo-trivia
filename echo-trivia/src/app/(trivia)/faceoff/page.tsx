@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Swords, Loader2, Share2, Info } from "lucide-react";
+import { Swords, Loader2, Share2, Info, LayoutGrid } from "lucide-react";
+import Link from "next/link";
 import { CATEGORIES, type Category, type Difficulty, type QuestionType, type Quiz, type Session } from "@/lib/types";
 import { usePlayStore } from "@/lib/store";
 import { storage } from "@/lib/storage";
@@ -120,6 +121,13 @@ function FaceoffContent() {
             <p className="text-muted-foreground">
               Create a custom challenge and share it with friends
             </p>
+            <Link
+              href="/faceoff/hub"
+              className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors font-medium"
+            >
+              <LayoutGrid className="h-4 w-4" />
+              Browse the Faceoff Hub
+            </Link>
           </div>
 
           {/* Info Alert */}
@@ -273,6 +281,14 @@ function FaceoffContent() {
                     </>
                   )}
                 </Button>
+
+                {/* Faceoff Hub Link */}
+                <div className="pt-4 border-t">
+                  <Link href="/faceoff/hub" className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+                    <LayoutGrid className="h-4 w-4" />
+                    <span>Browse all challenges in the Faceoff Hub</span>
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           )}

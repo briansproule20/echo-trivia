@@ -1,0 +1,13 @@
+{
+  "name": "echo-trivia-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd echo-trivia && npm run dev",
+    "dev:clean": "cd echo-trivia && npm run dev:clean",
+    "build": "cd echo-trivia && npm run build",
+    "start": "cd echo-trivia && npm run start",
+    "lint": "cd echo-trivia && npm run lint"
+  }
+}
+

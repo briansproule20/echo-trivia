@@ -27,7 +27,7 @@ export interface QuizSession {
   completed_at: string
   time_taken: number | null
   created_at: string
-  game_mode: 'daily' | 'practice' | 'endless' | 'jeopardy' | 'campaign' | 'faceoff' | null
+  game_mode: 'daily' | 'freeplay' | 'endless' | 'jeopardy' | 'campaign' | 'faceoff' | null
 }
 
 export interface Achievement {
@@ -130,7 +130,7 @@ export interface SaveQuizSessionRequest {
   title?: string
   time_taken?: number
   session_id?: string
-  game_mode?: 'daily' | 'practice' | 'endless' | 'jeopardy' | 'campaign' | 'faceoff'
+  game_mode?: 'daily' | 'freeplay' | 'endless' | 'jeopardy' | 'campaign' | 'faceoff'
   // Individual submissions for validation
   submissions?: Array<{
     question_id: string

@@ -188,8 +188,8 @@ export default function LeaderboardPage() {
                             <div className="flex gap-2">
                               <User className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                               <div>
-                                <p className="font-medium">Practice Tracking</p>
-                                <p className="text-xs text-muted-foreground">Practice quizzes are tracked privately in your profile and dashboard</p>
+                                <p className="font-medium">Freeplay Tracking</p>
+                                <p className="text-xs text-muted-foreground">Freeplay quizzes are tracked privately in your profile and dashboard</p>
                               </div>
                             </div>
                             <div className="flex gap-2">
@@ -401,7 +401,7 @@ export default function LeaderboardPage() {
                               <User className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                               <div>
                                 <p className="font-medium">All Quizzes Count</p>
-                                <p className="text-xs text-muted-foreground">Unlike the leaderboard, practice and daily quizzes both affect your Skill Index</p>
+                                <p className="text-xs text-muted-foreground">Unlike the leaderboard, freeplay and daily quizzes both affect your Skill Index</p>
                               </div>
                             </div>
                           </div>

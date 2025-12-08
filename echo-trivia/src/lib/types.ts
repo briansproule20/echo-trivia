@@ -55,7 +55,7 @@ export interface Session {
   score?: number;
   earnedTitle?: string;
   earnedTier?: string;
-  gameMode?: 'daily' | 'practice' | 'endless' | 'jeopardy' | 'campaign' | 'faceoff';
+  gameMode?: 'daily' | 'freeplay' | 'endless' | 'jeopardy' | 'campaign' | 'faceoff';
   isAuthenticated?: boolean; // Whether user was signed in when starting session
   // Faceoff challenge info (for challenger, not creator)
   faceoffChallenge?: {

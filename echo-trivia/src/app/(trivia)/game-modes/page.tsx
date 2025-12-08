@@ -81,7 +81,7 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
           />
         </div>
       ) : useBeams ? (
-        /* Animated beams for Practice Mode */
+        /* Animated beams for Freeplay */
         <div className="absolute inset-0 h-full w-full z-[1]">
           <BackgroundBeamsWithCollision className="h-full w-full rounded-2xl">
             <div className="absolute inset-0 pointer-events-none" />
@@ -361,10 +361,10 @@ export default function GameModesPage() {
       useVortex: true,
     },
     {
-      title: "Practice Mode",
+      title: "Freeplay",
       description: "Unlimited custom quizzes on any topic. Choose your difficulty, categories, and question count.",
       icon: <Sparkles className="h-7 w-7 text-primary" />,
-      href: "/practice",
+      href: "/freeplay",
       useBeams: true,
     },
     {
@@ -475,7 +475,7 @@ export default function GameModesPage() {
 
             {/* Game Mode Cards */}
             <div className="space-y-6 lg:space-y-8">
-              {/* Daily and Practice - Row 1 */}
+              {/* Daily and Freeplay - Row 1 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
                 {gameModes.slice(0, 2).map((mode, index) => (
                   <GameModeCard

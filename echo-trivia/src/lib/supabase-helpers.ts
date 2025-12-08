@@ -85,7 +85,7 @@ export async function submitQuizToSupabase(
       title: session.earnedTitle,
       time_taken: timeTaken,
       session_id: sessionId,
-      game_mode: session.gameMode || 'practice', // Default to practice if not set
+      game_mode: session.gameMode || 'freeplay', // Default to freeplay if not set
       submissions, // Include individual submissions for validation
       questions, // Include full question data for history review
     }

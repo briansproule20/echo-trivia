@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:clean": "./scripts/kill-ports.sh && next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "biome check --write",

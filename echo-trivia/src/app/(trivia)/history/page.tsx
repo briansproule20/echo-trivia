@@ -307,8 +307,8 @@ export default function HistoryPage() {
                       <Button onClick={() => router.push("/daily")}>
                         Daily Quiz
                       </Button>
-                      <Button onClick={() => router.push("/practice")} variant="outline">
-                        Practice Mode
+                      <Button onClick={() => router.push("/freeplay")} variant="outline">
+                        Freeplay
                       </Button>
                     </div>
                   </CardContent>
@@ -352,8 +352,8 @@ export default function HistoryPage() {
                         <Button onClick={() => router.push("/daily")}>
                           Daily Quiz
                         </Button>
-                        <Button onClick={() => router.push("/practice")} variant="outline">
-                          Practice Mode
+                        <Button onClick={() => router.push("/freeplay")} variant="outline">
+                          Freeplay
                         </Button>
                       </div>
                     </CardContent>

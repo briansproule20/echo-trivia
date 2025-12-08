@@ -62,7 +62,7 @@ export default function HomePage() {
             Summon Your Inner <FlipText words={["Ken Jennings", "Quiz Whiz", "Mastermind", "Pub Champion", "Genius", "Alex Trebek", "Know-It-All", "Scholar", "Trivia Master", "Champion"]} duration={3000} className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent font-semibold" />
           </p>
           <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">
-            Daily trivia challenges, infinite customizable practice
+            Daily trivia challenges, infinite customizable freeplay
           </p>
         </div>
 
@@ -83,17 +83,17 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-all cursor-pointer group flex flex-col h-full" onClick={() => router.push("/practice")}>
+          <Card className="hover:shadow-lg transition-all cursor-pointer group flex flex-col h-full" onClick={() => router.push("/freeplay")}>
             <CardHeader className="flex-1">
               <PlayCircle className="h-12 w-12 text-primary mb-4 group-hover:scale-110 transition-transform" />
-              <CardTitle className="text-xl">Practice Mode</CardTitle>
+              <CardTitle className="text-xl">Freeplay</CardTitle>
               <CardDescription className="line-clamp-2">
                 Unlimited quizzes on any topic you want
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Button className="w-full" variant="outline">
-                Start Practicing
+                Start Playing
               </Button>
             </CardContent>
           </Card>

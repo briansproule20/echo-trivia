@@ -271,7 +271,7 @@ export async function POST(req: Request) {
       const dailyHash = hashString(`${dailyDate}-${settings.category}`);
       seedHex = dailyHash.toString(16).padStart(64, '0').slice(0, 64);
     } else {
-      // For practice quizzes with established categories: random seed
+      // For freeplay quizzes with established categories: random seed
       seedHex = generateSeed();
     }
 
@@ -363,7 +363,7 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
       model: anthropic("claude-sonnet-4-20250514"),
       system: GENERATION_SYSTEM_PROMPT,
       prompt,
-      temperature: 1.0, // Higher temperature for more variety in practice quizzes
+      temperature: 1.0, // Higher temperature for more variety in freeplay quizzes
     });
 
     // Parse and validate response

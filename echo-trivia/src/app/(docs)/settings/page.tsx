@@ -523,7 +523,7 @@ export default function SettingsPage() {
               <CardTitle className="flex items-center gap-2">
                 <SlidersHorizontal className="h-5 w-5" />
                 Quiz Preferences
-                <span className="text-sm font-normal text-muted-foreground">(Practice)</span>
+                <span className="text-sm font-normal text-muted-foreground">(Freeplay)</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">

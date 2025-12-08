@@ -30,7 +30,7 @@ const orbitron = Orbitron({
 
 export const metadata: Metadata = {
   title: 'Trivia Wizard',
-  description: 'Daily challenge + infinite practice. Built on Echo.',
+  description: 'Daily challenge + infinite freeplay. Built on Echo.',
   icons: {
     icon: '/trivia-wizard-logo.png',
     apple: '/trivia-wizard-logo.png',

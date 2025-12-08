@@ -70,10 +70,10 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/practice"
+                  href="/freeplay"
                   className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
                 >
-                  Practice Mode
+                  Freeplay
                 </Link>
               </li>
               <li>
@@ -200,7 +200,7 @@ export function Footer() {
             <ul className="space-y-3 text-sm">
               <li>
                 <Link
-                  href="/practice"
+                  href="/freeplay"
                   className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors w-full sm:w-auto"
                 >
                   Start Quiz

@@ -159,13 +159,13 @@ export default function ResultsPage() {
     : undefined;
 
   const handleRetry = () => {
-    // For daily quizzes, redirect to practice with the same category
+    // For daily quizzes, redirect to freeplay with the same category
     if (session.quiz.seeded) {
-      router.push(`/practice?category=${encodeURIComponent(session.quiz.category)}`);
+      router.push(`/freeplay?category=${encodeURIComponent(session.quiz.category)}`);
       return;
     }
 
-    // For practice quizzes, try to reconstruct the original settings
+    // For freeplay quizzes, try to reconstruct the original settings
     const numQuestions = questionsCount;
     const questions = session.quiz.questions || [];
 
@@ -187,7 +187,7 @@ export default function ResultsPage() {
       type,
     });
 
-    router.push(`/practice?${params.toString()}`);
+    router.push(`/freeplay?${params.toString()}`);
   };
 
   const handleSaveUsername = async () => {
@@ -600,7 +600,7 @@ ${shareUrl}`;
                 <>
                   <Button onClick={handleRetry} size="lg" variant="outline">
                     <RotateCcw className="mr-2 h-4 w-4" />
-                    Practice Similar
+                    Play Similar
                   </Button>
                   <Button onClick={handleShare} size="lg" variant="outline">
                     <Share2 className="mr-2 h-4 w-4" />

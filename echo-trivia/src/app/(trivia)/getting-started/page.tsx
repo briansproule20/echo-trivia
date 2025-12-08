@@ -258,7 +258,7 @@ export default function GettingStartedPage() {
               Sign in, add credits, and start generating unlimited trivia quizzes on any topic you can imagine.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-              <Button size="lg" onClick={() => router.push("/practice")}>
+              <Button size="lg" onClick={() => router.push("/freeplay")}>
                 <Sparkles className="mr-2 h-4 w-4" />
                 Create Your First Quiz
               </Button>

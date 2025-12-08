@@ -101,8 +101,8 @@ export function MiniLeaderboard() {
                 <div className="flex gap-2">
                   <User className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-medium text-xs">Practice Tracking</p>
-                    <p className="text-xs text-muted-foreground">Practice quizzes are tracked privately in your profile and dashboard</p>
+                    <p className="font-medium text-xs">Freeplay Tracking</p>
+                    <p className="text-xs text-muted-foreground">Freeplay quizzes are tracked privately in your profile and dashboard</p>
                   </div>
                 </div>
                 <div className="flex gap-2">

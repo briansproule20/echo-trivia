@@ -16,7 +16,7 @@ import { storage } from "@/lib/storage";
 import { generateId } from "@/lib/quiz-utils";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 
-function PracticeContent() {
+function FreeplayContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setSession } = usePlayStore();
@@ -70,7 +70,7 @@ function PracticeContent() {
     }
   }, [searchParams]);
 
-  const handleStartPractice = async () => {
+  const handleStartFreeplay = async () => {
     if (generating) return;
 
     // Check if user is signed in
@@ -116,10 +116,10 @@ function PracticeContent() {
       const quiz: Quiz = await response.json();
 
       // Customize title/description and ensure category is preserved
-      quiz.title = `${finalCategory} Practice`;
+      quiz.title = `${finalCategory} Freeplay`;
       quiz.description = `${numQuestions} questions • ${difficulty === "mixed" ? "Mixed" : difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} difficulty`;
       quiz.category = finalCategory; // Explicitly set the category to ensure custom categories are preserved
-      // CRITICAL: Ensure seeded is explicitly false for practice
+      // CRITICAL: Ensure seeded is explicitly false for freeplay
       quiz.seeded = false;
 
       const session: Session = {
@@ -127,7 +127,7 @@ function PracticeContent() {
         quiz,
         startedAt: new Date().toISOString(),
         submissions: [],
-        gameMode: 'practice',
+        gameMode: 'freeplay',
       };
 
       setSession(session);
@@ -151,19 +151,19 @@ function PracticeContent() {
           {/* Header */}
           <div className="text-center mb-6 sm:mb-12 space-y-2 sm:space-y-4">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent leading-tight pb-1">
-              Practice Mode
+              Freeplay
             </h1>
             <p className="text-sm sm:text-base lg:text-xl text-muted-foreground">
               Customize and play instantly
             </p>
           </div>
 
-          {/* Practice Configuration Card */}
+          {/* Freeplay Configuration Card */}
           <Card className="shadow-xl">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="space-y-2 flex-1">
-                  <CardTitle className="text-3xl">Configure Your Practice</CardTitle>
+                  <CardTitle className="text-3xl">Configure Your Freeplay</CardTitle>
                   <CardDescription className="text-base">
                     AI-powered custom quiz generation
                   </CardDescription>
@@ -319,7 +319,7 @@ function PracticeContent() {
 
               {/* Summary */}
               <div className="p-4 bg-muted rounded-lg space-y-3">
-                <div className="text-sm font-semibold text-muted-foreground">Practice Summary</div>
+                <div className="text-sm font-semibold text-muted-foreground">Freeplay Summary</div>
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="secondary">
                     {category === "custom" ? (customCategory || "Custom Category") : category}
@@ -334,7 +334,7 @@ function PracticeContent() {
 
               {/* Start Button */}
               <Button
-                onClick={handleStartPractice}
+                onClick={handleStartFreeplay}
                 size="lg"
                 className="w-full"
                 disabled={generating || !user}
@@ -342,7 +342,7 @@ function PracticeContent() {
                 {generating ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating Your Practice Quiz...
+                    Generating Your Freeplay Quiz...
                   </>
                 ) : !user ? (
                   <>
@@ -352,7 +352,7 @@ function PracticeContent() {
                 ) : (
                   <>
                     <Sparkles className="mr-2 h-4 w-4" />
-                    Start Practice
+                    Start Freeplay
                   </>
                 )}
               </Button>
@@ -364,7 +364,7 @@ function PracticeContent() {
   );
 }
 
-export default function PracticePage() {
+export default function FreeplayPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -376,7 +376,7 @@ export default function PracticePage() {
         </div>
       </div>
     }>
-      <PracticeContent />
+      <FreeplayContent />
     </Suspense>
   );
 }

@@ -240,7 +240,7 @@ export function ChatWidget() {
                         {message.role === 'user' ? (
                           message.text
                         ) : (
-                          <Response className="text-xs prose prose-sm dark:prose-invert max-w-none">
+                          <Response className="text-xs prose prose-sm dark:prose-invert max-w-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:my-0.5">
                             {message.text}
                           </Response>
                         )}

@@ -82,6 +82,7 @@ export async function POST(request: NextRequest) {
       title,
       time_taken,
       session_id,
+      quiz_id,
       game_mode,
       faceoff_share_code,
       submissions,
@@ -165,8 +166,10 @@ export async function POST(request: NextRequest) {
 
     // 3. SECURITY: Get score from SERVER-SIDE evaluations only
     // We do NOT trust any scores or is_correct flags from the client
-    const serverEvaluations = await getServerEvaluations(session_id || '')
-    const answerKeys = await getAnswerKeys(session_id || '')
+    // Use quiz_id for lookups (that's what generate route uses for answer_keys)
+    const lookupId = quiz_id || session_id || ''
+    const serverEvaluations = await getServerEvaluations(lookupId)
+    const answerKeys = await getAnswerKeys(lookupId)
 
     // Build validated submissions from SERVER data
     let validatedSubmissions: Array<{
@@ -315,6 +318,7 @@ export async function POST(request: NextRequest) {
         const answerKey = answerKeyMap.get(q.id)
         return {
           session_id: session.id,
+          quiz_id: quiz_id || null, // Store original quiz_id for answer key lookups
           question_id: q.id,
           question_type: q.type,
           category: q.category,

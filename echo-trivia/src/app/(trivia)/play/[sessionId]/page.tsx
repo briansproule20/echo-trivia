@@ -137,6 +137,8 @@ export default function PlayPage() {
         submissions: [...currentSession.submissions, submission],
       };
       await storage.saveSession(updatedSession);
+      // Also update zustand store so state stays in sync
+      setSession(updatedSession);
     } catch (error) {
       console.error("Evaluation error:", error);
       alert(error instanceof Error ? error.message : "Failed to evaluate answer. Please try again.");

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
+import { createServiceClient } from '@/utils/supabase/service'
 import { isSignedIn } from '@/echo'
 
 // GET /api/quiz/history/[sessionId]?echo_user_id=xxx
@@ -53,6 +54,66 @@ export async function GET(
       // Questions might not exist for older sessions - continue without them
     }
 
+    // Fetch answer keys as fallback for correct answers
+    // Note: quiz_id in answer_keys table is the quiz.id, not the session.id
+    const serviceClient = createServiceClient()
+
+    // Try to find quiz_id from multiple sources
+    let quizId = sessionId
+    console.log('[History] Starting quiz_id lookup for session:', sessionId)
+    console.log('[History] Questions found:', questions?.length || 0)
+    if (questions?.[0]) {
+      console.log('[History] First question:', {
+        question_id: questions[0].question_id,
+        quiz_id: questions[0].quiz_id,
+        correct_answer: questions[0].correct_answer
+      })
+    }
+
+    // Source 1: quiz_id stored in questions table (new quizzes)
+    if (questions && questions.length > 0 && questions[0].quiz_id) {
+      quizId = questions[0].quiz_id
+      console.log('[History] Found quiz_id in questions table:', quizId)
+    }
+
+    // Source 2: Get quiz_id from evaluations table (older quizzes)
+    if (quizId === sessionId && questions && questions.length > 0) {
+      console.log('[History] Trying to find quiz_id from evaluations for question_id:', questions[0].question_id)
+      const { data: evalData, error: evalError } = await serviceClient
+        .from('quiz_evaluations')
+        .select('quiz_id')
+        .eq('question_id', questions[0].question_id)
+        .limit(1)
+        .single()
+      console.log('[History] Evaluations lookup result:', { evalData, evalError })
+      if (evalData?.quiz_id) {
+        quizId = evalData.quiz_id
+        console.log('[History] Found quiz_id in evaluations:', quizId)
+      }
+    }
+
+    console.log('[History] Final quiz_id for answer key lookup:', quizId)
+
+    // Fetch answer keys using the found quiz_id
+    const { data: answerKeyData, error: answerKeyError } = await serviceClient
+      .from('quiz_answer_keys')
+      .select('answers')
+      .eq('quiz_id', quizId)
+      .single()
+
+    console.log('[History] Answer keys lookup:', {
+      found: !!answerKeyData,
+      numAnswers: answerKeyData?.answers?.length,
+      error: answerKeyError
+    })
+
+    const answerKeys = (answerKeyData?.answers || []) as Array<{
+      question_id: string
+      answer: string
+      explanation: string
+    }>
+    const answerKeyMap = new Map(answerKeys.map(k => [k.question_id, k]))
+
     // Fetch submissions for this session
     const { data: submissions, error: submissionsError } = await supabase
       .from('quiz_submissions')
@@ -73,16 +134,19 @@ export async function GET(
         description: session.is_daily && session.daily_date
           ? `${session.daily_date} - Daily Challenge`
           : undefined,
-        questions: (questions || []).map((q: any) => ({
-          id: q.question_id,
-          type: q.question_type,
-          category: q.category,
-          difficulty: q.difficulty,
-          prompt: q.prompt,
-          choices: q.choices,
-          answer: q.correct_answer,
-          explanation: q.explanation,
-        })),
+        questions: (questions || []).map((q: any) => {
+          const answerKey = answerKeyMap.get(q.question_id)
+          return {
+            id: q.question_id,
+            type: q.question_type,
+            category: q.category,
+            difficulty: q.difficulty,
+            prompt: q.prompt,
+            choices: q.choices,
+            answer: q.correct_answer || answerKey?.answer || '',
+            explanation: q.explanation || answerKey?.explanation || '',
+          }
+        }),
         createdAt: session.completed_at,
         seeded: session.is_daily,
       },

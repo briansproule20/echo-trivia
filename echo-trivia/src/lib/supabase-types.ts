@@ -131,6 +131,7 @@ export interface SaveQuizSessionRequest {
   title?: string
   time_taken?: number
   session_id?: string
+  quiz_id?: string // Original quiz ID for answer key lookup
   game_mode?: 'daily' | 'freeplay' | 'endless' | 'jeopardy' | 'campaign' | 'faceoff'
   faceoff_share_code?: string
   // Individual submissions for validation

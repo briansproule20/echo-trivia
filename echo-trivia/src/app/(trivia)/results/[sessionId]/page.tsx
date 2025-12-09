@@ -73,24 +73,43 @@ export default function ResultsPage() {
 
   useEffect(() => {
     const loadSession = async () => {
-      let loadedSession: Session | null = null;
+      // Load from local storage
+      let loadedSession = await storage.getSession(sessionId);
 
-      // Try to load from cloud if cloud=true and user is authenticated
-      if (isCloudSession && echo.user?.id) {
-        try {
-          const response = await fetch(`/api/quiz/history/${sessionId}?echo_user_id=${echo.user.id}`);
-          if (response.ok) {
-            const data = await response.json();
-            loadedSession = data.session;
+      if (loadedSession) {
+        // Check if any questions are missing answers
+        const missingAnswers = loadedSession.quiz.questions.some(q => !q.answer);
+
+        if (missingAnswers && loadedSession.quiz.id) {
+          // Fetch answers from server using quiz.id
+          try {
+            const response = await fetch(`/api/quiz/answers/${loadedSession.quiz.id}`);
+            if (response.ok) {
+              const data = await response.json();
+              const answerMap = new Map(
+                (data.answers || []).map((a: any) => [a.question_id, a])
+              );
+
+              // Merge answers into questions
+              loadedSession = {
+                ...loadedSession,
+                quiz: {
+                  ...loadedSession.quiz,
+                  questions: loadedSession.quiz.questions.map(q => ({
+                    ...q,
+                    answer: q.answer || answerMap.get(q.id)?.answer || '',
+                    explanation: q.explanation || answerMap.get(q.id)?.explanation || '',
+                  })),
+                },
+              };
+
+              // Save updated session to local storage
+              await storage.saveSession(loadedSession);
+            }
+          } catch (error) {
+            console.error("Failed to fetch answers from server:", error);
           }
-        } catch (error) {
-          console.error("Failed to load cloud session:", error);
         }
-      }
-
-      // Fall back to local storage
-      if (!loadedSession) {
-        loadedSession = await storage.getSession(sessionId);
       }
 
       if (loadedSession) {
@@ -443,10 +462,12 @@ ${shareUrl}`;
                                 <span className="font-medium">Response:</span>{" "}
                                 {submission?.response || "No answer"}
                               </div>
-                              <div>
-                                <span className="font-medium">Correct Answer:</span>{" "}
-                                {question.answer}
-                              </div>
+                              {(question.type === "short_answer" || question.answer) && (
+                                <div>
+                                  <span className="font-medium">Correct Answer:</span>{" "}
+                                  {question.answer || "Not available"}
+                                </div>
+                              )}
                               {question.explanation && (
                                 <div className="mt-2 text-foreground">
                                   {question.explanation}

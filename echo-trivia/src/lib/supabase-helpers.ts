@@ -85,6 +85,7 @@ export async function submitQuizToSupabase(
       title: session.earnedTitle,
       time_taken: timeTaken,
       session_id: sessionId,
+      quiz_id: session.quiz.id, // Original quiz ID for answer key lookup
       game_mode: session.gameMode || 'freeplay', // Default to freeplay if not set
       faceoff_share_code: session.faceoffChallenge?.shareCode, // Link faceoff sessions to challenge
       submissions, // Include individual submissions for validation

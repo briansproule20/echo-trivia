@@ -22,7 +22,8 @@ async function getDailyChallenge(date: string) {
       // use the hash to cycle through categories in a pseudo-random but complete way
       // This ensures all categories appear over time
       const categoryIndex = seed % CATEGORIES.length;
-      const category = CATEGORIES[categoryIndex];
+      // Hardcode 2025-12-09 to Biology to match prod after category expansion
+      const category = date === "2025-12-09" ? "Biology" : CATEGORIES[categoryIndex];
 
       return {
         date,

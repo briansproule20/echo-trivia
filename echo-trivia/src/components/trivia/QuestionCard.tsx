@@ -195,6 +195,11 @@ export function QuestionCard({
                 {isCorrect ? "Correct!" : "Incorrect"}
               </span>
             </div>
+            {question.type === "short_answer" && correctAnswer && (
+              <p className="text-base font-medium mb-2">
+                Answer: <span className="text-foreground">{correctAnswer}</span>
+              </p>
+            )}
             {explanation && (
               <p className="text-sm text-muted-foreground">{explanation}</p>
             )}

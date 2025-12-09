@@ -86,7 +86,7 @@ export default function ResultsPage() {
             const response = await fetch(`/api/quiz/answers/${loadedSession.quiz.id}`);
             if (response.ok) {
               const data = await response.json();
-              const answerMap = new Map(
+              const answerMap = new Map<string, { answer?: string; explanation?: string }>(
                 (data.answers || []).map((a: any) => [a.question_id, a])
               );
 
@@ -95,11 +95,14 @@ export default function ResultsPage() {
                 ...loadedSession,
                 quiz: {
                   ...loadedSession.quiz,
-                  questions: loadedSession.quiz.questions.map(q => ({
-                    ...q,
-                    answer: q.answer || answerMap.get(q.id)?.answer || '',
-                    explanation: q.explanation || answerMap.get(q.id)?.explanation || '',
-                  })),
+                  questions: loadedSession.quiz.questions.map(q => {
+                    const answerData = answerMap.get(q.id);
+                    return {
+                      ...q,
+                      answer: q.answer || answerData?.answer || '',
+                      explanation: q.explanation || answerData?.explanation || '',
+                    };
+                  }),
                 },
               };
 

@@ -587,28 +587,6 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Auto-advance */}
-              <div className="flex items-center justify-between gap-4">
-                <div className="space-y-0.5 min-w-0 flex-1">
-                  <Label>Auto-advance</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Move to next question automatically
-                  </p>
-                </div>
-                <button
-                  onClick={() => quizPrefs.setAutoAdvance(!quizPrefs.autoAdvance)}
-                  className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${
-                    quizPrefs.autoAdvance ? 'bg-primary' : 'bg-muted'
-                  }`}
-                >
-                  <div
-                    className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-transform ${
-                      quizPrefs.autoAdvance ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-
               {/* Preferred Tone */}
               <div className="space-y-2">
                 <Label>Preferred Tone</Label>

@@ -141,14 +141,12 @@ interface QuizPreferencesState {
   difficulty: Difficulty;
   questionCount: QuestionCount;
   explanationTiming: ExplanationTiming;
-  autoAdvance: boolean;
   preferredTone: Tone | null;
   explanationStyle: ExplanationStyle | null;
   avatarId: AvatarId;
   setDifficulty: (difficulty: Difficulty) => void;
   setQuestionCount: (count: QuestionCount) => void;
   setExplanationTiming: (timing: ExplanationTiming) => void;
-  setAutoAdvance: (auto: boolean) => void;
   setPreferredTone: (tone: Tone | null) => void;
   setExplanationStyle: (style: ExplanationStyle | null) => void;
   setAvatarId: (id: AvatarId) => void;
@@ -160,14 +158,12 @@ export const useQuizPreferencesStore = create<QuizPreferencesState>()(
       difficulty: "mixed",
       questionCount: 5,
       explanationTiming: "after_each",
-      autoAdvance: false,
       preferredTone: null,
       explanationStyle: null,
       avatarId: "ghost",
       setDifficulty: (difficulty) => set({ difficulty }),
       setQuestionCount: (questionCount) => set({ questionCount }),
       setExplanationTiming: (explanationTiming) => set({ explanationTiming }),
-      setAutoAdvance: (autoAdvance) => set({ autoAdvance }),
       setPreferredTone: (preferredTone) => set({ preferredTone }),
       setExplanationStyle: (explanationStyle) => set({ explanationStyle }),
       setAvatarId: (avatarId) => set({ avatarId }),

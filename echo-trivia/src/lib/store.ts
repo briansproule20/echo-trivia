@@ -17,7 +17,7 @@ interface PlayState {
   currentSession: Session | null;
   currentQuestionIndex: number;
   isPaused: boolean;
-  setSession: (session: Session) => void;
+  setSession: (session: Session, preserveIndex?: boolean) => void;
   setQuestionIndex: (index: number) => void;
   addSubmission: (submission: Session["submissions"][0]) => void;
   togglePause: () => void;
@@ -59,11 +59,11 @@ export const usePlayStore = create<PlayState>((set) => ({
   currentSession: null,
   currentQuestionIndex: 0,
   isPaused: false,
-  setSession: (session) => set({
+  setSession: (session, preserveIndex = false) => set((state) => ({
     currentSession: session,
-    // Restore to the question after the last submission, or 0 if none
-    currentQuestionIndex: session.submissions.length
-  }),
+    // Only restore question index on initial load, not on updates during play
+    currentQuestionIndex: preserveIndex ? state.currentQuestionIndex : session.submissions.length
+  })),
   setQuestionIndex: (index) => set({ currentQuestionIndex: index }),
   addSubmission: (submission) =>
     set((state) => ({

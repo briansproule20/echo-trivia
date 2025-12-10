@@ -42,7 +42,7 @@ export function QuestionCard({
     setSelectedChoice("");
     setShortAnswer("");
     setShowFlurp(false);
-  }, [question.id]);
+  }, [question?.id]);
 
   // Trigger flurp animation when answer is correct
   useEffect(() => {

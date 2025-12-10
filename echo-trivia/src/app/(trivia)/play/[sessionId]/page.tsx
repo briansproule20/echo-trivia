@@ -27,6 +27,9 @@ export default function PlayPage() {
   const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false);
   const [startTime, setStartTime] = useState<number>(Date.now());
   const [showFlurp, setShowFlurp] = useState(false);
+  // State to store the explanation and correct answer returned from server after evaluation
+  const [currentExplanation, setCurrentExplanation] = useState<string>("");
+  const [currentCorrectAnswer, setCurrentCorrectAnswer] = useState<string>("");
 
   useEffect(() => {
     // Load session from storage if not in state
@@ -67,13 +70,15 @@ export default function PlayPage() {
   }
 
   const currentQuestion = currentSession.quiz.questions[currentQuestionIndex];
+
+  // Guard against invalid question index
+  if (!currentQuestion) {
+    return <div className="min-h-screen flex items-center justify-center">Loading question...</div>;
+  }
+
   const isLastQuestion = currentQuestionIndex === currentSession.quiz.questions.length - 1;
   const hasTimeLimit = currentSession.quiz.questions[0]?.type && currentSession.quiz.questions.length > 0;
   const timePerQuestion = 20; // Default for speedrun
-
-  // State to store the explanation and correct answer returned from server after evaluation
-  const [currentExplanation, setCurrentExplanation] = useState<string>("");
-  const [currentCorrectAnswer, setCurrentCorrectAnswer] = useState<string>("");
 
   const handleSubmit = async (response: string) => {
     setIsEvaluating(true);
@@ -138,7 +143,8 @@ export default function PlayPage() {
       };
       await storage.saveSession(updatedSession);
       // Also update zustand store so state stays in sync
-      setSession(updatedSession);
+      // preserveIndex=true so we don't auto-advance and kill the animation
+      setSession(updatedSession, true);
     } catch (error) {
       console.error("Evaluation error:", error);
       alert(error instanceof Error ? error.message : "Failed to evaluate answer. Please try again.");
@@ -208,7 +214,14 @@ export default function PlayPage() {
     endSession();
 
     try {
-      await finalizeSession(currentSession);
+      // Get the latest session from storage to ensure we have all submissions
+      const latestSession = await storage.getSession(sessionId);
+      if (latestSession) {
+        await finalizeSession(latestSession);
+      } else {
+        // Fallback to current session if storage fails
+        await finalizeSession(currentSession);
+      }
     } catch (error) {
       console.error('Error finishing quiz:', error);
     } finally {

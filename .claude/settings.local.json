@@ -20,7 +20,13 @@
       "WebFetch(domain:models.dev)",
       "Bash(git checkout:*)",
       "Bash(git fetch:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "WebFetch(domain:vercel.com)",
+      "Bash(grep:*)",
+      "Bash(curl:*)",
+      "Bash(npx tsc:*)",
+      "Bash(git stash:*)",
+      "Bash(git show:*)"
     ],
     "deny": [],
     "ask": []

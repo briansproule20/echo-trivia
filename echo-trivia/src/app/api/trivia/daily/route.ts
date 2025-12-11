@@ -8,6 +8,9 @@ import { CATEGORIES } from "@/lib/types";
 
 export const dynamic = 'force-dynamic';
 
+// Cache version - increment this to bust cache when categories change
+const CACHE_VERSION = `v2-${CATEGORIES.length}`;
+
 // Cached challenge generator - generates once per day with date-specific cache key
 async function getDailyChallenge(date: string) {
   return unstable_cache(
@@ -22,8 +25,7 @@ async function getDailyChallenge(date: string) {
       // use the hash to cycle through categories in a pseudo-random but complete way
       // This ensures all categories appear over time
       const categoryIndex = seed % CATEGORIES.length;
-      // Hardcode 2025-12-09 to Biology to match prod after category expansion
-      const category = date === "2025-12-09" ? "Biology" : CATEGORIES[categoryIndex];
+      const category = CATEGORIES[categoryIndex];
 
       return {
         date,
@@ -35,7 +37,7 @@ async function getDailyChallenge(date: string) {
         type: "mixed" as const,
       };
     },
-    [`daily-challenge-${date}`], // Include date in cache key
+    [`daily-challenge-${CACHE_VERSION}-${date}`], // Include version and date in cache key
     {
       revalidate: 86400, // 24 hours
       tags: [`daily-challenge-${date}`],

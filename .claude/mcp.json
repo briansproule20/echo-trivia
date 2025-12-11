@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "attention-market": {
+      "type": "http",
+      "url": "https://www.attention.market/api/mcp/79021ee9-d44d-4e28-a663-e2bc62a7ba65/mcp"
+    }
+  }
+}

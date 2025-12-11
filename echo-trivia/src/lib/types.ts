@@ -253,6 +253,7 @@ export const CATEGORIES = [
   "Deserts & Biomes",
   "Islands & Archipelagos",
   "US Geography",
+  "US National Parks",
   "European Geography",
   "Flags & Symbols",
 

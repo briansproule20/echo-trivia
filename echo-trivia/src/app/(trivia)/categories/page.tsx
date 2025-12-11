@@ -473,11 +473,11 @@ export default function CategoriesPage() {
               <div className="text-xs sm:text-sm text-muted-foreground">Total Categories</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-primary">1.4+</div>
+              <div className="text-2xl sm:text-3xl font-bold text-primary">{(CATEGORIES.length / 365).toFixed(1)}+</div>
               <div className="text-xs sm:text-sm text-muted-foreground">Years of Unique Dailies</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-primary">15</div>
+              <div className="text-2xl sm:text-3xl font-bold text-primary">{Object.keys(CATEGORY_GROUPS).length - 1}</div>
               <div className="text-xs sm:text-sm text-muted-foreground">Topic Groups</div>
             </div>
             <div className="text-center">

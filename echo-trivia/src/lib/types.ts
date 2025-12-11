@@ -355,47 +355,27 @@ export const CATEGORIES = [
   // ═══════════════════════════════════════════════════════════════════════════
   "The Beatles",
   "The Rolling Stones",
-  "Led Zeppelin",
   "Pink Floyd",
   "Queen",
-  "David Bowie",
   "Bob Dylan",
   "Michael Jackson",
-  "Madonna",
-  "Prince",
-  "Nirvana",
-  "Radiohead",
-  "Kanye West",
-  "Beyoncé",
-  "Taylor Swift",
-  "The Grateful Dead",
-  "Wu-Tang Clan",
-  "Daft Punk",
-  "Metallica",
-  "AC/DC",
+  "U2",
+
 
   // ═══════════════════════════════════════════════════════════════════════════
   // VIDEO GAME FRANCHISES (20)
   // ═══════════════════════════════════════════════════════════════════════════
-  "Super Mario Series",
-  "The Legend of Zelda",
-  "Pokémon Games",
+
   "Final Fantasy Series",
   "The Elder Scrolls",
   "Fallout Series",
   "Grand Theft Auto",
   "Call of Duty",
   "Halo Series",
-  "Dark Souls & Souls-like Games",
   "Minecraft",
-  "Fortnite",
-  "League of Legends",
   "World of Warcraft",
   "The Witcher Games",
   "Red Dead Redemption",
-  "Metal Gear Solid",
-  "Resident Evil",
-  "God of War",
   "Assassin's Creed",
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -426,15 +406,11 @@ export const CATEGORIES = [
   "Thai Street Food",
   "Indian Curries & Spices",
   "Mexican Authentic Cuisine",
-  "Chinese Regional Cooking",
   "Korean BBQ & Banchan",
   "Vietnamese Pho & Street Food",
   "Spanish Tapas & Paella",
   "Greek Mediterranean Food",
   "Turkish Kebabs & Mezes",
-  "Lebanese Middle Eastern",
-  "Ethiopian Cuisine",
-  "Peruvian Ceviche & Dishes",
 
   // ═══════════════════════════════════════════════════════════════════════════
   // ARCHITECTURAL LANDMARKS (15)
@@ -591,45 +567,16 @@ export const CATEGORIES = [
   // ═══════════════════════════════════════════════════════════════════════════
   // MISCELLANEOUS FUN (15)
   // ═══════════════════════════════════════════════════════════════════════════
-  "Guinness World Records",
   "Espionage & Spies",
   "Haunted Places & Ghost Stories",
-  "Amusement Parks & Theme Parks",
-  "Magic & Illusions",
-  "Advertising & Marketing",
-  "Circus & Carnival History",
   "Treasure Hunts & Lost Artifacts",
   "Famous Heists",
   "Cults & Secret Societies",
   "Titanic History",
   "Las Vegas History",
   "Hollywood History",
-  "British Royal Family",
   "Presidential History",
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // MUSICAL INSTRUMENTS (8)
-  // ═══════════════════════════════════════════════════════════════════════════
-  "Piano & Keyboard History",
-  "Guitar Types & Techniques",
-  "Violin & String Instruments",
-  "Drums & Percussion",
-  "Synthesizers & Electronic Music",
-  "Brass Instruments",
-  "Woodwind Instruments",
-  "Traditional World Instruments",
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // FASHION & STYLE (8)
-  // ═══════════════════════════════════════════════════════════════════════════
-  "Coco Chanel",
-  "Fashion Through the Decades",
-  "Streetwear Culture",
-  "Luxury Fashion Houses",
-  "Sneaker Culture",
-  "Fashion Week & Runway",
-  "Vintage & Retro Fashion",
-  "Sustainable Fashion",
 
   // ═══════════════════════════════════════════════════════════════════════════
   // DRINK & BEVERAGE (6)
@@ -679,10 +626,8 @@ export const CATEGORIES = [
   // TRUE CRIME & MYSTERY (6)
   // ═══════════════════════════════════════════════════════════════════════════
   "Serial Killers",
-  "Cold Cases",
   "True Crime Documentaries",
   "Famous Criminals",
-  "Prison History",
   "Forensic Science",
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -690,10 +635,7 @@ export const CATEGORIES = [
   // ═══════════════════════════════════════════════════════════════════════════
   "Disney Movies & Characters",
   "Pixar Films",
-  "Studio Ghibli",
   "DreamWorks Animation",
-  "WWE & Professional Wrestling",
-  "UFC & MMA",
   "Boxing History",
   "Chess",
   "Poker & Card Games",
@@ -716,19 +658,6 @@ export const CATEGORIES = [
   "Augmented Reality",
   "Podcasting History",
   "YouTube & Content Creators",
-  "TikTok & Short Form Video",
-  "Twitch & Livestreaming",
-  "Esports",
-  "Speedrunning",
-  "Retro Gaming",
-  "Mobile Gaming",
-  "Indie Games",
-  "Game Development",
-  "Animation History",
-  "Voice Acting",
-  "Film Directors",
-  "Screenwriting",
-  "Cinematography",
   "Film Scores & Soundtracks",
   "Horror Films",
   "Comedy Films",
@@ -736,7 +665,6 @@ export const CATEGORIES = [
   "Romantic Comedies",
   "Documentaries",
   "Foreign Films",
-  "Silent Film Era",
   "Golden Age of Hollywood",
   "New Hollywood Era",
   "Blockbuster Era",

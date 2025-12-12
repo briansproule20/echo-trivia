@@ -5,9 +5,8 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, PlayCircle, Trophy, Clock, TrendingUp, Award } from "lucide-react";
-import { storage } from "@/lib/storage";
-import type { Session } from "@/lib/types";
+import { Calendar, PlayCircle, Trophy, Clock, TrendingUp, Award, Cloud } from "lucide-react";
+import { useEcho } from "@merit-systems/echo-react-sdk";
 import { motion } from "framer-motion";
 import { DotBackground } from "@/components/ui/dot-background";
 import { MiniLeaderboard } from "@/components/trivia/MiniLeaderboard";
@@ -17,30 +16,68 @@ import { FlipText } from "@/components/ui/flip-text";
 import { FinishQuizFlurp } from "@/components/trivia/FinishQuizFlurp";
 import { ChatWidget } from "@/components/ChatWidget";
 
+// Type for cloud sessions from Supabase
+interface CloudSession {
+  id: string;
+  category: string;
+  num_questions: number;
+  correct_answers: number;
+  total_questions: number;
+  score_percentage: number;
+  difficulty: string | null;
+  quiz_type: string | null;
+  is_daily: boolean;
+  daily_date: string | null;
+  title: string | null;
+  completed_at: string;
+  time_taken: number | null;
+  game_mode: string | null;
+}
+
 export default function HomePage() {
   const router = useRouter();
-  const [recentSessions, setRecentSessions] = useState<Session[]>([]);
+  const echo = useEcho();
+  const [recentSessions, setRecentSessions] = useState<CloudSession[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showFlurp, setShowFlurp] = useState(false);
   const [pendingResultsId, setPendingResultsId] = useState<string | null>(null);
+  const [isCloudResult, setIsCloudResult] = useState(false);
 
-  const handleViewResults = (sessionId: string) => {
+  const handleViewResults = (sessionId: string, cloud: boolean = false) => {
     setPendingResultsId(sessionId);
+    setIsCloudResult(cloud);
     setShowFlurp(true);
   };
 
   const handleFlurpComplete = () => {
     if (pendingResultsId) {
-      router.push(`/results/${pendingResultsId}`);
+      const url = isCloudResult ? `/results/${pendingResultsId}?cloud=true` : `/results/${pendingResultsId}`;
+      router.push(url);
     }
   };
 
   useEffect(() => {
     const loadSessions = async () => {
-      const sessions = await storage.getSessions();
-      setRecentSessions(sessions.slice(0, 3));
+      if (!echo.user?.id) {
+        setRecentSessions([]);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/quiz/history?echo_user_id=${echo.user.id}&limit=3`);
+        if (response.ok) {
+          const data = await response.json();
+          setRecentSessions(data.sessions || []);
+        }
+      } catch (error) {
+        console.error('Error loading cloud sessions:', error);
+      } finally {
+        setLoading(false);
+      }
     };
     loadSessions();
-  }, []);
+  }, [echo.user?.id]);
 
   return (
     <>
@@ -109,13 +146,16 @@ export default function HomePage() {
           <CommunityLoreSection />
         </div>
 
-        {/* Recent Sessions */}
-        {recentSessions.length > 0 && (
+        {/* Recent Sessions - Cloud History for signed-in users */}
+        {echo.user && !loading && recentSessions.length > 0 && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <h2 className="text-3xl font-bold tracking-tight">Recent Sessions</h2>
-                <p className="text-sm text-muted-foreground">Your latest quiz performances</p>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-3xl font-bold tracking-tight">Recent Sessions</h2>
+                  <Cloud className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">Your latest quiz performances, synced across devices</p>
               </div>
               <Button variant="outline" onClick={() => router.push("/history")}>
                 View All
@@ -123,11 +163,8 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {recentSessions.map((session, idx) => {
-                const score = session.submissions.filter((s) => s.correct).length;
-                const percentage = Math.round((score / session.quiz.questions.length) * 100);
-                const timeElapsed = session.endedAt && session.startedAt
-                  ? Math.round((new Date(session.endedAt).getTime() - new Date(session.startedAt).getTime()) / 1000)
-                  : 0;
+                const percentage = Math.round(session.score_percentage);
+                const timeElapsed = session.time_taken || 0;
 
                 return (
                   <motion.div
@@ -135,7 +172,7 @@ export default function HomePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: idx * 0.1 }}
-                    onClick={() => handleViewResults(session.id)}
+                    onClick={() => handleViewResults(session.id, true)}
                     className="cursor-pointer"
                   >
                     <Card className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-border hover:shadow-lg transition-all duration-300 h-full flex flex-col">
@@ -146,10 +183,10 @@ export default function HomePage() {
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0 space-y-1">
                             <CardTitle className="text-base font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                              {session.quiz.title}
+                              {session.category}
                             </CardTitle>
                             <CardDescription className="text-xs line-clamp-1">
-                              {session.quiz.category}
+                              {session.title}
                             </CardDescription>
                           </div>
                           <Badge
@@ -171,20 +208,22 @@ export default function HomePage() {
                             <div className="flex-1">
                               <p className="text-xs text-muted-foreground">Score</p>
                               <p className="text-sm font-semibold">
-                                {score} / {session.quiz.questions.length}
+                                {session.correct_answers} / {session.total_questions}
                               </p>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2 text-sm">
-                            <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-muted text-muted-foreground">
-                              <Clock className="h-4 w-4" />
+                          {timeElapsed > 0 && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-muted text-muted-foreground">
+                                <Clock className="h-4 w-4" />
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-xs text-muted-foreground">Time</p>
+                                <p className="text-sm font-semibold">{timeElapsed}s</p>
+                              </div>
                             </div>
-                            <div className="flex-1">
-                              <p className="text-xs text-muted-foreground">Time</p>
-                              <p className="text-sm font-semibold">{timeElapsed}s</p>
-                            </div>
-                          </div>
+                          )}
                         </div>
 
                         <Button
@@ -193,7 +232,7 @@ export default function HomePage() {
                           className="w-full mt-auto group-hover:bg-primary group-hover:text-primary-foreground transition-colors pointer-events-none md:pointer-events-auto"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleViewResults(session.id);
+                            handleViewResults(session.id, true);
                           }}
                         >
                           View Results

@@ -113,10 +113,10 @@ export default function HistoryPage() {
             <div className="flex items-start justify-between gap-3 pr-8">
               <div className="flex-1 min-w-0 space-y-1">
                 <CardTitle className="text-base font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                  {session.title || `${session.category} Quiz`}
+                  {session.category}
                 </CardTitle>
                 <CardDescription className="text-xs line-clamp-1">
-                  {session.category}
+                  {session.title || 'Quiz'}
                 </CardDescription>
                 <CardDescription className="text-xs">
                   {formatDate(session.completed_at)}
@@ -207,10 +207,10 @@ export default function HistoryPage() {
             <div className="flex items-start justify-between gap-3 pr-8">
               <div className="flex-1 min-w-0 space-y-1">
                 <CardTitle className="text-base font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                  {session.quiz.title}
+                  {session.quiz.category}
                 </CardTitle>
                 <CardDescription className="text-xs line-clamp-1">
-                  {session.quiz.category}
+                  {session.quiz.title || 'Quiz'}
                 </CardDescription>
                 <CardDescription className="text-xs">
                   {formatDate(session.startedAt)}

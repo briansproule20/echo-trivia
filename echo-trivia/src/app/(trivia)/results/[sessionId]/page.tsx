@@ -73,44 +73,66 @@ export default function ResultsPage() {
 
   useEffect(() => {
     const loadSession = async () => {
-      // Load from local storage
-      let loadedSession = await storage.getSession(sessionId);
+      let loadedSession: Session | null = null;
 
-      if (loadedSession) {
-        // Check if any questions are missing answers
-        const missingAnswers = loadedSession.quiz.questions.some(q => !q.answer);
+      // For cloud sessions, fetch from the API
+      if (isCloudSession) {
+        // Wait for user to be available for cloud sessions
+        if (!echo.user?.id) {
+          // Still loading user, don't redirect yet
+          return;
+        }
+        try {
+          const response = await fetch(`/api/quiz/history/${sessionId}?echo_user_id=${echo.user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            loadedSession = data.session;
+          } else {
+            console.error("Failed to fetch cloud session:", response.status);
+          }
+        } catch (error) {
+          console.error("Error fetching cloud session:", error);
+        }
+      } else {
+        // Load from local storage for non-cloud sessions
+        loadedSession = await storage.getSession(sessionId);
 
-        if (missingAnswers && loadedSession.quiz.id) {
-          // Fetch answers from server using quiz.id
-          try {
-            const response = await fetch(`/api/quiz/answers/${loadedSession.quiz.id}`);
-            if (response.ok) {
-              const data = await response.json();
-              const answerMap = new Map<string, { answer?: string; explanation?: string }>(
-                (data.answers || []).map((a: any) => [a.question_id, a])
-              );
+        if (loadedSession) {
+          // Check if any questions are missing answers
+          const missingAnswers = loadedSession.quiz.questions.some(q => !q.answer);
 
-              // Merge answers into questions
-              loadedSession = {
-                ...loadedSession,
-                quiz: {
-                  ...loadedSession.quiz,
-                  questions: loadedSession.quiz.questions.map(q => {
-                    const answerData = answerMap.get(q.id);
-                    return {
-                      ...q,
-                      answer: q.answer || answerData?.answer || '',
-                      explanation: q.explanation || answerData?.explanation || '',
-                    };
-                  }),
-                },
-              };
+          if (missingAnswers && loadedSession.quiz.id) {
+            // Fetch answers from server using quiz.id
+            try {
+              const response = await fetch(`/api/quiz/answers/${loadedSession.quiz.id}`);
+              if (response.ok) {
+                const data = await response.json();
+                const answerMap = new Map<string, { answer?: string; explanation?: string }>(
+                  (data.answers || []).map((a: any) => [a.question_id, a])
+                );
 
-              // Save updated session to local storage
-              await storage.saveSession(loadedSession);
+                // Merge answers into questions
+                loadedSession = {
+                  ...loadedSession,
+                  quiz: {
+                    ...loadedSession.quiz,
+                    questions: loadedSession.quiz.questions.map(q => {
+                      const answerData = answerMap.get(q.id);
+                      return {
+                        ...q,
+                        answer: q.answer || answerData?.answer || '',
+                        explanation: q.explanation || answerData?.explanation || '',
+                      };
+                    }),
+                  },
+                };
+
+                // Save updated session to local storage
+                await storage.saveSession(loadedSession);
+              }
+            } catch (error) {
+              console.error("Failed to fetch answers from server:", error);
             }
-          } catch (error) {
-            console.error("Failed to fetch answers from server:", error);
           }
         }
       }

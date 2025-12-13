@@ -74,6 +74,7 @@ export interface QuizSubmission {
 export interface QuizQuestion {
   id: string
   session_id: string
+  quiz_id: string | null
   question_id: string
   question_type: string
   category: string

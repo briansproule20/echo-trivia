@@ -42,8 +42,11 @@ export async function GET(
       )
     }
 
+    // Use service client for quiz_questions - RLS policy uses auth.uid() which doesn't work with Echo auth
+    const serviceClient = createServiceClient()
+
     // Fetch questions for this session
-    const { data: questions, error: questionsError } = await supabase
+    const { data: questions, error: questionsError } = await serviceClient
       .from('quiz_questions')
       .select('*')
       .eq('session_id', sessionId)
@@ -56,7 +59,6 @@ export async function GET(
 
     // Fetch answer keys as fallback for correct answers
     // Note: quiz_id in answer_keys table is the quiz.id, not the session.id
-    const serviceClient = createServiceClient()
 
     // Try to find quiz_id from multiple sources
     let quizId = sessionId
@@ -124,6 +126,36 @@ export async function GET(
       console.error('Error fetching submissions:', submissionsError)
     }
 
+    // If no questions stored, try to construct basic question info from submissions
+    // This handles older sessions that didn't save full question data
+    let questionsData = (questions || []).map((q: any) => {
+      const answerKey = answerKeyMap.get(q.question_id)
+      return {
+        id: q.question_id,
+        type: q.question_type,
+        category: q.category,
+        difficulty: q.difficulty,
+        prompt: q.prompt,
+        choices: q.choices,
+        answer: q.correct_answer || answerKey?.answer || '',
+        explanation: q.explanation || answerKey?.explanation || '',
+      }
+    })
+
+    // Fallback: construct minimal question data from submissions if no questions stored
+    if (questionsData.length === 0 && submissions && submissions.length > 0) {
+      questionsData = submissions.map((s: any, index: number) => ({
+        id: s.question_id,
+        type: 'unknown',
+        category: session.category,
+        difficulty: null,
+        prompt: `Question ${index + 1}`, // We don't have the original prompt
+        choices: null,
+        answer: s.correct_answer || '',
+        explanation: '',
+      }))
+    }
+
     // Transform data to match the Session type expected by the results page
     const transformedSession = {
       id: session.id,
@@ -134,19 +166,7 @@ export async function GET(
         description: session.is_daily && session.daily_date
           ? `${session.daily_date} - Daily Challenge`
           : undefined,
-        questions: (questions || []).map((q: any) => {
-          const answerKey = answerKeyMap.get(q.question_id)
-          return {
-            id: q.question_id,
-            type: q.question_type,
-            category: q.category,
-            difficulty: q.difficulty,
-            prompt: q.prompt,
-            choices: q.choices,
-            answer: q.correct_answer || answerKey?.answer || '',
-            explanation: q.explanation || answerKey?.explanation || '',
-          }
-        }),
+        questions: questionsData,
         createdAt: session.completed_at,
         seeded: session.is_daily,
       },

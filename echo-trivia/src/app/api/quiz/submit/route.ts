@@ -287,6 +287,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Save individual submissions to database (use VALIDATED submissions)
+    // Use service client to bypass RLS policies that block anon inserts
+    const serviceClient = createServiceClient()
+
     if (validatedSubmissions && validatedSubmissions.length > 0 && session?.id) {
       const submissionRecords = validatedSubmissions.map((sub) => ({
         session_id: session.id,
@@ -297,7 +300,7 @@ export async function POST(request: NextRequest) {
         time_ms: sub.time_ms || null,
       }))
 
-      const { error: submissionsError } = await supabase
+      const { error: submissionsError } = await serviceClient
         .from('quiz_submissions')
         .insert(submissionRecords)
 
@@ -332,7 +335,7 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      const { error: questionsError } = await supabase
+      const { error: questionsError } = await serviceClient
         .from('quiz_questions')
         .insert(questionRecords)
 

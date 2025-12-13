@@ -185,19 +185,6 @@ Curriculum Mode:
 Offline Mode
 - Caches recipes and quizzes for offline play in PWA mode.
 
-PWA Installable App
-- Fully badge-able, themed, and with push notifications.
-
-Accessibility Improvements
-- Large text mode
-- Dyslexia-friendly font
-- Colorblind palette switch
-- Keyboard-only mode
-
-Authentication & Account Enhancements
-Supabase Profile Sync
-- Sync history, favorites, stats, and settings across devices. This will require a rework of the current hybrid storage model...
-
 ## License
 
 MIT

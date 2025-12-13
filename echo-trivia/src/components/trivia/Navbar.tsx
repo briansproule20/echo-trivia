@@ -106,13 +106,14 @@ export function Navbar() {
                     <span>Navigation</span>
                   </SheetTitle>
                 </SheetHeader>
-                <div className="flex flex-col space-y-6 mt-8 overflow-y-auto flex-1 pr-2">
-                  {/* Theme Toggle */}
-                  <div className="flex items-center justify-between px-3 py-2 border-b" suppressHydrationWarning>
-                    <span className="text-sm font-medium">Theme</span>
-                    <ThemeToggle />
-                  </div>
 
+                {/* Theme Toggle - Fixed at top, outside scrollable area */}
+                <div className="flex items-center justify-between px-3 py-2 border-b mt-4 shrink-0" suppressHydrationWarning>
+                  <span className="text-sm font-medium">Theme</span>
+                  <ThemeToggle />
+                </div>
+
+                <div className="flex flex-col space-y-6 mt-4 overflow-y-auto flex-1 pr-2">
                   {/* Navigation Links */}
                   <nav className="flex flex-col space-y-3">
                     {NAV_ITEMS.map((item) => (

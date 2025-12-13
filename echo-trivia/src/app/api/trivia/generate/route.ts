@@ -80,6 +80,7 @@ Rules:
 - NEVER include the answer within the question prompt itself. BAD: "What world wonder was located in Alexandria: The Lighthouse of Alexandria?" GOOD: "Which ancient wonder was located in Alexandria, Egypt?"
 - For multiple choice, the "answer" field should be the choice ID (A, B, C, or D).
 - For true/false, the "answer" field should be "true" or "false".
+- CRITICAL FOR TRUE/FALSE: You MUST balance true and false answers roughly 50/50. Do NOT make all or most answers "true". Actively create statements that are FALSE by using incorrect facts, wrong dates, wrong attributions, etc. For example: "The Great Wall of China is visible from space" (false), "Shakespeare wrote 37 plays" (true), "Mount Everest is in the Alps" (false).
 - For short answer, the "answer" field should be the expected text answer.
 
 CRITICAL - Fair and Clear Questions:

@@ -45,6 +45,19 @@ const buttonVariants = cva(
           'before:content-[""] before:absolute before:w-full before:h-full before:rounded-md before:pointer-events-none',
           'before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:animate-shimmer'
         ),
+        liquidGlass: cn(
+          'bg-white/10 dark:bg-white/5 backdrop-blur-md',
+          'border border-white/20 dark:border-white/10',
+          'shadow-[0_8px_32px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.4)]',
+          'dark:shadow-[0_8px_32px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.1)]',
+          'hover:bg-white/20 dark:hover:bg-white/10 hover:border-white/30 dark:hover:border-white/20',
+          'hover:shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.5)]',
+          'dark:hover:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.15)]',
+          'relative overflow-hidden',
+          'before:content-[""] before:absolute before:inset-0 before:rounded-md before:pointer-events-none',
+          'before:bg-gradient-to-br before:from-white/20 before:via-transparent before:to-transparent',
+          'text-foreground'
+        ),
         unstyled: '',
       },
       size: {

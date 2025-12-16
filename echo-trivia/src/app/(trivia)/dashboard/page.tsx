@@ -1297,21 +1297,62 @@ export default function DashboardPage() {
           {/* All Categories */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">All Categories Played</CardTitle>
+              <CardTitle className="text-lg sm:text-xl">All Categories Played ({categoryMastery.length})</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {stats?.categories_played.map((cat) => (
-                  <Badge key={cat} variant="outline" className="text-xs sm:text-sm">
-                    {cat}
-                  </Badge>
-                ))}
-                {(!stats?.categories_played || stats.categories_played.length === 0) && (
-                  <span className="text-xs sm:text-sm text-muted-foreground">
-                    Start playing to explore categories
-                  </span>
-                )}
-              </div>
+              {categoryMastery.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                  {categoryMastery.map((cat, index) => {
+                    const masteryColors = {
+                      master: 'border-purple-500/50 bg-purple-500/10',
+                      advanced: 'border-blue-500/50 bg-blue-500/10',
+                      intermediate: 'border-green-500/50 bg-green-500/10',
+                      beginner: 'border-yellow-500/50 bg-yellow-500/10',
+                      struggling: 'border-red-500/50 bg-red-500/10'
+                    };
+                    const masteryIcons = {
+                      master: '👑',
+                      advanced: '⭐',
+                      intermediate: '📈',
+                      beginner: '🌱',
+                      struggling: '⚠️'
+                    };
+
+                    return (
+                      <motion.div
+                        key={cat.category}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.02 }}
+                        onClick={() => handleCategoryClick(cat.category)}
+                        className={`${masteryColors[cat.mastery as keyof typeof masteryColors]} border rounded-lg p-3 cursor-pointer hover:scale-[1.02] transition-all`}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <span className="font-medium text-sm leading-tight line-clamp-2 flex-1">
+                            {cat.category}
+                          </span>
+                          <span className="text-base flex-shrink-0">
+                            {masteryIcons[cat.mastery as keyof typeof masteryIcons]}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span className="font-semibold text-foreground">{cat.avgScore.toFixed(0)}%</span>
+                          <span>{cat.count} {cat.count === 1 ? 'quiz' : 'quizzes'}</span>
+                        </div>
+                        {cat.lastPlayed && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Last: {new Date(cat.lastPlayed).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </div>
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <span className="text-xs sm:text-sm text-muted-foreground">
+                  Start playing to explore categories
+                </span>
+              )}
             </CardContent>
           </Card>
         </div>

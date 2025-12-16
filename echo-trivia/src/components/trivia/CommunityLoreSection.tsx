@@ -231,28 +231,150 @@ export function CommunityLoreSection() {
                 </span>
               </div>
 
-              <div className="relative h-3 bg-secondary rounded-full overflow-hidden border border-border">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${stats.progress}%` }}
-                  transition={{ delay: 1, duration: 1.5, ease: "easeOut" }}
-                  className="absolute inset-y-0 left-0 bg-primary rounded-full"
-                />
-
-                {/* Shimmer effect */}
+              <div className="relative">
+                {/* Outer glow effect */}
                 <motion.div
                   animate={{
-                    x: ['-100%', '200%']
+                    opacity: [0.4, 0.7, 0.4],
+                    scale: [1, 1.02, 1]
                   }}
                   transition={{
-                    duration: 2,
+                    duration: 2.5,
                     repeat: Infinity,
-                    ease: "linear",
-                    repeatDelay: 1
+                    ease: "easeInOut"
                   }}
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                  style={{ width: '50%' }}
+                  className="absolute -inset-1 bg-primary/20 rounded-full blur-md"
+                  style={{ width: `calc(${stats.progress}% + 8px)` }}
                 />
+
+                <div className="relative h-3 bg-secondary rounded-full overflow-hidden border border-border">
+                  {/* Filled progress bar container */}
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${stats.progress}%` }}
+                    transition={{ delay: 1, duration: 1.5, ease: "easeOut" }}
+                    className="absolute inset-y-0 left-0 bg-primary rounded-full overflow-hidden"
+                  >
+                    {/* Top edge highlight */}
+                    <div
+                      className="absolute inset-x-0 top-0 h-[1px]"
+                      style={{
+                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 20%, rgba(255,255,255,0.3) 80%, transparent 100%)'
+                      }}
+                    />
+
+                    {/* Primary shimmer - bright highlight */}
+                    <motion.div
+                      animate={{
+                        x: ['-100%', '400%']
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: [0.25, 0.1, 0.25, 1],
+                        repeatDelay: 1
+                      }}
+                      className="absolute inset-0 w-1/4"
+                      style={{
+                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 20%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.1) 80%, transparent 100%)'
+                      }}
+                    />
+
+                    {/* Secondary shimmer - wider, softer */}
+                    <motion.div
+                      animate={{
+                        x: ['-100%', '400%']
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: [0.25, 0.1, 0.25, 1],
+                        repeatDelay: 1,
+                        delay: 0.1
+                      }}
+                      className="absolute inset-0 w-1/2"
+                      style={{
+                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)'
+                      }}
+                    />
+
+                    {/* Sparkle points */}
+                    <motion.div
+                      animate={{
+                        x: ['-50%', '450%'],
+                        opacity: [0, 1, 1, 0]
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "linear",
+                        repeatDelay: 1
+                      }}
+                      className="absolute top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-white"
+                      style={{
+                        boxShadow: '0 0 4px 1px rgba(255,255,255,0.8), 0 0 8px 2px rgba(255,255,255,0.4)'
+                      }}
+                    />
+
+                    {/* Second sparkle with offset */}
+                    <motion.div
+                      animate={{
+                        x: ['-50%', '450%'],
+                        opacity: [0, 1, 1, 0]
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "linear",
+                        repeatDelay: 1,
+                        delay: 0.3
+                      }}
+                      className="absolute top-1/2 -translate-y-1/2 w-0.5 h-0.5 rounded-full bg-white"
+                      style={{
+                        boxShadow: '0 0 3px 1px rgba(255,255,255,0.6)'
+                      }}
+                    />
+
+                    {/* Ambient color wave */}
+                    <motion.div
+                      animate={{
+                        opacity: [0.2, 0.4, 0.2],
+                        backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
+                      }}
+                      transition={{
+                        duration: 4,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                      className="absolute inset-0"
+                      style={{
+                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 25%, transparent 50%, rgba(255,255,255,0.1) 75%, transparent 100%)',
+                        backgroundSize: '200% 100%'
+                      }}
+                    />
+                  </motion.div>
+
+                  {/* Leading edge glow */}
+                  <motion.div
+                    initial={{ left: 0 }}
+                    animate={{ left: `${stats.progress}%` }}
+                    transition={{ delay: 1, duration: 1.5, ease: "easeOut" }}
+                    className="absolute top-0 bottom-0 w-2 -translate-x-1/2"
+                  >
+                    <motion.div
+                      animate={{
+                        opacity: [0.6, 1, 0.6],
+                        scale: [0.8, 1, 0.8]
+                      }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                      className="absolute inset-0 bg-white rounded-full blur-sm"
+                    />
+                  </motion.div>
+                </div>
               </div>
 
               <div className="text-center">

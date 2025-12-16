@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, BookOpen, FileQuestion, BarChart3, Trophy, User, Sparkles, Users, Settings, MessageCircle, LayoutGrid } from "lucide-react";
+import { Menu, BookOpen, FileQuestion, BarChart3, Trophy, User, Sparkles, Users, Settings, MessageCircle, LayoutGrid, Compass } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { EchoAccount } from "@/components/echo-account-next";
@@ -35,6 +36,14 @@ export function Navbar() {
   const { theme, resolvedTheme } = useTheme();
   const isAuthenticated = !!echo.user;
   const [mounted, setMounted] = useState(false);
+  const [compassSpinning, setCompassSpinning] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const handleCompassClick = () => {
+    setCompassSpinning(true);
+    audioRef.current?.play();
+    setTimeout(() => setCompassSpinning(false), 3000);
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -105,8 +114,19 @@ export function Navbar() {
                       className="h-6 w-6 object-contain"
                     />
                     <span>Navigation</span>
+                    <motion.button
+                      onClick={handleCompassClick}
+                      animate={compassSpinning ? { rotate: 1080 } : { rotate: 0 }}
+                      transition={{ duration: 3, ease: "easeInOut" }}
+                      className="p-1.5 rounded-full hover:bg-accent transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Compass className="h-4 w-4 text-muted-foreground" />
+                    </motion.button>
                   </SheetTitle>
                 </SheetHeader>
+                <audio ref={audioRef} src="/skyrim-i-used-to-be-an-adventure-like-you.mp3" />
 
                 {/* Theme Toggle - Fixed at top, outside scrollable area */}
                 <div className="flex items-center justify-between px-3 py-2 border-b mt-4 shrink-0" suppressHydrationWarning>

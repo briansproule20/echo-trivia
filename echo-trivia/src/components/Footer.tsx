@@ -1,11 +1,22 @@
 "use client";
 
+import { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ExternalLink, Sparkles, Trophy, BookOpen, Zap, MessageCircle } from "lucide-react";
+import { ExternalLink, Sparkles, Trophy, BookOpen, Zap, MessageCircle, Compass } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { motion } from "framer-motion";
 
 export function Footer() {
+  const [compassSpinning, setCompassSpinning] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const handleCompassClick = () => {
+    setCompassSpinning(true);
+    audioRef.current?.play();
+    setTimeout(() => setCompassSpinning(false), 3000);
+  };
+
   return (
     <footer className="border-t bg-muted/30">
       <div className="container mx-auto px-4 py-12 sm:py-16">
@@ -221,6 +232,21 @@ export function Footer() {
                 >
                   Daily Challenge
                 </Link>
+              </li>
+              <li>
+                <button
+                  onClick={handleCompassClick}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md text-muted-foreground hover:text-primary hover:bg-accent transition-colors w-full sm:w-auto"
+                >
+                  <motion.span
+                    animate={compassSpinning ? { rotate: 1080 } : { rotate: 0 }}
+                    transition={{ duration: 3, ease: "easeInOut" }}
+                  >
+                    <Compass className="h-4 w-4" />
+                  </motion.span>
+                  Adventure
+                </button>
+                <audio ref={audioRef} src="/skyrim-i-used-to-be-an-adventure-like-you.mp3" />
               </li>
             </ul>
           </div>

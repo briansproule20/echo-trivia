@@ -3,7 +3,7 @@ import EchoBalance from '@/components/balance';
 import { EchoTopUpButton } from '@/components/top-up-button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/echo-button';
-import { PopoverContent } from '@/components/ui/popover';
+import { AnimatedPopoverContent } from '@/components/ui/popover';
 import { type EchoContextValue } from '@merit-systems/echo-react-sdk';
 import { LogOut, BookOpen } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -12,7 +12,7 @@ export function EchoAccountButtonPopover({ echo }: { echo: EchoContextValue }) {
   const { user, signOut } = echo;
 
   return (
-    <PopoverContent className="w-[280px] sm:w-[380px] p-0" align="end">
+    <AnimatedPopoverContent className="w-[280px] sm:w-[380px] p-0" align="end">
       {/* Header */}
       <div className="flex items-center justify-between gap-2 border-b p-4">
         <Button
@@ -49,6 +49,6 @@ export function EchoAccountButtonPopover({ echo }: { echo: EchoContextValue }) {
       <div className="p-4 border-b">
         <EchoTopUpButton echo={echo} />
       </div>
-    </PopoverContent>
+    </AnimatedPopoverContent>
   );
 }

@@ -12,6 +12,7 @@ import { useEcho } from "@merit-systems/echo-react-sdk";
 import { useTheme } from "next-themes";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ReferralBanner } from "@/components/ReferralBanner";
+import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
@@ -64,9 +65,9 @@ export function Navbar() {
               alt="Trivia Wizard"
               className="h-8 w-8 object-contain"
             />
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <AnimatedGradientText className="text-xl font-bold">
               Trivia Wizard
-            </span>
+            </AnimatedGradientText>
           </Link>
 
           {/* Center/Desktop Nav Links */}

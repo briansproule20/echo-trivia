@@ -15,6 +15,7 @@ import { Footer } from "@/components/Footer";
 import { FlipText } from "@/components/ui/flip-text";
 import { FinishQuizFlurp } from "@/components/trivia/FinishQuizFlurp";
 import { ChatWidget } from "@/components/ChatWidget";
+import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
 
 // Type for cloud sessions from Supabase
 interface CloudSession {
@@ -89,9 +90,9 @@ export default function HomePage() {
         <div className="text-center mb-8 sm:mb-12 space-y-4 sm:space-y-6">
           <div className="space-y-2 sm:space-y-3">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
-              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <AnimatedGradientText>
                 Trivia Wizard
-              </span>
+              </AnimatedGradientText>
             </h1>
             <div className="h-px w-24 mx-auto bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
           </div>

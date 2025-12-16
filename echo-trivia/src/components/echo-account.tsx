@@ -4,7 +4,7 @@ import { EchoAccountButtonPopover } from '@/components/echo-popover';
 import { formatCurrency } from '@/lib/currency-utils';
 import { Button } from '@/components/echo-button';
 import { Logo } from '@/components/logo';
-import { Popover, PopoverTrigger } from '@/components/ui/popover';
+import { AnimatedPopover, PopoverTrigger } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
 import { type EchoContextValue } from '@merit-systems/echo-react-sdk';
 import { Gift, Loader2 } from 'lucide-react';
@@ -13,6 +13,7 @@ import { useState } from 'react';
 export function EchoAccountButton({ echo }: { echo: EchoContextValue }) {
   const { user, balance, freeTierBalance, signIn, isLoading } = echo;
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const totalBalance =
     (balance?.balance || 0) + (freeTierBalance?.userSpendInfo.amountLeft || 0);
   const hasFreeCredits = freeTierBalance?.userSpendInfo.amountLeft ?? 0 > 0;
@@ -42,7 +43,7 @@ export function EchoAccountButton({ echo }: { echo: EchoContextValue }) {
   const button = (
     <div className="relative inline-flex">
       <Button
-        variant="outline"
+        variant="liquidGlass"
         onClick={
           !user
             ? () => {
@@ -69,9 +70,9 @@ export function EchoAccountButton({ echo }: { echo: EchoContextValue }) {
   }
 
   return (
-    <Popover>
+    <AnimatedPopover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>{button}</PopoverTrigger>
       <EchoAccountButtonPopover echo={echo} />
-    </Popover>
+    </AnimatedPopover>
   );
 }

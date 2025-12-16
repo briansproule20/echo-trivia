@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
 
@@ -39,10 +40,95 @@ function PopoverContent({
   );
 }
 
+const MotionDiv = motion.div;
+
+function AnimatedPopoverContent({
+  className,
+  align = 'center',
+  sideOffset = 4,
+  children,
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+  return (
+    <PopoverPrimitive.Portal forceMount>
+      <PopoverPrimitive.Content
+        data-slot="popover-content"
+        align={align}
+        sideOffset={sideOffset}
+        forceMount
+        asChild
+        {...props}
+      >
+        <MotionDiv
+          initial={{
+            opacity: 0,
+            scaleY: 0,
+            scaleX: 0.3,
+            y: -20,
+          }}
+          animate={{
+            opacity: 1,
+            scaleY: 1,
+            scaleX: 1,
+            y: 0,
+          }}
+          exit={{
+            opacity: 0,
+            scaleY: 0,
+            scaleX: 0.3,
+            y: -20,
+            transition: {
+              type: 'spring',
+              stiffness: 500,
+              damping: 30,
+              mass: 0.5,
+            }
+          }}
+          transition={{
+            type: 'spring',
+            stiffness: 300,
+            damping: 20,
+            mass: 0.8,
+          }}
+          style={{ transformOrigin: 'top right' }}
+          className={cn(
+            'bg-popover text-popover-foreground z-50 w-72 rounded-md border p-4 shadow-md outline-hidden overflow-hidden',
+            className
+          )}
+        >
+          {children}
+        </MotionDiv>
+      </PopoverPrimitive.Content>
+    </PopoverPrimitive.Portal>
+  );
+}
+
 function PopoverAnchor({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Anchor>) {
   return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />;
 }
 
-export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor };
+interface AnimatedPopoverProps {
+  children: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+function AnimatedPopover({ children, open, onOpenChange }: AnimatedPopoverProps) {
+  // Separate trigger from content - trigger is first child, content is second
+  const childArray = React.Children.toArray(children);
+  const trigger = childArray[0];
+  const content = childArray[1];
+
+  return (
+    <PopoverPrimitive.Root data-slot="popover" open={open} onOpenChange={onOpenChange}>
+      {trigger}
+      <AnimatePresence>
+        {open && content}
+      </AnimatePresence>
+    </PopoverPrimitive.Root>
+  );
+}
+
+export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor, AnimatedPopover, AnimatedPopoverContent };

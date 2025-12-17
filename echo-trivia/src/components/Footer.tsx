@@ -3,16 +3,19 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ExternalLink, Sparkles, Trophy, BookOpen, Zap, MessageCircle, Compass, Layers } from "lucide-react";
+import { ExternalLink, Sparkles, Trophy, BookOpen, Zap, MessageCircle, Compass, Layers, Castle, X } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 export function Footer() {
   const [compassSpinning, setCompassSpinning] = useState(false);
+  const [showAdventurePopup, setShowAdventurePopup] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const handleCompassClick = () => {
     setCompassSpinning(true);
+    setShowAdventurePopup(true);
     audioRef.current?.play();
     setTimeout(() => setCompassSpinning(false), 3000);
   };
@@ -301,6 +304,56 @@ export function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Adventure Mode Popup */}
+      <AnimatePresence>
+        {showAdventurePopup && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowAdventurePopup(false)}
+              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50"
+            />
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md"
+            >
+              <div className="bg-card border border-border rounded-lg shadow-lg p-6 mx-4">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Castle className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">The Wizard's Tower</h3>
+                      <p className="text-sm text-muted-foreground">Adventure Mode</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full"
+                    onClick={() => setShowAdventurePopup(false)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium text-primary">Coming Soon</span>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </footer>
   );
 }

@@ -448,14 +448,21 @@ export default function ChatPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex gap-2 mb-3 justify-start sm:justify-center overflow-x-auto sm:overflow-visible sm:flex-wrap pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none"
               >
-                <button
+                <motion.button
                   onClick={() => handleSuggestion('primer')}
                   disabled={isLoading}
-                  className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border border-border bg-card hover:bg-accent hover:border-primary/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                  className="relative shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border border-primary/50 bg-primary/5 hover:bg-primary/10 hover:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap overflow-hidden"
+                  animate={{ scale: [1, 1.02, 1] }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
                 >
-                  <BookOpen className="h-3 w-3 text-primary" />
-                  Daily Primer
-                </button>
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent animate-shimmer" />
+                  <BookOpen className="h-3 w-3 text-primary relative z-10" />
+                  <span className="relative z-10">Daily Primer</span>
+                </motion.button>
                 <button
                   onClick={() => handleSuggestion('random')}
                   disabled={isLoading || hasUnansweredQuestion}

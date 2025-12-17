@@ -62,7 +62,6 @@ export async function POST(req: Request) {
       model: provider(model),
       system: SYSTEM_PROMPT,
       messages: convertToModelMessages(messages),
-      maxSteps: 3, // Allow multiple tool calls if needed
       tools: {
         trivia_question: tool({
           description: 'Present a trivia question. Always include exactly 4 options (A, B, C, D).',

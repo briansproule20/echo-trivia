@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ExternalLink, Sparkles, Trophy, BookOpen, Zap, MessageCircle, Compass } from "lucide-react";
+import { ExternalLink, Sparkles, Trophy, BookOpen, Zap, MessageCircle, Compass, Layers } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
 
@@ -21,9 +21,9 @@ export function Footer() {
     <footer className="border-t bg-muted/30">
       <div className="container mx-auto px-4 py-12 sm:py-16">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-12 mb-12">
-          {/* Brand Section - Larger on desktop */}
-          <div className="space-y-4 lg:col-span-4">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 mb-12">
+          {/* Brand Section */}
+          <div className="space-y-4 lg:w-64 lg:flex-shrink-0">
             <Link href="/" className="inline-flex items-center gap-2 group">
               <Image
                 src="/triviawizard favicon.png"
@@ -64,12 +64,14 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Game Modes */}
-          <div className="space-y-4 lg:col-span-2">
-            <div className="flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-primary" />
-              <h4 className="text-sm font-semibold">Game Modes</h4>
-            </div>
+          {/* Link Columns */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 flex-1">
+            {/* Game Modes */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-primary" />
+                <h4 className="text-sm font-semibold">Game Modes</h4>
+              </div>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link
@@ -106,11 +108,11 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Community */}
-          <div className="space-y-4 lg:col-span-2">
+          {/* Scores & History */}
+          <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" />
-              <h4 className="text-sm font-semibold">Community</h4>
+              <h4 className="text-sm font-semibold whitespace-nowrap">Scores & History</h4>
             </div>
             <ul className="space-y-3 text-sm">
               <li>
@@ -149,7 +151,7 @@ export function Footer() {
           </div>
 
           {/* Resources */}
-          <div className="space-y-4 lg:col-span-2">
+          <div className="space-y-4">
             <div className="flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-primary" />
               <h4 className="text-sm font-semibold">Resources</h4>
@@ -171,6 +173,43 @@ export function Footer() {
                   FAQs & Docs
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/referrals"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Referrals
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/settings"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Settings
+                </Link>
+              </li>
+              <li>
+                <a
+                  href="https://echo.merit.systems/dashboard"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
+                >
+                  Echo Dashboard
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* More */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Layers className="h-4 w-4 text-primary" />
+              <h4 className="text-sm font-semibold">More</h4>
+            </div>
+            <ul className="space-y-3 text-sm">
               <li>
                 <Link
                   href="/chat"
@@ -196,22 +235,11 @@ export function Footer() {
                   Categories
                 </Link>
               </li>
-              <li>
-                <a
-                  href="https://echo.merit.systems/dashboard"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
-                >
-                  Echo Dashboard
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </li>
             </ul>
           </div>
 
           {/* Quick Actions */}
-          <div className="space-y-4 lg:col-span-2">
+          <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-primary" />
               <h4 className="text-sm font-semibold">Quick Start</h4>
@@ -249,6 +277,7 @@ export function Footer() {
                 <audio ref={audioRef} src="/skyrim-i-used-to-be-an-adventure-like-you.mp3" />
               </li>
             </ul>
+          </div>
           </div>
         </div>
 

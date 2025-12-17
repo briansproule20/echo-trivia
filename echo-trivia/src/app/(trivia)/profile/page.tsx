@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Target, Flame, Clock, Award, Edit2, Check, X, BarChart3, ArrowRight, Swords, Zap, Star, Castle } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Trophy, Target, Flame, Clock, Award, Edit2, Check, X, BarChart3, ArrowRight, Swords, Zap, Star, Castle, HelpCircle } from "lucide-react";
 import Link from "next/link";
 import type { UserStats, UserAchievement, DailyStreak } from "@/lib/supabase-types";
 
@@ -376,7 +377,32 @@ export default function ProfilePage() {
               {/* Category Performance */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg sm:text-xl">Category Insights</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg sm:text-xl">Category Insights</CardTitle>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="rounded-full p-1.5 hover:bg-accent transition-colors">
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>About Category Insights</DialogTitle>
+                          <DialogDescription>
+                            Understanding your category statistics
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-3 py-4 text-sm text-muted-foreground">
+                          <p>
+                            Categories are tracked across all game modes, including Freeplay sessions and Daily Challenges.
+                          </p>
+                          <p>
+                            If you notice duplicate entries, this may occur when the same category appears in both modes—each is recorded separately to preserve your complete quiz history.
+                          </p>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">

@@ -1039,6 +1039,7 @@ export default function DashboardPage() {
                       />
                       <YAxis
                         domain={[0, 100]}
+                        ticks={[20, 40, 60, 80, 100]}
                         fontSize={10}
                       />
                       <Tooltip

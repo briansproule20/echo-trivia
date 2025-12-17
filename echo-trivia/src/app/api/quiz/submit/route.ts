@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import { createServiceClient } from '@/utils/supabase/service'
 import { isSignedIn } from '@/echo'
 import type { SaveQuizSessionRequest } from '@/lib/supabase-types'
+import { normalizeCategoryWithAliases } from '@/lib/normalize-category'
 
 // Type for server-side evaluation record
 interface ServerEvaluation {
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
     const {
       echo_user_id,
       echo_user_name,
-      category,
+      category: rawCategory,
       num_questions,
       correct_answers,
       total_questions,
@@ -88,6 +89,9 @@ export async function POST(request: NextRequest) {
       submissions,
       questions,
     } = body
+
+    // Normalize category name for consistent storage
+    const category = normalizeCategoryWithAliases(rawCategory)
 
     // Validate required fields
     if (

@@ -48,6 +48,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
+import { ActivityHeatmap } from "@/components/trivia/ActivityHeatmap";
 
 // Custom tooltip component for Recharts that matches shadcn UI theme
 const CustomChartTooltip = ({ active, payload, label }: any) => {
@@ -98,6 +99,7 @@ export default function DashboardPage() {
   const [shuffledCategories, setShuffledCategories] = useState<typeof categoryPerformance>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categoryQuizzes, setCategoryQuizzes] = useState<QuizSession[]>([]);
+  const [dailyActivityMap, setDailyActivityMap] = useState<Record<string, { count: number; avgScore: number; totalScore: number }>>({});
 
   useEffect(() => {
     if (echo.user?.id) {
@@ -132,6 +134,7 @@ export default function DashboardPage() {
         setRadarData(data.radarData || []);
         setScoreTrend(data.scoreTrend || []);
         setDifficultyPerformance(data.difficultyPerformance || []);
+        setDailyActivityMap(data.dailyActivityMap || {});
       }
 
       // Fetch all achievements
@@ -1355,6 +1358,9 @@ export default function DashboardPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Activity Heatmap */}
+          <ActivityHeatmap dailyActivityMap={dailyActivityMap} />
         </div>
 
         {/* Category Quiz History Modal */}

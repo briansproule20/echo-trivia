@@ -192,6 +192,21 @@ export async function GET(request: NextRequest) {
       timeTaken: s.time_taken || 0
     }))
 
+    // Daily activity heatmap data (last 365 days)
+    const dailyActivityMap: Record<string, { count: number; avgScore: number; totalScore: number }> = {}
+    sessions.forEach(s => {
+      const dateKey = new Date(s.completed_at).toISOString().split('T')[0]
+      if (!dailyActivityMap[dateKey]) {
+        dailyActivityMap[dateKey] = { count: 0, avgScore: 0, totalScore: 0 }
+      }
+      dailyActivityMap[dateKey].count++
+      dailyActivityMap[dateKey].totalScore += s.score_percentage
+    })
+    // Calculate averages
+    Object.keys(dailyActivityMap).forEach(date => {
+      dailyActivityMap[date].avgScore = dailyActivityMap[date].totalScore / dailyActivityMap[date].count
+    })
+
     const stats: UserStats = {
       echo_user_id: echoUserId,
       total_quizzes: totalQuizzes,
@@ -216,7 +231,8 @@ export async function GET(request: NextRequest) {
       radarData,
       scoreTrend,
       difficultyPerformance,
-      faceoffCount
+      faceoffCount,
+      dailyActivityMap
     })
   } catch (error) {
     console.error('Error fetching user stats:', error)

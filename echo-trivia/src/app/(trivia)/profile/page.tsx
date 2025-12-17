@@ -101,12 +101,20 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto px-4 py-6 sm:py-12">
         <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
-          {/* Header with Username */}
-          <div className="text-center space-y-3 sm:space-y-4">
-            <h1 className="text-3xl sm:text-4xl font-bold">
-              {currentUsername || "Anonymous Wizard"}
+          {/* Page Header */}
+          <div className="text-center mb-6 space-y-4">
+            <Badge variant="secondary" className="mb-2">
+              Profile
+            </Badge>
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
+              Welcome back,{' '}
+              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                {currentUsername || 'Traveler'}
+              </span>
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground">Track your trivia journey</p>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Track your trivia journey and achievements
+            </p>
           </div>
 
           {/* Stats Overview */}

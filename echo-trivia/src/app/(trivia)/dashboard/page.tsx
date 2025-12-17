@@ -228,14 +228,20 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold mb-2">Dashboard</h1>
-              <span className="text-base sm:text-lg text-muted-foreground">
-                {currentUsername || "Anonymous Wizard"}
+          {/* Page Header */}
+          <div className="text-center mb-6 space-y-4">
+            <Badge variant="secondary" className="mb-2">
+              Dashboard
+            </Badge>
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
+              Welcome back,{' '}
+              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                {currentUsername || 'Traveler'}
               </span>
-            </div>
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Your detailed trivia analytics and insights
+            </p>
           </div>
 
           {/* Key Stats */}

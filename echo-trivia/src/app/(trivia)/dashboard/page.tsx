@@ -4,9 +4,6 @@ import { useEffect, useState } from "react";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { TooltipProps } from "recharts";
 import {
   BarChart,
@@ -36,7 +33,7 @@ import {
   Scatter,
   ZAxis,
 } from "recharts";
-import { Trophy, Target, Flame, Clock, Award, Edit2, Check, X, HelpCircle, Shuffle } from "lucide-react";
+import { Trophy, Target, Flame, Clock, Award, HelpCircle, Shuffle } from "lucide-react";
 import type { UserStats, UserAchievement, DailyStreak, QuizSession, Achievement } from "@/lib/supabase-types";
 import { CATEGORIES } from "@/lib/types";
 import {
@@ -92,8 +89,6 @@ export default function DashboardPage() {
   const [scoreTrend, setScoreTrend] = useState<Array<{ session: number; score: number; date: string; category: string }>>([]);
   const [difficultyPerformance, setDifficultyPerformance] = useState<Array<{ difficulty: string; score: number; category: string; timeTaken: number }>>([]);
   const [loading, setLoading] = useState(true);
-  const [editingUsername, setEditingUsername] = useState(false);
-  const [newUsername, setNewUsername] = useState("");
   const [currentUsername, setCurrentUsername] = useState("");
   const [showRandomCategories, setShowRandomCategories] = useState(false);
   const [shuffledCategories, setShuffledCategories] = useState<typeof categoryPerformance>([]);
@@ -118,7 +113,6 @@ export default function DashboardPage() {
         const data = await profileRes.json();
         if (data.user) {
           setCurrentUsername(data.user.username || "");
-          setNewUsername(data.user.username || "");
         }
       }
 
@@ -161,32 +155,6 @@ export default function DashboardPage() {
       console.error('Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleUsernameUpdate = async () => {
-    if (!echo.user?.id || !newUsername.trim()) return;
-
-    try {
-      const response = await fetch('/api/user/profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          echo_user_id: echo.user.id,
-          username: newUsername.trim(),
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setCurrentUsername(data.user.username);
-        setEditingUsername(false);
-      } else {
-        alert('Failed to update username');
-      }
-    } catch (error) {
-      console.error('Error updating username:', error);
-      alert('Failed to update username');
     }
   };
 
@@ -260,48 +228,13 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Header with Username Edit */}
+          {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold mb-2">Dashboard</h1>
-              <div className="flex items-center gap-2">
-                {editingUsername ? (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Input
-                      value={newUsername}
-                      onChange={(e) => setNewUsername(e.target.value)}
-                      placeholder="Enter username"
-                      className="max-w-[200px] sm:max-w-xs"
-                    />
-                    <Button size="sm" onClick={handleUsernameUpdate}>
-                      <Check className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setEditingUsername(false);
-                        setNewUsername(currentUsername);
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="text-base sm:text-lg text-muted-foreground">
-                      {currentUsername || "Set your username"}
-                    </span>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setEditingUsername(true)}
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </div>
+              <span className="text-base sm:text-lg text-muted-foreground">
+                {currentUsername || "Anonymous Wizard"}
+              </span>
             </div>
           </div>
 

@@ -5,11 +5,10 @@ import { useEcho } from "@merit-systems/echo-react-sdk";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Trophy, Target, Flame, Clock, Award, Edit2, Check, X, BarChart3, ArrowRight, Swords, Zap, Star, Castle, HelpCircle } from "lucide-react";
+import { Trophy, Target, Flame, Clock, Award, BarChart3, ArrowRight, Swords, Zap, Star, Castle, HelpCircle } from "lucide-react";
 import Link from "next/link";
 import type { UserStats, UserAchievement, DailyStreak } from "@/lib/supabase-types";
 
@@ -19,8 +18,6 @@ export default function ProfilePage() {
   const [achievements, setAchievements] = useState<UserAchievement[]>([]);
   const [streak, setStreak] = useState<DailyStreak | null>(null);
   const [loading, setLoading] = useState(true);
-  const [editingUsername, setEditingUsername] = useState(false);
-  const [newUsername, setNewUsername] = useState("");
   const [currentUsername, setCurrentUsername] = useState("");
   const [faceoffStats, setFaceoffStats] = useState({ played: 0 });
 
@@ -41,7 +38,6 @@ export default function ProfilePage() {
         const data = await profileRes.json();
         if (data.user) {
           setCurrentUsername(data.user.username || "");
-          setNewUsername(data.user.username || "");
         }
       }
 
@@ -70,32 +66,6 @@ export default function ProfilePage() {
       console.error('Error fetching user data:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleUsernameUpdate = async () => {
-    if (!echo.user?.id || !newUsername.trim()) return;
-
-    try {
-      const response = await fetch('/api/user/profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          echo_user_id: echo.user.id,
-          username: newUsername.trim(),
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setCurrentUsername(data.user.username);
-        setEditingUsername(false);
-      } else {
-        alert('Failed to update username');
-      }
-    } catch (error) {
-      console.error('Error updating username:', error);
-      alert('Failed to update username');
     }
   };
 
@@ -133,44 +103,9 @@ export default function ProfilePage() {
         <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
           {/* Header with Username */}
           <div className="text-center space-y-3 sm:space-y-4">
-            <div className="flex items-center justify-center gap-2">
-              {editingUsername ? (
-                <div className="flex items-center gap-2 flex-wrap justify-center">
-                  <Input
-                    value={newUsername}
-                    onChange={(e) => setNewUsername(e.target.value)}
-                    placeholder="Enter username"
-                    className="max-w-[200px] sm:max-w-xs"
-                  />
-                  <Button size="sm" onClick={handleUsernameUpdate}>
-                    <Check className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setEditingUsername(false);
-                      setNewUsername(currentUsername);
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <h1 className="text-3xl sm:text-4xl font-bold">
-                    {currentUsername || "Set your username"}
-                  </h1>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setEditingUsername(true)}
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
+            <h1 className="text-3xl sm:text-4xl font-bold">
+              {currentUsername || "Anonymous Wizard"}
+            </h1>
             <p className="text-sm sm:text-base text-muted-foreground">Track your trivia journey</p>
           </div>
 

@@ -12,7 +12,7 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Response } from '@/components/ai-elements/response'
 import { useQuizPreferencesStore, type AvatarId } from '@/lib/store'
-import { Skull, Ghost, Cat, Swords, Shield, Target, Glasses, TreePine, Flame, Zap, Crown, Anchor, Bird, Bug, Snowflake, Cherry, Sparkles, Calendar, Shuffle, Trophy, Lightbulb, BookOpen } from 'lucide-react'
+import { Skull, Ghost, Cat, Swords, Shield, Target, Glasses, TreePine, Flame, Zap, Crown, Anchor, Bird, Bug, Snowflake, Cherry, Sparkles, Shuffle, Trophy, Lightbulb, BookOpen } from 'lucide-react'
 import { TriviaQuestion } from '@/components/chat/TriviaQuestion'
 import { CATEGORIES } from '@/lib/types'
 
@@ -59,15 +59,14 @@ export default function ChatPage() {
   }, [])
 
   // Handle suggestion bubble click
-  const handleSuggestion = useCallback((type: 'daily' | 'random' | 'challenge' | 'easy' | 'primer') => {
+  const handleSuggestion = useCallback((type: 'random' | 'challenge' | 'easy' | 'primer') => {
     const randomCategory = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)]
 
     const prompts = {
-      daily: `Give me a trivia question about ${dailyCategory || 'History'} (today's daily category)`,
       random: `Give me a trivia question about ${randomCategory}`,
       challenge: `Give me a challenging hard trivia question`,
       easy: `Give me a fun easy trivia question to warm up`,
-      primer: `Give me a quick primer on ${dailyCategory || 'History'} - today's daily challenge category. Do NOT use the trivia_question tool - just share some interesting facts, key dates, notable figures, and context that might help me prepare for trivia questions on this topic.`,
+      primer: `Give me a quick primer on ${dailyCategory || 'History'} - today's daily challenge category. Share some interesting facts, key dates, notable figures, and context that might help me prepare for trivia questions on this topic.`,
     }
 
     sendMessage({ text: prompts[type] }, { body: { model: 'claude-sonnet-4-20250514' } })
@@ -456,14 +455,6 @@ export default function ChatPage() {
                 >
                   <BookOpen className="h-3 w-3 text-primary" />
                   Daily Primer
-                </button>
-                <button
-                  onClick={() => handleSuggestion('daily')}
-                  disabled={isLoading || hasUnansweredQuestion}
-                  className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border border-border bg-card hover:bg-accent hover:border-primary/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                >
-                  <Calendar className="h-3 w-3 text-primary" />
-                  Daily Warmup
                 </button>
                 <button
                   onClick={() => handleSuggestion('random')}

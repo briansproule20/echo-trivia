@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Sparkles, Loader2, Lock, ChevronDown, Calendar, CalendarDays, Clock } from "lucide-react";
+import { Sparkles, Loader2, Lock, ChevronDown, Calendar, CalendarDays, Clock, MessageCircle } from "lucide-react";
+import Link from "next/link";
 import { storage } from "@/lib/storage";
 import { getTodayString, getTodayFormatted, generateId } from "@/lib/quiz-utils";
 import { usePlayStore } from "@/lib/store";
@@ -248,6 +249,16 @@ export default function DailyQuizPage() {
               </p>
             </div>
           </div>
+
+          {/* Warmup Prompt */}
+          <Link href="/chat" className="block group">
+            <div className="flex items-center justify-center gap-3 px-4 py-3 rounded-lg border border-border bg-card/50 hover:bg-accent/50 hover:border-primary/30 transition-all">
+              <MessageCircle className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+              <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                Need to warm up? Try the <span className="font-medium text-foreground">Daily Primer</span> in the Wizard's Hat
+              </p>
+            </div>
+          </Link>
 
           {/* Loading State */}
           {loading && (

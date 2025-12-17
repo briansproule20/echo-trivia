@@ -46,6 +46,7 @@ import {
 } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
 import { ActivityHeatmap } from "@/components/trivia/ActivityHeatmap";
+import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
 
 // Custom tooltip component for Recharts that matches shadcn UI theme
 const CustomChartTooltip = ({ active, payload, label }: any) => {
@@ -235,9 +236,9 @@ export default function DashboardPage() {
             </Badge>
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
               Welcome back,{' '}
-              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <AnimatedGradientText>
                 {currentUsername || 'Traveler'}
-              </span>
+              </AnimatedGradientText>
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Your detailed trivia analytics and insights

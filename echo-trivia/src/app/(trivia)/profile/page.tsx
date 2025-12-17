@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Trophy, Target, Flame, Clock, Award, BarChart3, ArrowRight, Swords, Zap, Star, Castle, HelpCircle } from "lucide-react";
 import Link from "next/link";
 import type { UserStats, UserAchievement, DailyStreak } from "@/lib/supabase-types";
+import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
 
 export default function ProfilePage() {
   const echo = useEcho();
@@ -108,9 +109,9 @@ export default function ProfilePage() {
             </Badge>
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
               Welcome back,{' '}
-              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <AnimatedGradientText>
                 {currentUsername || 'Traveler'}
-              </span>
+              </AnimatedGradientText>
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Track your trivia journey and achievements

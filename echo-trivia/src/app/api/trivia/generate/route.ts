@@ -130,7 +130,7 @@ async function generateCustomCategoryQuiz(settings: any, preferredTone?: string,
         : settings.type === "multiple_choice"
         ? "All questions should be multiple choice with EXACTLY 4 options (A, B, C, D)"
         : settings.type === "true_false"
-        ? "All questions should be true/false"
+        ? "All questions should be true/false. NO TRICK QUESTIONS - statements must be clearly and unambiguously true or false."
         : "All questions should be short answer";
 
     const difficultyInstruction =
@@ -310,7 +310,7 @@ export async function POST(req: Request) {
         : settings.type === "multiple_choice"
         ? "All questions should be multiple choice with EXACTLY 4 options (A, B, C, D)"
         : settings.type === "true_false"
-        ? "All questions should be true/false"
+        ? "All questions should be true/false. NO TRICK QUESTIONS - statements must be clearly and unambiguously true or false."
         : "All questions should be short answer";
 
     // Use user preferences if provided, otherwise fall back to recipe

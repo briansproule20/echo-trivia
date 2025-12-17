@@ -34,6 +34,8 @@ CRITICAL RULES:
 - Do NOT include text outside of JSON
 - For multiple_choice: EXACTLY 4 options with IDs A, B, C, D (in that order), exactly one correct
 - The choices array must contain exactly 4 objects in order
+- For true_false: NO TRICK QUESTIONS - statements must be clearly and unambiguously true or false
+- CRITICAL FOR TRUE/FALSE: You MUST balance true and false answers roughly 50/50. Do NOT make all or most answers "true". Actively create statements that are FALSE by using incorrect facts, wrong dates, wrong attributions, etc.
 - NEVER include the answer within the question prompt itself
 - Use clear phrasing; avoid double negatives
 - All questions must be factually accurate

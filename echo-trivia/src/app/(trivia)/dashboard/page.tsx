@@ -1120,7 +1120,7 @@ export default function DashboardPage() {
                     >
                       <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                       <XAxis dataKey="difficulty" fontSize={11} />
-                      <YAxis domain={[0, 100]} fontSize={10} />
+                      <YAxis domain={[0, 100]} ticks={[20, 40, 60, 80, 100]} fontSize={10} />
                       <Tooltip
                         content={({ payload }) => {
                           if (!payload || !payload[0]) return null;

@@ -161,7 +161,7 @@ export function CommunityLoreSection() {
             className="mb-6 space-y-2"
           >
             <p className="text-muted-foreground leading-relaxed text-sm">
-              Under the Trivia Wizard's guidance, we stand united against the wretched forces of ignorance. Each correct answer strikes a blow for knowledge, empowering our legion's march toward enlightenment.
+              The Trivia Wizard has gathered the curious, the clever, the gloriously nerdy. Together we chase answers, collect wisdom, and prove that knowing stuff is actually pretty cool.
             </p>
           </motion.div>
 

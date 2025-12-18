@@ -49,7 +49,8 @@ async function saveRun(
   category: string | null,
   streak: number,
   categoriesSeen: string[],
-  timePlayed: number
+  timePlayed: number,
+  questionsAttempted: QuestionAttempt[]
 ): Promise<{ rank: number | null; isPersonalBest: boolean }> {
   const supabase = createServiceClient();
 
@@ -73,6 +74,7 @@ async function saveRun(
       categories_seen: categoriesSeen,
       time_played_seconds: Math.floor(timePlayed / 1000),
       ended_at: new Date().toISOString(),
+      questions_attempted: questionsAttempted,
     })
     .select()
     .single();
@@ -85,10 +87,11 @@ async function saveRun(
 
   console.log("Successfully saved survival run:", insertedRun?.id);
 
-  // Also save to quiz_sessions for stats integration
+  // Also save to quiz_sessions for stats integration (use same ID for linking)
   const { error: sessionError } = await supabase
     .from("quiz_sessions")
     .insert({
+      id: runId, // Use same ID as survival_runs for linking
       user_id: userData?.id || null,
       echo_user_id: echoUserId,
       category: category || "Mixed",
@@ -231,7 +234,8 @@ export async function POST(req: Request) {
         runState.category,
         runState.streak,
         runState.categories_seen,
-        timePlayed
+        timePlayed,
+        runState.questions_attempted
       );
 
       // Clean up active run

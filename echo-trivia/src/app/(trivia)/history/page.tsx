@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Clock, AlertCircle, TrendingUp, Award, Cloud, HardDrive } from "lucide-react";
+import { Trophy, Clock, AlertCircle, TrendingUp, Award, Cloud, HardDrive, Flame } from "lucide-react";
 import { storage } from "@/lib/storage";
 import type { Session } from "@/lib/types";
 import { useEcho } from "@merit-systems/echo-react-sdk";
@@ -90,6 +90,10 @@ export default function HistoryPage() {
   const renderCloudSessionCard = (session: CloudSession, idx: number) => {
     const percentage = Math.round(session.score_percentage);
     const timeElapsed = session.time_taken || 0;
+    const isSurvival = session.game_mode === "endless";
+    const resultsUrl = isSurvival
+      ? `/survival/results/${session.id}`
+      : `/results/${session.id}?cloud=true`;
 
     return (
       <motion.div
@@ -97,38 +101,52 @@ export default function HistoryPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: Math.min(idx * 0.05, 0.5) }}
-        onClick={() => router.push(`/results/${session.id}?cloud=true`)}
+        onClick={() => router.push(resultsUrl)}
         className="cursor-pointer"
       >
         <Card className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-border hover:shadow-lg transition-all duration-300 h-full flex flex-col">
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          {/* Cloud indicator */}
+          {/* Mode indicator */}
           <div className="absolute top-3 right-3 z-10">
-            <Cloud className="h-4 w-4 text-muted-foreground" />
+            {isSurvival ? (
+              <Flame className="h-4 w-4 text-orange-500" />
+            ) : (
+              <Cloud className="h-4 w-4 text-muted-foreground" />
+            )}
           </div>
 
           <CardHeader className="space-y-3 pb-4">
             <div className="flex items-start justify-between gap-3 pr-8">
               <div className="flex-1 min-w-0 space-y-1">
                 <CardTitle className="text-base font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                  {session.category}
+                  {isSurvival ? "Survival" : session.category}
                 </CardTitle>
                 <CardDescription className="text-xs line-clamp-1">
-                  {session.title || 'Quiz'}
+                  {isSurvival ? `${session.category} Mode` : (session.title || 'Quiz')}
                 </CardDescription>
                 <CardDescription className="text-xs">
                   {formatDate(session.completed_at)}
                 </CardDescription>
               </div>
-              <Badge
-                variant={percentage >= 70 ? "default" : "secondary"}
-                className="flex items-center gap-1 px-2.5 py-1 text-sm font-semibold shrink-0"
-              >
-                {percentage >= 70 && <Award className="h-3 w-3" />}
-                {percentage}%
-              </Badge>
+              {isSurvival ? (
+                <Badge
+                  variant="secondary"
+                  className="flex items-center gap-1 px-2.5 py-1 text-sm font-semibold shrink-0"
+                >
+                  <Flame className="h-3 w-3" />
+                  {session.correct_answers}
+                </Badge>
+              ) : (
+                <Badge
+                  variant={percentage >= 70 ? "default" : "secondary"}
+                  className="flex items-center gap-1 px-2.5 py-1 text-sm font-semibold shrink-0"
+                >
+                  {percentage >= 70 && <Award className="h-3 w-3" />}
+                  {percentage}%
+                </Badge>
+              )}
             </div>
           </CardHeader>
 
@@ -136,12 +154,12 @@ export default function HistoryPage() {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm">
                 <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 text-primary">
-                  <Trophy className="h-4 w-4" />
+                  {isSurvival ? <Flame className="h-4 w-4" /> : <Trophy className="h-4 w-4" />}
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs text-muted-foreground">Score</p>
+                  <p className="text-xs text-muted-foreground">{isSurvival ? "Streak" : "Score"}</p>
                   <p className="text-sm font-semibold">
-                    {session.correct_answers} / {session.total_questions}
+                    {isSurvival ? session.correct_answers : `${session.correct_answers} / ${session.total_questions}`}
                   </p>
                 </div>
               </div>
@@ -165,7 +183,7 @@ export default function HistoryPage() {
               className="w-full mt-auto group-hover:bg-primary group-hover:text-primary-foreground transition-colors pointer-events-none md:pointer-events-auto"
               onClick={(e) => {
                 e.stopPropagation();
-                router.push(`/results/${session.id}?cloud=true`);
+                router.push(resultsUrl);
               }}
             >
               View Results

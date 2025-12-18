@@ -195,6 +195,15 @@ export default function HomePage() {
               {recentSessions.map((session, idx) => {
                 const percentage = Math.round(session.score_percentage);
                 const timeElapsed = session.time_taken || 0;
+                const isSurvival = session.game_mode === "endless";
+
+                const handleClick = () => {
+                  if (isSurvival) {
+                    router.push(`/survival/results/${session.id}`);
+                  } else {
+                    handleViewResults(session.id, true);
+                  }
+                };
 
                 return (
                   <motion.div
@@ -202,7 +211,7 @@ export default function HomePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: idx * 0.1 }}
-                    onClick={() => handleViewResults(session.id, true)}
+                    onClick={handleClick}
                     className="cursor-pointer"
                   >
                     <Card className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-border hover:shadow-lg transition-all duration-300 h-full flex flex-col">
@@ -213,19 +222,29 @@ export default function HomePage() {
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0 space-y-1">
                             <CardTitle className="text-base font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                              {session.category}
+                              {isSurvival ? "Survival" : session.category}
                             </CardTitle>
                             <CardDescription className="text-xs line-clamp-1">
-                              {session.title}
+                              {isSurvival ? `${session.category} Mode` : session.title}
                             </CardDescription>
                           </div>
-                          <Badge
-                            variant={percentage >= 70 ? "default" : "secondary"}
-                            className="flex items-center gap-1 px-2.5 py-1 text-sm font-semibold shrink-0"
-                          >
-                            {percentage >= 70 && <Award className="h-3 w-3" />}
-                            {percentage}%
-                          </Badge>
+                          {isSurvival ? (
+                            <Badge
+                              variant="secondary"
+                              className="flex items-center gap-1 px-2.5 py-1 text-sm font-semibold shrink-0"
+                            >
+                              <Flame className="h-3 w-3" />
+                              {session.correct_answers}
+                            </Badge>
+                          ) : (
+                            <Badge
+                              variant={percentage >= 70 ? "default" : "secondary"}
+                              className="flex items-center gap-1 px-2.5 py-1 text-sm font-semibold shrink-0"
+                            >
+                              {percentage >= 70 && <Award className="h-3 w-3" />}
+                              {percentage}%
+                            </Badge>
+                          )}
                         </div>
                       </CardHeader>
 
@@ -233,12 +252,12 @@ export default function HomePage() {
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 text-sm">
                             <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 text-primary">
-                              <Trophy className="h-4 w-4" />
+                              {isSurvival ? <Flame className="h-4 w-4" /> : <Trophy className="h-4 w-4" />}
                             </div>
                             <div className="flex-1">
-                              <p className="text-xs text-muted-foreground">Score</p>
+                              <p className="text-xs text-muted-foreground">{isSurvival ? "Streak" : "Score"}</p>
                               <p className="text-sm font-semibold">
-                                {session.correct_answers} / {session.total_questions}
+                                {isSurvival ? session.correct_answers : `${session.correct_answers} / ${session.total_questions}`}
                               </p>
                             </div>
                           </div>
@@ -262,7 +281,7 @@ export default function HomePage() {
                           className="w-full mt-auto group-hover:bg-primary group-hover:text-primary-foreground transition-colors pointer-events-none md:pointer-events-auto"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleViewResults(session.id, true);
+                            handleClick();
                           }}
                         >
                           View Results

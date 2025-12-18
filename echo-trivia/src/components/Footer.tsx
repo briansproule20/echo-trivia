@@ -37,9 +37,9 @@ export function Footer() {
 
   return (
     <footer className="border-t bg-muted/30">
-      <div className="container mx-auto px-4 py-12 sm:py-16">
+      <div className="container mx-auto px-4 py-8 sm:py-10">
         {/* Main Footer Content */}
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 mb-8">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 mb-4">
           {/* Brand Section */}
           <div className="space-y-4 lg:w-64 lg:flex-shrink-0">
             <Link href="/" className="inline-flex items-center gap-2 group">
@@ -438,7 +438,7 @@ export function Footer() {
         </div>
 
         {/* Built With - Mobile only */}
-        <div className="lg:hidden flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-6">
+        <div className="lg:hidden flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-4">
           <span className="text-xs text-muted-foreground">Built with</span>
           <a href="https://echo.merit.systems" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity">
             <Image src="https://echo.merit.systems/favicon.ico" alt="Echo" width={14} height={14} className="size-3.5" />
@@ -470,7 +470,7 @@ export function Footer() {
           </a>
         </div>
 
-        <Separator className="mb-8" />
+        <Separator className="mb-4 sm:mb-8" />
 
         {/* Bottom Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs sm:text-sm text-muted-foreground">

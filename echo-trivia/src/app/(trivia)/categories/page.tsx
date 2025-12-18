@@ -169,11 +169,6 @@ const getCategoryGroup = (category: string): keyof typeof CATEGORY_GROUPS => {
       cat.includes("basketball") || cat.includes("baseball") || cat.includes("tennis") ||
       cat.includes("golf") || cat.includes("olympic") || cat.includes("extreme") ||
       cat.includes("combat") || cat.includes("motorsport") || cat.includes("racing") ||
-      cat.includes("jordan") || cat.includes("ali") || cat.includes("babe ruth") ||
-      cat.includes("brady") || cat.includes("messi") || cat.includes("ronaldo") ||
-      cat.includes("serena") || cat.includes("tiger woods") || cat.includes("usain") ||
-      cat.includes("phelps") || cat.includes("gretzky") || cat.includes("pelé") ||
-      cat.includes("lebron") || cat.includes("kobe") || cat.includes("federer") ||
       cat.includes("wwe") || cat.includes("wrestling") || cat.includes("ufc") ||
       cat.includes("mma") || cat.includes("boxing") || cat.includes("chess") ||
       cat.includes("formula 1")) return "sports";

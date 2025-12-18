@@ -14,13 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Zap, Shuffle, BookOpen, Trophy, Medal, Award, Flame, Clock, Loader2 } from "lucide-react";
+import { Zap, Shuffle, BookOpen, Trophy, Medal, Award, Flame, Clock, Loader2, LogIn } from "lucide-react";
 import { CATEGORIES } from "@/lib/types";
 import type { SurvivalStats, SurvivalLeaderboardEntry } from "@/lib/supabase-types";
 
 export default function SurvivalHubPage() {
   const router = useRouter();
-  const { user, isLoading: authLoading } = useEcho();
+  const echo = useEcho();
+  const { user, isLoading: authLoading } = echo;
   const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORIES[0]);
   const [stats, setStats] = useState<SurvivalStats | null>(null);
   const [mixedLeaderboard, setMixedLeaderboard] = useState<SurvivalLeaderboardEntry[]>([]);
@@ -80,19 +81,19 @@ export default function SurvivalHubPage() {
     fetchCategoryLeaderboard();
   }, [leaderboardTab, leaderboardCategory]);
 
-  const handleStartMixed = () => {
-    if (!user) {
-      router.push("/sign-in?redirect=/survival/ready?mode=mixed");
-      return;
+  const handleSignIn = async () => {
+    try {
+      await echo.signIn();
+    } catch (error) {
+      console.error("Sign in failed:", error);
     }
+  };
+
+  const handleStartMixed = () => {
     router.push("/survival/ready?mode=mixed");
   };
 
   const handleStartCategory = () => {
-    if (!user) {
-      router.push(`/sign-in?redirect=/survival/ready?mode=category&category=${encodeURIComponent(selectedCategory)}`);
-      return;
-    }
     router.push(`/survival/ready?mode=category&category=${encodeURIComponent(selectedCategory)}`);
   };
 
@@ -128,58 +129,78 @@ export default function SurvivalHubPage() {
           </p>
         </div>
 
-        {/* Mode Selection Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* Mixed Mode Card */}
-          <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors">
+        {/* Sign In Required */}
+        {!user && !authLoading && (
+          <Card className="mb-8">
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <Shuffle className="h-6 w-6 text-primary" />
-                <CardTitle>Mixed Mode</CardTitle>
-              </div>
+              <CardTitle>Sign In Required</CardTitle>
               <CardDescription>
-                Random categories test your knowledge across all topics. The ultimate challenge.
+                You need to be signed in to play Survival mode and save your runs to the leaderboard
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={handleStartMixed} className="w-full" size="lg">
-                <Zap className="mr-2 h-4 w-4" />
-                Start Mixed Run
+              <Button onClick={handleSignIn} className="w-full" size="lg">
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In to Play
               </Button>
             </CardContent>
           </Card>
+        )}
 
-          {/* Category Mode Card */}
-          <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-6 w-6 text-primary" />
-                <CardTitle>Category Mode</CardTitle>
-              </div>
-              <CardDescription>
-                Master one category. How deep does your knowledge go?
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent className="max-h-[300px]">
-                  {[...CATEGORIES].sort().map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button onClick={handleStartCategory} className="w-full" size="lg">
-                <Zap className="mr-2 h-4 w-4" />
-                Start Category Run
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Mode Selection Cards */}
+        {(user || authLoading) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Mixed Mode Card */}
+            <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Shuffle className="h-6 w-6 text-primary" />
+                  <CardTitle>Mixed Mode</CardTitle>
+                </div>
+                <CardDescription>
+                  Random categories test your knowledge across all topics. The ultimate challenge.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={handleStartMixed} className="w-full" size="lg" disabled={!user}>
+                  <Zap className="mr-2 h-4 w-4" />
+                  Start Mixed Run
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Category Mode Card */}
+            <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-6 w-6 text-primary" />
+                  <CardTitle>Category Mode</CardTitle>
+                </div>
+                <CardDescription>
+                  Master one category. How deep does your knowledge go?
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {[...CATEGORIES].sort().map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button onClick={handleStartCategory} className="w-full" size="lg" disabled={!user}>
+                  <Zap className="mr-2 h-4 w-4" />
+                  Start Category Run
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* User Stats */}
         {user && stats && stats.total_runs > 0 && (

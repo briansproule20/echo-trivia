@@ -5,28 +5,29 @@ import { useEcho } from "@merit-systems/echo-react-sdk";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Zap, Target, Skull, BarChart3, Shuffle, BookOpen, ArrowLeft, Loader2 } from "lucide-react";
+import { Zap, Target, Skull, BarChart3, Shuffle, BookOpen, ArrowLeft, Loader2, LogIn } from "lucide-react";
 import { Suspense } from "react";
 
 function ReadyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isLoading } = useEcho();
+  const echo = useEcho();
+  const { user, isLoading } = echo;
 
   const mode = searchParams.get("mode") || "mixed";
   const category = searchParams.get("category");
 
   const isMixedMode = mode === "mixed";
 
-  const handleBegin = () => {
-    if (!user) {
-      const redirect = isMixedMode
-        ? "/survival/play?mode=mixed"
-        : `/survival/play?mode=category&category=${encodeURIComponent(category || "")}`;
-      router.push(`/sign-in?redirect=${encodeURIComponent(redirect)}`);
-      return;
+  const handleSignIn = async () => {
+    try {
+      await echo.signIn();
+    } catch (error) {
+      console.error("Sign in failed:", error);
     }
+  };
 
+  const handleBegin = () => {
     if (isMixedMode) {
       router.push("/survival/play?mode=mixed");
     } else {
@@ -140,15 +141,21 @@ function ReadyContent() {
                   : `How deep does your ${category} knowledge go?`}
               </p>
 
-              <Button onClick={handleBegin} size="lg" className="w-full text-lg py-6">
-                <Zap className="mr-2 h-5 w-5" />
-                Begin Survival
-              </Button>
-
-              {!user && (
-                <p className="text-xs text-muted-foreground">
-                  Sign in required to save your run to the leaderboard
-                </p>
+              {!user ? (
+                <>
+                  <Button onClick={handleSignIn} size="lg" className="w-full text-lg py-6">
+                    <LogIn className="mr-2 h-5 w-5" />
+                    Sign In to Play
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Sign in required to play and save your run to the leaderboard
+                  </p>
+                </>
+              ) : (
+                <Button onClick={handleBegin} size="lg" className="w-full text-lg py-6">
+                  <Zap className="mr-2 h-5 w-5" />
+                  Begin Survival
+                </Button>
               )}
             </div>
           </CardContent>

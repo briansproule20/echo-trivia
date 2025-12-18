@@ -22,6 +22,7 @@ import {
   Star,
   ChevronDown,
   ChevronUp,
+  LogIn,
 } from "lucide-react";
 
 interface Question {
@@ -56,7 +57,8 @@ interface GameOverStats {
 function PlayContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isLoading: authLoading } = useEcho();
+  const echo = useEcho();
+  const { user, isLoading: authLoading } = echo;
 
   const mode = (searchParams.get("mode") || "mixed") as "mixed" | "category";
   const category = searchParams.get("category") || undefined;
@@ -80,12 +82,13 @@ function PlayContent() {
   const [showCorrectFlurp, setShowCorrectFlurp] = useState(false);
   const hasFetchedInitial = useRef(false);
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/sign-in?redirect=" + encodeURIComponent(window.location.pathname + window.location.search));
+  const handleSignIn = async () => {
+    try {
+      await echo.signIn();
+    } catch (error) {
+      console.error("Sign in failed:", error);
     }
-  }, [user, authLoading, router]);
+  };
 
   // Fetch first question
   const fetchQuestion = useCallback(async (existingRunId?: string) => {
@@ -226,7 +229,25 @@ function PlayContent() {
   }
 
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md border-2">
+          <CardContent className="p-8 text-center">
+            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <Zap className="h-8 w-8 text-primary" />
+            </div>
+            <h2 className="text-xl font-bold mb-2">Sign In Required</h2>
+            <p className="text-muted-foreground mb-6">
+              You need to be signed in to play Survival mode
+            </p>
+            <Button onClick={handleSignIn} size="lg" className="w-full">
+              <LogIn className="mr-2 h-4 w-4" />
+              Sign In to Play
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   // Confetti particles for personal best

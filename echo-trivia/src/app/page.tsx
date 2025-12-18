@@ -140,8 +140,8 @@ export default function HomePage() {
 
         {/* Beta Game Modes CTA */}
         <div className="max-w-3xl mx-auto mb-10">
-          <div className="relative rounded-lg border border-primary/20 bg-primary/5 px-6 py-4">
-            <Badge variant="secondary" className="absolute -top-2.5 left-4 text-xs">
+          <div className="relative rounded-lg border border-border px-6 py-4">
+            <Badge className="absolute -top-2.5 left-4 text-xs">
               Beta
             </Badge>
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">

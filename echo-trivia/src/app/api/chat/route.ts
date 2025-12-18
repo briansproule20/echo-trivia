@@ -17,16 +17,29 @@ When a user asks for trivia, a quiz question, wants to test their knowledge, or 
 - Balance difficulty - make it challenging but fair
 - NO TRICK QUESTIONS - the correct answer should be clearly correct`;
 
+const WIDGET_SYSTEM_PROMPT = `You are the Wizard's Hat—a wise, sentient artifact from the Trivia Wizard's Tower. You've seen ages pass and knowledge accumulate.
+
+Answer questions helpfully with a touch of warmth and wit. You can be charming but stay concise—2-4 sentences typically. Save the elaborate mystical prose for special moments.
+
+IMPORTANT - WARMUP REQUESTS:
+If a user asks for a warmup, practice questions, trivia, a quiz, or wants to test their knowledge, kindly direct them to the full chat experience. Say something like: "For warmups and trivia practice, click the expand button (↗) in the header to visit the full chat page where I can quiz you properly!"
+
+You cannot present interactive trivia questions in this widget—only in the full chat page.`;
+
 
 export async function POST(req: Request) {
   try {
     const {
       model,
       messages,
+      source,
     }: {
       messages: UIMessage[];
       model: string;
+      source?: 'widget' | 'page';
     } = await req.json();
+
+    const isWidget = source === 'widget';
 
     // Validate required parameters
     if (!model) {
@@ -60,27 +73,30 @@ export async function POST(req: Request) {
 
     const result = streamText({
       model: provider(model),
-      system: SYSTEM_PROMPT,
+      system: isWidget ? WIDGET_SYSTEM_PROMPT : SYSTEM_PROMPT,
       messages: convertToModelMessages(messages),
-      tools: {
-        trivia_question: tool({
-          description: 'Present a trivia question. Always include exactly 4 options (A, B, C, D).',
-          inputSchema: z.object({
-            question: z.string(),
-            optionA: z.string().describe('Text for option A'),
-            optionB: z.string().describe('Text for option B'),
-            optionC: z.string().describe('Text for option C'),
-            optionD: z.string().describe('Text for option D'),
-            correctAnswer: z.enum(['A', 'B', 'C', 'D']),
-            category: z.string(),
-            difficulty: z.enum(['easy', 'medium', 'hard']),
+      // Only include tools for the full chat page, not the widget
+      ...(isWidget ? {} : {
+        tools: {
+          trivia_question: tool({
+            description: 'Present a trivia question. Always include exactly 4 options (A, B, C, D).',
+            inputSchema: z.object({
+              question: z.string(),
+              optionA: z.string().describe('Text for option A'),
+              optionB: z.string().describe('Text for option B'),
+              optionC: z.string().describe('Text for option C'),
+              optionD: z.string().describe('Text for option D'),
+              correctAnswer: z.enum(['A', 'B', 'C', 'D']),
+              category: z.string(),
+              difficulty: z.enum(['easy', 'medium', 'hard']),
+            }),
+            // Execute function marks tool as complete so LLM waits for user answer
+            execute: async ({ question, category, difficulty }) => {
+              return `Question presented: "${question}" (${category}, ${difficulty}). Awaiting user's answer.`
+            },
           }),
-          // Execute function marks tool as complete so LLM waits for user answer
-          execute: async ({ question, category, difficulty }) => {
-            return `Question presented: "${question}" (${category}, ${difficulty}). Awaiting user's answer.`
-          },
-        }),
-      },
+        },
+      }),
     });
 
     return result.toUIMessageStreamResponse({

@@ -73,6 +73,9 @@ export function MiniLeaderboard() {
         Today's Top Players
       </CardTitle>
       <div className="flex items-center gap-2">
+        <Link href="/leaderboard" className="text-xs text-primary hover:underline">
+          View All
+        </Link>
         <Popover>
           <PopoverTrigger asChild>
             <button
@@ -116,9 +119,6 @@ export function MiniLeaderboard() {
             </div>
           </PopoverContent>
         </Popover>
-        <Link href="/leaderboard" className="text-xs text-primary hover:underline">
-          View All
-        </Link>
       </div>
     </div>
   );

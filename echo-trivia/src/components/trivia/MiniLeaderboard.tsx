@@ -109,7 +109,7 @@ export function MiniLeaderboard() {
                   <Award className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                   <div>
                     <p className="font-medium text-xs">Qualification</p>
-                    <p className="text-xs text-muted-foreground">Minimum 5 daily challenges required for All Time, Monthly, and Weekly boards</p>
+                    <p className="text-xs text-muted-foreground">5 quizzes minimum for all-time leaderboards</p>
                   </div>
                 </div>
               </div>

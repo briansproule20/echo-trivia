@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, BookOpen, FileQuestion, BarChart3, Trophy, User, Sparkles, Users, Settings, MessageCircle, LayoutGrid, Compass } from "lucide-react";
-import { motion } from "framer-motion";
+import { Menu, BookOpen, FileQuestion, BarChart3, Trophy, User, Sparkles, Users, Settings, MessageCircle, LayoutGrid, Compass, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { EchoAccount } from "@/components/echo-account-next";
@@ -37,12 +37,24 @@ export function Navbar() {
   const isAuthenticated = !!echo.user;
   const [mounted, setMounted] = useState(false);
   const [compassSpinning, setCompassSpinning] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const moreEndRef = useRef<HTMLDivElement>(null);
 
   const handleCompassClick = () => {
     setCompassSpinning(true);
     audioRef.current?.play();
     setTimeout(() => setCompassSpinning(false), 3000);
+  };
+
+  const handleMoreToggle = () => {
+    const opening = !moreOpen;
+    setMoreOpen(opening);
+    if (opening) {
+      setTimeout(() => {
+        moreEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 250);
+    }
   };
 
   useEffect(() => {
@@ -200,98 +212,123 @@ export function Navbar() {
                       <EchoAccount />
                     </div>
 
-                    {/* Getting Started - Below Echo Account */}
-                    <Link
-                      href="/getting-started"
-                      className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
-                        pathname === "/getting-started"
-                          ? "text-primary bg-primary/10"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      <BookOpen className="h-4 w-4" />
-                      Getting Started
-                    </Link>
-
-                    {/* FAQs and Docs */}
-                    <Link
-                      href="/faqs-and-docs"
-                      className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
-                        pathname === "/faqs-and-docs"
-                          ? "text-primary bg-primary/10"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      <FileQuestion className="h-4 w-4" />
-                      FAQs & Docs
-                    </Link>
-
-                    {/* Chat */}
-                    <Link
-                      href="/chat"
-                      className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
-                        pathname === "/chat"
-                          ? "text-primary bg-primary/10"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      The Wizard's Hat
-                    </Link>
-
-                    {/* Referrals */}
-                    <Link
-                      href="/referrals"
-                      className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
-                        pathname === "/referrals"
-                          ? "text-primary bg-primary/10"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      <Users className="h-4 w-4" />
-                      Referrals
-                    </Link>
-
-                    {/* Lore */}
-                    <Link
-                      href="/lore"
-                      className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
-                        pathname === "/lore"
-                          ? "text-primary bg-primary/10"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      <BookOpen className="h-4 w-4" />
-                      Lore
-                    </Link>
-
-                    {/* Categories */}
-                    <Link
-                      href="/categories"
-                      className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
-                        pathname === "/categories"
-                          ? "text-primary bg-primary/10"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      <LayoutGrid className="h-4 w-4" />
-                      Categories
-                    </Link>
-
-                    {/* Settings - Only show when signed in */}
-                    {isAuthenticated && (
-                      <Link
-                        href="/settings"
-                        className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
-                          pathname === "/settings"
-                            ? "text-primary bg-primary/10"
-                            : "text-muted-foreground"
-                        }`}
+                    {/* More Dropdown */}
+                    <div className="mt-2">
+                      <button
+                        onClick={handleMoreToggle}
+                        className="flex items-center justify-between w-full text-sm font-medium text-muted-foreground hover:text-primary px-3 py-2 rounded-md mx-3 hover:bg-accent transition-colors"
+                        style={{ width: 'calc(100% - 24px)' }}
                       >
-                        <Settings className="h-4 w-4" />
-                        Settings
-                      </Link>
-                    )}
+                        <span>More</span>
+                        <motion.div
+                          animate={{ rotate: moreOpen ? 180 : 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </motion.div>
+                      </button>
+
+                      <AnimatePresence>
+                        {moreOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="pt-1 space-y-1">
+                              <Link
+                                href="/getting-started"
+                                className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
+                                  pathname === "/getting-started"
+                                    ? "text-primary bg-primary/10"
+                                    : "text-muted-foreground"
+                                }`}
+                              >
+                                <BookOpen className="h-4 w-4" />
+                                Getting Started
+                              </Link>
+
+                              <Link
+                                href="/faqs-and-docs"
+                                className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
+                                  pathname === "/faqs-and-docs"
+                                    ? "text-primary bg-primary/10"
+                                    : "text-muted-foreground"
+                                }`}
+                              >
+                                <FileQuestion className="h-4 w-4" />
+                                FAQs & Docs
+                              </Link>
+
+                              <Link
+                                href="/chat"
+                                className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
+                                  pathname === "/chat"
+                                    ? "text-primary bg-primary/10"
+                                    : "text-muted-foreground"
+                                }`}
+                              >
+                                <MessageCircle className="h-4 w-4" />
+                                The Wizard's Hat
+                              </Link>
+
+                              <Link
+                                href="/referrals"
+                                className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
+                                  pathname === "/referrals"
+                                    ? "text-primary bg-primary/10"
+                                    : "text-muted-foreground"
+                                }`}
+                              >
+                                <Users className="h-4 w-4" />
+                                Referrals
+                              </Link>
+
+                              <Link
+                                href="/lore"
+                                className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
+                                  pathname === "/lore"
+                                    ? "text-primary bg-primary/10"
+                                    : "text-muted-foreground"
+                                }`}
+                              >
+                                <BookOpen className="h-4 w-4" />
+                                Lore
+                              </Link>
+
+                              <Link
+                                href="/categories"
+                                className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
+                                  pathname === "/categories"
+                                    ? "text-primary bg-primary/10"
+                                    : "text-muted-foreground"
+                                }`}
+                              >
+                                <LayoutGrid className="h-4 w-4" />
+                                Categories
+                              </Link>
+
+                              {isAuthenticated && (
+                                <Link
+                                  href="/settings"
+                                  className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
+                                    pathname === "/settings"
+                                      ? "text-primary bg-primary/10"
+                                      : "text-muted-foreground"
+                                  }`}
+                                >
+                                  <Settings className="h-4 w-4" />
+                                  Settings
+                                </Link>
+                              )}
+                              <div ref={moreEndRef} />
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
                 </div>
               </SheetContent>

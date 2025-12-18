@@ -1,7 +1,6 @@
 "use client";
 import React, { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 
 interface InfiniteScrollBackgroundProps {
   className?: string;
@@ -159,93 +158,6 @@ export const InfiniteScrollBackground: React.FC<InfiniteScrollBackgroundProps> =
         ))}
       </div>
 
-      {/* Journey character MOBILE */}
-      <div className="absolute inset-0 z-[15] md:hidden">
-        <div
-          className="absolute left-[100%]"
-          style={{
-            bottom: "-20%",
-            animation: "tower-scroll 20s linear infinite 0s",
-            filter: "drop-shadow(0 0 15px hsl(var(--primary) / 0.3))",
-          }}
-        >
-          <div className="relative w-36 h-36" style={{ transform: "scaleX(-1)" }}>
-            <Image
-              src="/journey.png"
-              alt="Journey"
-              fill
-              className="object-contain"
-              unoptimized
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Journey character DESKTOP */}
-      <div className="absolute inset-0 z-[15] hidden md:block">
-        <div
-          className="absolute left-[100%]"
-          style={{
-            bottom: "-27.5%",
-            animation: "tower-scroll 40s linear infinite -20s",
-            filter: "drop-shadow(0 0 15px hsl(var(--primary) / 0.3))",
-          }}
-        >
-          <div className="relative w-48 h-48" style={{ transform: "scaleX(-1)" }}>
-            <Image
-              src="/journey.png"
-              alt="Journey"
-              fill
-              className="object-contain"
-              unoptimized
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Wizard's Tower MOBILE */}
-      <div className="absolute inset-0 md:hidden">
-        <div
-          className="absolute left-[100%]"
-          style={{
-            bottom: "-18%",
-            animation: "tower-scroll 20s linear infinite",
-            filter: "drop-shadow(0 0 20px hsl(var(--primary) / 0.4))",
-            animationDelay: "-10s",
-          }}
-        >
-          <div className="relative w-32 h-52">
-            <Image
-              src="/wiztower reacticon.png"
-              alt="Wizard Tower"
-              fill
-              className="object-contain"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Wizard's Tower DESKTOP */}
-      <div className="absolute inset-0 hidden md:block">
-        <div
-          className="absolute left-[100%]"
-          style={{
-            bottom: "-28%",
-            animation: "tower-scroll 50s linear infinite",
-            filter: "drop-shadow(0 0 20px hsl(var(--primary) / 0.4))",
-          }}
-        >
-          <div className="relative w-43 h-69">
-            <Image
-              src="/wiztower reacticon.png"
-              alt="Wizard Tower"
-              fill
-              className="object-contain"
-            />
-          </div>
-        </div>
-      </div>
-
       <style jsx>{`
         @keyframes scroll-horizontal {
           0% {
@@ -296,23 +208,6 @@ export const InfiniteScrollBackground: React.FC<InfiniteScrollBackgroundProps> =
           }
           100% {
             transform: translateX(-120vw) scaleX(0.3);
-            opacity: 0;
-          }
-        }
-
-        @keyframes tower-scroll {
-          0% {
-            transform: translateX(0);
-            opacity: 0;
-          }
-          5% {
-            opacity: 1;
-          }
-          95% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateX(-120vw);
             opacity: 0;
           }
         }

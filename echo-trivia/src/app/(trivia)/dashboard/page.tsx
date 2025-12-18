@@ -33,8 +33,8 @@ import {
   Scatter,
   ZAxis,
 } from "recharts";
-import { Trophy, Target, Flame, Clock, Award, HelpCircle, Shuffle } from "lucide-react";
-import type { UserStats, UserAchievement, DailyStreak, QuizSession, Achievement } from "@/lib/supabase-types";
+import { Trophy, Target, Flame, Clock, Award, HelpCircle, Shuffle, Zap } from "lucide-react";
+import type { UserStats, UserAchievement, DailyStreak, QuizSession, Achievement, SurvivalStats } from "@/lib/supabase-types";
 import { CATEGORIES } from "@/lib/types";
 import {
   Dialog,
@@ -96,6 +96,7 @@ export default function DashboardPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categoryQuizzes, setCategoryQuizzes] = useState<QuizSession[]>([]);
   const [dailyActivityMap, setDailyActivityMap] = useState<Record<string, { count: number; avgScore: number; totalScore: number }>>({});
+  const [survivalStats, setSurvivalStats] = useState<SurvivalStats | null>(null);
 
   useEffect(() => {
     if (echo.user?.id) {
@@ -151,6 +152,13 @@ export default function DashboardPage() {
       if (streakRes.ok) {
         const data = await streakRes.json();
         setStreak(data.streak);
+      }
+
+      // Fetch survival stats
+      const survivalRes = await fetch(`/api/survival/stats?echo_user_id=${echo.user.id}`);
+      if (survivalRes.ok) {
+        const data = await survivalRes.json();
+        setSurvivalStats(data);
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -306,6 +314,70 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Survival Mode Stats */}
+          {survivalStats && survivalStats.total_runs > 0 && (
+            <Card className="border-2 border-primary/20">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-primary" />
+                    Endless Survival
+                  </CardTitle>
+                  <Badge variant="default" className="text-xs">Beta</Badge>
+                </div>
+                <CardDescription>Your survival mode performance</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center justify-center gap-1 text-2xl font-bold text-primary">
+                      <Flame className="h-5 w-5" />
+                      {survivalStats.mixed_best_streak}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Best Mixed Streak</div>
+                    {survivalStats.mixed_rank && (
+                      <div className="text-xs text-muted-foreground">Rank #{survivalStats.mixed_rank}</div>
+                    )}
+                  </div>
+                  <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <div className="text-2xl font-bold">{survivalStats.total_runs}</div>
+                    <div className="text-xs text-muted-foreground">Total Runs</div>
+                  </div>
+                  <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <div className="text-2xl font-bold">{survivalStats.total_questions_survived}</div>
+                    <div className="text-xs text-muted-foreground">Questions Survived</div>
+                  </div>
+                  <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center justify-center gap-1 text-2xl font-bold">
+                      <Clock className="h-5 w-5" />
+                      {Math.floor(survivalStats.total_time_played / 60)}m
+                    </div>
+                    <div className="text-xs text-muted-foreground">Time Survived</div>
+                  </div>
+                </div>
+
+                {survivalStats.category_bests.length > 0 && (
+                  <div className="mt-4 pt-4 border-t">
+                    <h4 className="text-sm font-medium mb-2">Category Bests</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {survivalStats.category_bests.slice(0, 5).map((cb) => (
+                        <Badge key={cb.category} variant="secondary" className="text-xs">
+                          {cb.category}: {cb.streak}
+                          {cb.rank && <span className="ml-1 opacity-60">#{cb.rank}</span>}
+                        </Badge>
+                      ))}
+                      {survivalStats.category_bests.length > 5 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{survivalStats.category_bests.length - 5} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">

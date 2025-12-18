@@ -161,3 +161,58 @@ export interface LeaderboardQuery {
   category?: string
   limit?: number
 }
+
+// ============================================================================
+// SURVIVAL MODE TYPES
+// ============================================================================
+
+export interface SurvivalRun {
+  id: string
+  user_id: string | null
+  echo_user_id: string
+  mode: 'mixed' | 'category'
+  category: string | null // NULL for mixed mode
+  streak: number
+  categories_seen: string[]
+  time_played_seconds: number
+  ended_at: string
+  created_at: string
+}
+
+export interface SurvivalStats {
+  mixed_best_streak: number
+  mixed_rank: number | null
+  total_runs: number
+  total_questions_survived: number
+  total_time_played: number
+  category_bests: Array<{
+    category: string
+    streak: number
+    rank: number | null
+  }>
+  recent_runs: Array<{
+    id: string
+    mode: 'mixed' | 'category'
+    category: string | null
+    streak: number
+    ended_at: string
+  }>
+}
+
+export interface SurvivalLeaderboardEntry {
+  echo_user_id: string
+  username: string | null
+  avatar_url: string | null
+  avatar_id: string | null
+  streak: number
+  rank: number
+  ended_at: string
+}
+
+export interface SurvivalLeaderboardResponse {
+  leaderboard: SurvivalLeaderboardEntry[]
+  userPosition?: {
+    streak: number
+    rank: number
+  }
+}

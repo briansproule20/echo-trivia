@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Trophy, Target, Flame, Clock, Award, BarChart3, ArrowRight, Swords, Zap, Star, Castle, HelpCircle } from "lucide-react";
 import Link from "next/link";
-import type { UserStats, UserAchievement, DailyStreak } from "@/lib/supabase-types";
+import type { UserStats, UserAchievement, DailyStreak, SurvivalStats } from "@/lib/supabase-types";
 import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
 
 export default function ProfilePage() {
@@ -21,6 +21,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [currentUsername, setCurrentUsername] = useState("");
   const [faceoffStats, setFaceoffStats] = useState({ played: 0 });
+  const [survivalStats, setSurvivalStats] = useState<SurvivalStats | null>(null);
 
   useEffect(() => {
     if (echo.user?.id) {
@@ -62,6 +63,13 @@ export default function ProfilePage() {
       if (streakRes.ok) {
         const data = await streakRes.json();
         setStreak(data.streak);
+      }
+
+      // Fetch survival stats
+      const survivalRes = await fetch(`/api/survival/stats?echo_user_id=${echo.user.id}`);
+      if (survivalRes.ok) {
+        const data = await survivalRes.json();
+        setSurvivalStats(data);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -204,19 +212,25 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            <Card className="opacity-60">
+            <Card>
               <CardHeader className="pb-2 sm:pb-3">
-                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
-                  Survival Streak
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+                    Survival Best
+                  </CardTitle>
+                  <Badge variant="secondary" className="text-xs">Beta</Badge>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2">
                   <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
-                  <span className="text-2xl sm:text-3xl font-bold">-</span>
+                  <span className="text-2xl sm:text-3xl font-bold">
+                    {survivalStats?.mixed_best_streak || 0}
+                  </span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Coming soon
+                  {survivalStats?.total_runs ? `${survivalStats.total_runs} runs` : 'Best streak'}
+                  {survivalStats?.mixed_rank && ` · Rank #${survivalStats.mixed_rank}`}
                 </p>
               </CardContent>
             </Card>

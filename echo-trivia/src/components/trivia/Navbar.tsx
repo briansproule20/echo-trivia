@@ -228,16 +228,14 @@ export function Navbar() {
                         </motion.div>
                       </button>
 
-                      <AnimatePresence>
-                        {moreOpen && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="overflow-hidden"
-                          >
-                            <div className="pt-1 space-y-1">
+                      <div
+                        className="grid transition-all duration-300 ease-in-out"
+                        style={{
+                          gridTemplateRows: moreOpen ? "1fr" : "0fr",
+                        }}
+                      >
+                        <div className="overflow-hidden">
+                          <div className="pt-1 space-y-1">
                               <Link
                                 href="/getting-started"
                                 className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent px-3 py-2 rounded-md mx-3 ${
@@ -325,9 +323,8 @@ export function Navbar() {
                               )}
                               <div ref={moreEndRef} />
                             </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                          </div>
+                        </div>
                     </div>
                   </div>
                 </div>

@@ -101,7 +101,7 @@ export default function HomePage() {
             Summon Your Inner <FlipText words={["Ken Jennings", "Quiz Whiz", "Mastermind", "Pub Champion", "Genius", "Alex Trebek", "Know-It-All", "Scholar", "Trivia Master", "Champion"]} duration={3000} className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent font-semibold" />
           </p>
           <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">
-            Daily trivia challenges, infinite customizable freeplay
+            Daily trivia challenges,<br className="sm:hidden" /> infinite customizable freeplay, and more
           </p>
         </div>
 

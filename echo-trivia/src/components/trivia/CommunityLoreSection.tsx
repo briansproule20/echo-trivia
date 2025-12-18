@@ -79,7 +79,7 @@ export function CommunityLoreSection() {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="flex items-center justify-between mb-6"
+            className="flex items-start justify-between mb-6"
           >
             <div className="flex items-center gap-3">
               <div className="relative">

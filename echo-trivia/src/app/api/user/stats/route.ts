@@ -72,24 +72,28 @@ export async function GET(request: NextRequest) {
       0
     )
 
-    // Get unique categories
+    // Get unique categories (exclude "Mixed" which is survival mode)
     const categoriesPlayed = Array.from(
       new Set(sessions.map((s) => s.category))
-    )
+    ).filter(cat => cat !== 'Mixed')
 
-    // Find favorite category (most played)
+    // Find favorite category (most played) - exclude "Mixed" (survival mode)
     const categoryCount: Record<string, number> = {}
     sessions.forEach((s) => {
-      categoryCount[s.category] = (categoryCount[s.category] || 0) + 1
+      if (s.category !== 'Mixed') {
+        categoryCount[s.category] = (categoryCount[s.category] || 0) + 1
+      }
     })
     const favoriteCategory =
       Object.entries(categoryCount).sort((a, b) => b[1] - a[1])[0]?.[0] || null
 
-    // Find best category (highest average score)
+    // Find best category (highest average score) - exclude "Mixed" (survival mode)
     const categoryScores: Record<string, number[]> = {}
     sessions.forEach((s) => {
-      if (!categoryScores[s.category]) categoryScores[s.category] = []
-      categoryScores[s.category].push(s.score_percentage)
+      if (s.category !== 'Mixed') {
+        if (!categoryScores[s.category]) categoryScores[s.category] = []
+        categoryScores[s.category].push(s.score_percentage)
+      }
     })
     const categoryAverages = Object.entries(categoryScores).map(
       ([cat, scores]) => ({
@@ -171,10 +175,13 @@ export async function GET(request: NextRequest) {
     ]
 
     // Score trend over time (last 20 sessions for area chart)
+    // Exclude faceoff and survival (endless) sessions
     // Sort sessions by completion date to ensure chronological order
-    const sortedSessions = [...sessions].sort((a, b) =>
-      new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime()
-    )
+    const sortedSessions = [...sessions]
+      .filter(s => s.game_mode !== 'faceoff' && s.game_mode !== 'endless')
+      .sort((a, b) =>
+        new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime()
+      )
     const scoreTrend = sortedSessions
       .slice(-20)
       .map((s, index) => ({

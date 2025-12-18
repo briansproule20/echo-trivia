@@ -102,6 +102,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/survival"
+                  className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
+                >
+                  Survival
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/game-modes"
                   className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
                 >

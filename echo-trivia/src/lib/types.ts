@@ -93,14 +93,10 @@ export const CATEGORIES = [
   // ═══════════════════════════════════════════════════════════════════════════
   // POP CULTURE & ENTERTAINMENT (8)
   // ═══════════════════════════════════════════════════════════════════════════
-  "Anime & Manga",
   "Comic Books & Graphic Novels",
   "Broadway & Theater",
   "Podcasts & Radio",
   "Memes & Internet Culture",
-  "Reality TV",
-  "Stand-Up Comedy",
-  "Award Shows & Ceremonies",
 
   // ═══════════════════════════════════════════════════════════════════════════
   // ACADEMIC & INTELLECTUAL (10)
@@ -121,8 +117,6 @@ export const CATEGORIES = [
   // ═══════════════════════════════════════════════════════════════════════════
   "Asian History & Culture",
   "European History & Culture",
-  "Latin American History & Culture",
-  "African History & Culture",
   "Ancient Civilizations",
   "Indigenous Cultures",
   "World Religions",
@@ -132,8 +126,9 @@ export const CATEGORIES = [
   // ═══════════════════════════════════════════════════════════════════════════
   "Ancient Rome",
   "Ancient Greece",
-  "Medieval Times",
-  "Renaissance Era",
+  "Medieval Era",
+  "The Renaissance",
+  "The Englightenment",
   "Age of Exploration",
   "Industrial Revolution",
   "World Wars",
@@ -179,8 +174,6 @@ export const CATEGORIES = [
   "Tennis",
   "Golf",
   "Olympic Sports",
-  "Extreme Sports",
-  "Combat Sports",
   "Motorsports & Racing",
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -194,7 +187,7 @@ export const CATEGORIES = [
   "Electronic & Dance Music",
   "Painting & Visual Arts",
   "Sculpture",
-  "Street Art & Graffiti",
+
 
   // ═══════════════════════════════════════════════════════════════════════════
   // SCIENCE & NATURE SPECIFIC (9)
@@ -226,15 +219,15 @@ export const CATEGORIES = [
   "Famous Disasters & Accidents",
   "Unsolved Mysteries",
   "Famous Trials & Court Cases",
-  "Hoaxes & Pranks",
   "Inventions & Patents",
   "Superstitions & Traditions",
-  "Oddities & Strange Facts",
 
   // ═══════════════════════════════════════════════════════════════════════════
   // LITERATURE SPECIFIC (8)
   // ═══════════════════════════════════════════════════════════════════════════
   "Poetry",
+  "Famous Poets",
+  "Famous Authors",
   "Science Fiction",
   "Fantasy Literature",
   "Mystery & Detective Fiction",
@@ -282,42 +275,30 @@ export const CATEGORIES = [
   "Cartoons & Animation",
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // ═══════════════════════════════════════════════════════════════════════════
-  // NEW CATEGORIES (248 more to reach 365)
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  // ═══════════════════════════════════════════════════════════════════════════
   // SPECIFIC MYTHOLOGIES (4)
   // ═══════════════════════════════════════════════════════════════════════════
   "Greek Mythology",
   "Roman Mythology",
   "Norse Mythology",
   "Egyptian Mythology",
+  "Irish Mythology",
 
   // ═══════════════════════════════════════════════════════════════════════════
   // FILM & TV FRANCHISES (22)
   // ═══════════════════════════════════════════════════════════════════════════
   "Star Wars Universe",
-  "Star Trek Universe",
   "Marvel Cinematic Universe",
-  "DC Comics Adaptations",
+  "Lord of the Rings Films",
+  "Harry Potter Films",
   "James Bond Films",
+  "Jason Bourne Films",
   "Indiana Jones Series",
   "Jurassic Park Franchise",
   "The Matrix Trilogy",
   "Breaking Bad",
-  "The Sopranos",
-  "The Wire",
   "Friends",
   "Seinfeld",
   "The Office",
-  "Doctor Who",
-  "Stranger Things",
-  "The Simpsons",
-  "South Park",
-  "Rick and Morty",
-  "Black Mirror",
   "Parks and Recreation",
   "Arrested Development",
 
@@ -366,14 +347,12 @@ export const CATEGORIES = [
   // VIDEO GAME FRANCHISES (20)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  "Final Fantasy Series",
   "The Elder Scrolls",
   "Fallout Series",
   "Grand Theft Auto",
   "Call of Duty",
   "Halo Series",
   "Minecraft",
-  "World of Warcraft",
   "The Witcher Games",
   "Red Dead Redemption",
   "Assassin's Creed",
@@ -390,7 +369,6 @@ export const CATEGORIES = [
   "Cuban Missile Crisis",
   "Watergate Scandal",
   "Chernobyl Disaster",
-  "COVID-19 Pandemic",
   "D-Day & Normandy Invasion",
   "Battle of Stalingrad",
   "American Revolutionary War",
@@ -446,9 +424,7 @@ export const CATEGORIES = [
   "Ada Lovelace",
   "Galileo Galilei",
   "Leonardo da Vinci",
-  "Rosalind Franklin",
   "Jane Goodall",
-  "Neil deGrasse Tyson",
 
   // ═══════════════════════════════════════════════════════════════════════════
   // ARTISTS & ART MOVEMENTS (15)
@@ -457,7 +433,6 @@ export const CATEGORIES = [
   "Pablo Picasso",
   "Salvador Dalí",
   "Andy Warhol",
-  "Banksy",
   "Michelangelo",
   "Rembrandt",
   "Claude Monet",

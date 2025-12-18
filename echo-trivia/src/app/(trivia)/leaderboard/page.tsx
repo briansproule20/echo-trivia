@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Trophy, Medal, Award, User, HelpCircle, Zap } from "lucide-react";
+import { Trophy, Medal, Award, User, HelpCircle, Zap, Swords, Flame } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import type { LeaderboardEntry } from "@/lib/supabase-types";
 
 interface EloEntry {
@@ -512,6 +514,29 @@ export default function LeaderboardPage() {
               </Card>
             </TabsContent>
           </Tabs>
+
+          {/* Other Leaderboards Section */}
+          <div className="mt-8 pt-8 border-t">
+            <div className="text-center space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Looking for other leaderboards?
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Button asChild variant="outline" className="w-full sm:w-auto">
+                  <Link href="/faceoff/hub">
+                    <Swords className="mr-2 h-4 w-4" />
+                    Face-Off Leaderboards
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full sm:w-auto">
+                  <Link href="/survival">
+                    <Flame className="mr-2 h-4 w-4" />
+                    Survival Leaderboards
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

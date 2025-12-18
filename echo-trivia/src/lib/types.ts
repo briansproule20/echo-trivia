@@ -122,7 +122,6 @@ export const CATEGORIES = [
   "Asian History & Culture",
   "European History & Culture",
   "Latin American History & Culture",
-  "Middle Eastern History & Culture",
   "African History & Culture",
   "Ancient Civilizations",
   "Indigenous Cultures",
@@ -469,25 +468,6 @@ export const CATEGORIES = [
   "Baroque Art",
   "Pop Art",
   "Abstract Expressionism",
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // SPORTS FIGURES (15)
-  // ═══════════════════════════════════════════════════════════════════════════
-  "Michael Jordan",
-  "Muhammad Ali",
-  "Babe Ruth",
-  "Tom Brady",
-  "Lionel Messi",
-  "Cristiano Ronaldo",
-  "Serena Williams",
-  "Tiger Woods",
-  "Usain Bolt",
-  "Michael Phelps",
-  "Wayne Gretzky",
-  "Pelé",
-  "LeBron James",
-  "Kobe Bryant",
-  "Roger Federer",
 
   // ═══════════════════════════════════════════════════════════════════════════
   // MYTHICAL CREATURES & FOLKLORE (12)

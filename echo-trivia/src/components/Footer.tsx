@@ -24,7 +24,7 @@ export function Footer() {
     <footer className="border-t bg-muted/30">
       <div className="container mx-auto px-4 py-12 sm:py-16">
         {/* Main Footer Content */}
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 mb-12">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 mb-8">
           {/* Brand Section */}
           <div className="space-y-4 lg:w-64 lg:flex-shrink-0">
             <Link href="/" className="inline-flex items-center gap-2 group">
@@ -43,27 +43,105 @@ export function Footer() {
             <p className="text-sm text-muted-foreground max-w-xs">
               AI-powered trivia quizzes for every mind. Challenge yourself, compete globally, and join the Wizard's Legion.
             </p>
-            {/* Echo Attribution */}
+            {/* Built With */}
             <div className="pt-2">
-              <p className="text-xs text-muted-foreground mb-2">Powered by</p>
-              <a
-                href="https://echo.merit.systems"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 group hover:opacity-80 transition-opacity"
-              >
-                <Image
-                  src="https://echo.merit.systems/favicon.ico"
-                  alt="Echo"
-                  width={20}
-                  height={20}
-                  className="size-5 group-hover:scale-110 transition-transform"
-                />
-                <span className="text-sm font-medium text-primary inline-flex items-center gap-1">
-                  Echo by Merit
-                  <ExternalLink className="h-3 w-3" />
-                </span>
-              </a>
+              <p className="text-xs text-muted-foreground mb-2">Built with</p>
+              <div className="flex flex-col gap-1.5">
+                <a
+                  href="https://echo.merit.systems"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 group hover:opacity-80 transition-opacity"
+                >
+                  <Image
+                    src="https://echo.merit.systems/favicon.ico"
+                    alt="Echo"
+                    width={18}
+                    height={18}
+                    className="size-[18px] group-hover:scale-110 transition-transform"
+                  />
+                  <span className="text-sm font-medium text-primary">Echo</span>
+                </a>
+                <a
+                  href="https://merit.systems"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 group hover:opacity-80 transition-opacity"
+                >
+                  <Image
+                    src="https://merit.systems/favicon.ico"
+                    alt="Merit Systems"
+                    width={18}
+                    height={18}
+                    className="size-[18px] group-hover:scale-110 transition-transform"
+                  />
+                  <span className="text-sm font-medium text-[#E53935]">Merit Systems</span>
+                </a>
+                <a
+                  href="https://vercel.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 group hover:opacity-80 transition-opacity"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="https://vercel.com/favicon.ico"
+                    alt="Vercel"
+                    width={18}
+                    height={18}
+                    className="size-[18px] group-hover:scale-110 transition-transform"
+                  />
+                  <span className="text-sm font-medium text-foreground">Vercel</span>
+                </a>
+                <a
+                  href="https://supabase.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 group hover:opacity-80 transition-opacity"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="https://supabase.com/favicon/favicon-32x32.png"
+                    alt="Supabase"
+                    width={18}
+                    height={18}
+                    className="size-[18px] group-hover:scale-110 transition-transform"
+                  />
+                  <span className="text-sm font-medium text-[#3ECF8E]">Supabase</span>
+                </a>
+                <a
+                  href="https://anthropic.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 group hover:opacity-80 transition-opacity"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="https://anthropic.com/favicon.ico"
+                    alt="Anthropic"
+                    width={18}
+                    height={18}
+                    className="size-[18px] group-hover:scale-110 transition-transform"
+                  />
+                  <span className="text-sm font-medium text-[#D4A574]">Anthropic</span>
+                </a>
+                <a
+                  href="https://cursor.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 group hover:opacity-80 transition-opacity"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="https://cursor.com/favicon.ico"
+                    alt="Cursor"
+                    width={18}
+                    height={18}
+                    className="size-[18px] group-hover:scale-110 transition-transform"
+                  />
+                  <span className="text-sm font-medium text-white">Cursor</span>
+                </a>
+              </div>
             </div>
           </div>
 

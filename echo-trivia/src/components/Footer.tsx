@@ -43,8 +43,8 @@ export function Footer() {
             <p className="text-sm text-muted-foreground max-w-xs">
               AI-powered trivia quizzes for every mind. Challenge yourself, compete globally, and join the Wizard's Legion.
             </p>
-            {/* Built With */}
-            <div className="pt-2">
+            {/* Built With - Desktop only */}
+            <div className="pt-2 hidden lg:block">
               <p className="text-xs text-muted-foreground mb-2">Built with</p>
               <div className="flex flex-col gap-1.5">
                 <a
@@ -141,6 +141,52 @@ export function Footer() {
                   />
                   <span className="text-sm font-medium text-white">Cursor</span>
                 </a>
+              </div>
+            </div>
+
+            {/* Quick Start - Mobile only */}
+            <div className="lg:hidden space-y-3 pt-4">
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-primary" />
+                <h4 className="text-sm font-semibold">Quick Start</h4>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href="/daily"
+                  className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                >
+                  Daily
+                </Link>
+                <Link
+                  href="/freeplay"
+                  className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  Freeplay
+                </Link>
+                <Link
+                  href="/survival"
+                  className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  Survival
+                </Link>
+                <Link
+                  href="/faceoff"
+                  className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  Faceoff
+                </Link>
+                <button
+                  onClick={handleCompassClick}
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  <motion.span
+                    animate={compassSpinning ? { rotate: 1080 } : { rotate: 0 }}
+                    transition={{ duration: 3, ease: "easeInOut" }}
+                  >
+                    <Compass className="h-3 w-3" />
+                  </motion.span>
+                  Adventure
+                </button>
               </div>
             </div>
           </div>
@@ -327,47 +373,86 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Quick Actions */}
-          <div className="space-y-4">
+          {/* Quick Actions - Desktop only */}
+          <div className="hidden lg:block space-y-4">
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-primary" />
               <h4 className="text-sm font-semibold">Quick Start</h4>
             </div>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <Link
-                  href="/freeplay"
-                  className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors w-full sm:w-auto"
+            <div className="flex flex-col gap-2">
+              <Link
+                href="/daily"
+                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                Daily Challenge
+              </Link>
+              <Link
+                href="/freeplay"
+                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                Freeplay
+              </Link>
+              <Link
+                href="/survival"
+                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                Survival
+              </Link>
+              <Link
+                href="/faceoff"
+                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                Faceoff
+              </Link>
+              <button
+                onClick={handleCompassClick}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                <motion.span
+                  animate={compassSpinning ? { rotate: 1080 } : { rotate: 0 }}
+                  transition={{ duration: 3, ease: "easeInOut" }}
                 >
-                  Start Quiz
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/daily"
-                  className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md border border-primary text-primary hover:bg-primary/10 transition-colors w-full sm:w-auto"
-                >
-                  Daily Challenge
-                </Link>
-              </li>
-              <li>
-                <button
-                  onClick={handleCompassClick}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md border border-border text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-accent transition-colors w-full sm:w-auto"
-                >
-                  <motion.span
-                    animate={compassSpinning ? { rotate: 1080 } : { rotate: 0 }}
-                    transition={{ duration: 3, ease: "easeInOut" }}
-                  >
-                    <Compass className="h-4 w-4" />
-                  </motion.span>
-                  Adventure
-                </button>
-                <audio ref={audioRef} src="/skyrim-i-used-to-be-an-adventure-like-you.mp3" />
-              </li>
-            </ul>
+                  <Compass className="h-4 w-4" />
+                </motion.span>
+                Adventure
+              </button>
+              <audio ref={audioRef} src="/skyrim-i-used-to-be-an-adventure-like-you.mp3" />
+            </div>
           </div>
           </div>
+        </div>
+
+        {/* Built With - Mobile only */}
+        <div className="lg:hidden flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-6">
+          <span className="text-xs text-muted-foreground">Built with</span>
+          <a href="https://echo.merit.systems" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+            <Image src="https://echo.merit.systems/favicon.ico" alt="Echo" width={14} height={14} className="size-3.5" />
+            <span className="text-xs font-medium text-primary">Echo</span>
+          </a>
+          <a href="https://merit.systems" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+            <Image src="https://merit.systems/favicon.ico" alt="Merit" width={14} height={14} className="size-3.5" />
+            <span className="text-xs font-medium text-[#E53935]">Merit</span>
+          </a>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+            <img src="https://vercel.com/favicon.ico" alt="Vercel" width={14} height={14} className="size-3.5" />
+            <span className="text-xs font-medium text-foreground">Vercel</span>
+          </a>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+            <img src="https://supabase.com/favicon/favicon-32x32.png" alt="Supabase" width={14} height={14} className="size-3.5" />
+            <span className="text-xs font-medium text-[#3ECF8E]">Supabase</span>
+          </a>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <a href="https://anthropic.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+            <img src="https://anthropic.com/favicon.ico" alt="Anthropic" width={14} height={14} className="size-3.5" />
+            <span className="text-xs font-medium text-[#D4A574]">Anthropic</span>
+          </a>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <a href="https://cursor.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+            <img src="https://cursor.com/favicon.ico" alt="Cursor" width={14} height={14} className="size-3.5" />
+            <span className="text-xs font-medium text-white">Cursor</span>
+          </a>
         </div>
 
         <Separator className="mb-8" />

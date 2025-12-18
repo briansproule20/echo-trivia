@@ -43,17 +43,22 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [showFlurp, setShowFlurp] = useState(false);
   const [pendingResultsId, setPendingResultsId] = useState<string | null>(null);
-  const [isCloudResult, setIsCloudResult] = useState(false);
+  const [pendingGameMode, setPendingGameMode] = useState<string | null>(null);
 
-  const handleViewResults = (sessionId: string, cloud: boolean = false) => {
+  const handleViewResults = (sessionId: string, gameMode: string = "default") => {
     setPendingResultsId(sessionId);
-    setIsCloudResult(cloud);
+    setPendingGameMode(gameMode);
     setShowFlurp(true);
   };
 
   const handleFlurpComplete = () => {
     if (pendingResultsId) {
-      const url = isCloudResult ? `/results/${pendingResultsId}?cloud=true` : `/results/${pendingResultsId}`;
+      let url: string;
+      if (pendingGameMode === "endless") {
+        url = `/survival/results/${pendingResultsId}`;
+      } else {
+        url = `/results/${pendingResultsId}?cloud=true`;
+      }
       router.push(url);
     }
   };
@@ -198,11 +203,7 @@ export default function HomePage() {
                 const isSurvival = session.game_mode === "endless";
 
                 const handleClick = () => {
-                  if (isSurvival) {
-                    router.push(`/survival/results/${session.id}`);
-                  } else {
-                    handleViewResults(session.id, true);
-                  }
+                  handleViewResults(session.id, session.game_mode || "default");
                 };
 
                 return (

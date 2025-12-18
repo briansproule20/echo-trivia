@@ -12,6 +12,7 @@ import { z } from "zod";
 // Client only sends quiz_id, question_id, and their response - NOT the answer
 const SecureEvaluateRequestSchema = z.object({
   quiz_id: z.string(),
+  session_id: z.string(), // Unique per play session - critical for faceoff mode
   question_id: z.string(),
   response: z.string(),
   question_prompt: z.string(), // For LLM fuzzy matching context
@@ -91,10 +92,11 @@ async function storeEvaluation(
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { quiz_id, question_id, response, question_prompt, isAuthenticated } =
+    const { quiz_id, session_id, question_id, response, question_prompt, isAuthenticated } =
       SecureEvaluateRequestSchema.parse(body);
 
     // SECURITY: Look up the correct answer from server-side storage
+    // Use quiz_id for answer key lookup (answers are stored per quiz)
     const answerKey = await getAnswerKey(quiz_id, question_id);
 
     if (!answerKey) {
@@ -105,8 +107,10 @@ export async function POST(req: Request) {
     }
 
     // Check if this question was already evaluated (prevent abuse)
+    // CRITICAL: Use session_id (unique per play) not quiz_id (shared in faceoff mode)
+    // This ensures each player's answers are evaluated independently
     const { alreadySubmitted, existingResult } = await storeEvaluation(
-      quiz_id,
+      session_id, // Changed from quiz_id - this is the key fix for faceoff mode
       question_id,
       response,
       false // Placeholder, will update if new
@@ -175,7 +179,7 @@ export async function POST(req: Request) {
     await supabase
       .from("quiz_evaluations")
       .update({ is_correct: correct })
-      .eq("quiz_id", quiz_id)
+      .eq("quiz_id", session_id) // Use session_id for consistency with storeEvaluation
       .eq("question_id", question_id);
 
     const result = EvaluateResponseSchema.parse({

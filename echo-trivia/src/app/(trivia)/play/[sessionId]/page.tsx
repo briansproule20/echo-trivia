@@ -84,13 +84,15 @@ export default function PlayPage() {
     setIsEvaluating(true);
 
     try {
-      // SECURITY: Send only quiz_id, question_id, and response
+      // SECURITY: Send only quiz_id, session_id, question_id, and response
       // Server looks up the correct answer from secure storage
+      // session_id is unique per play - critical for faceoff mode where multiple players share the same quiz_id
       const evalResponse = await fetch("/api/trivia/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           quiz_id: currentSession.quiz.id,
+          session_id: currentSession.id, // Unique per play session - fixes faceoff evaluation bug
           question_id: currentQuestion.id,
           response,
           question_prompt: currentQuestion.prompt, // For LLM fuzzy matching context

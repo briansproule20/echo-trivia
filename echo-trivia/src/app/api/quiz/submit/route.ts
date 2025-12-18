@@ -170,10 +170,10 @@ export async function POST(request: NextRequest) {
 
     // 3. SECURITY: Get score from SERVER-SIDE evaluations only
     // We do NOT trust any scores or is_correct flags from the client
-    // Use quiz_id for lookups (that's what generate route uses for answer_keys)
-    const lookupId = quiz_id || session_id || ''
-    const serverEvaluations = await getServerEvaluations(lookupId)
-    const answerKeys = await getAnswerKeys(lookupId)
+    // IMPORTANT: Evaluations are stored by session_id (unique per play)
+    // Answer keys are stored by quiz_id (shared across faceoff challengers)
+    const serverEvaluations = await getServerEvaluations(session_id || '')
+    const answerKeys = await getAnswerKeys(quiz_id || session_id || '')
 
     // Build validated submissions from SERVER data
     let validatedSubmissions: Array<{

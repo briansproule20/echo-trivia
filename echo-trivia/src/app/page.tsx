@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, PlayCircle, Trophy, Clock, TrendingUp, Award, Cloud } from "lucide-react";
+import { Calendar, PlayCircle, Trophy, Clock, TrendingUp, Award, Cloud, Swords, Flame } from "lucide-react";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 import { motion } from "framer-motion";
 import { DotBackground } from "@/components/ui/dot-background";
@@ -135,6 +136,34 @@ export default function HomePage() {
               </Button>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Beta Game Modes CTA */}
+        <div className="max-w-3xl mx-auto mb-10">
+          <div className="relative rounded-lg border border-primary/20 bg-primary/5 px-6 py-4">
+            <Badge variant="secondary" className="absolute -top-2.5 left-4 text-xs">
+              Beta
+            </Badge>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p className="text-sm font-medium">
+                Help me test new game modes!
+              </p>
+              <div className="flex items-center gap-2">
+                <Button asChild variant="outline" size="sm" className="bg-background">
+                  <Link href="/faceoff">
+                    <Swords className="mr-1.5 h-3.5 w-3.5" />
+                    Face-Off
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="bg-background">
+                  <Link href="/survival">
+                    <Flame className="mr-1.5 h-3.5 w-3.5" />
+                    Survival
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Mini Leaderboard */}

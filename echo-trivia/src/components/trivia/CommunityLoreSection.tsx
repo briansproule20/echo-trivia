@@ -73,7 +73,7 @@ export function CommunityLoreSection() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20" />
 
-        <div className="relative z-10 p-4 sm:p-6">
+        <div className="relative z-10 px-3 py-2 sm:px-4 sm:py-3">
           {/* Header with skull icon and help */}
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -134,9 +134,10 @@ export function CommunityLoreSection() {
                       const isCompleted = nextTierGoal
                         ? stats.totalCorrectAnswers >= nextTierGoal
                         : stats.totalCorrectAnswers >= tier.goal
+                      const isCurrentTier = tier.level === stats.currentTier.level
                       return (
-                        <div key={tier.level} className={`flex justify-between text-xs ${isCompleted ? 'text-primary' : ''}`}>
-                          <span className={isCompleted ? '' : 'text-muted-foreground'}>
+                        <div key={tier.level} className={`flex justify-between text-xs ${isCurrentTier ? 'text-primary font-semibold' : isCompleted ? 'text-primary' : 'text-muted-foreground'}`}>
+                          <span>
                             {tier.name}
                           </span>
                           <span className="font-mono">{rangeDisplay}</span>

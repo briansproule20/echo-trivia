@@ -153,7 +153,7 @@ export default function JeopardyPage() {
                           size="lg"
                           className="h-24 flex-col gap-2"
                         >
-                          <Grid3X3 className="h-6 w-6" />
+                          <LayoutGrid className="h-6 w-6" />
                           <span>3 Categories</span>
                           <span className="text-xs text-muted-foreground">15 questions</span>
                         </Button>
@@ -163,7 +163,7 @@ export default function JeopardyPage() {
                           size="lg"
                           className="h-24 flex-col gap-2"
                         >
-                          <LayoutGrid className="h-6 w-6" />
+                          <Grid3X3 className="h-6 w-6" />
                           <span>5 Categories</span>
                           <span className="text-xs text-muted-foreground">25 questions</span>
                         </Button>

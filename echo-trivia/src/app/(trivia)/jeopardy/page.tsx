@@ -78,8 +78,16 @@ export default function JeopardyPage() {
     }
   };
 
-  const getFilteredCategories = (searchQuery: string) => {
-    const sorted = [...CATEGORIES].sort();
+  const getFilteredCategories = (searchQuery: string, currentIndex: number) => {
+    // Get categories selected in other slots (exclude "random" and current slot)
+    const selectedElsewhere = categories
+      .filter((_, idx) => idx !== currentIndex)
+      .filter(cat => cat !== "random" && CATEGORIES.includes(cat as any));
+
+    const sorted = [...CATEGORIES]
+      .filter(cat => !selectedElsewhere.includes(cat))
+      .sort();
+
     if (!searchQuery.trim()) return sorted;
     const query = searchQuery.toLowerCase();
     return sorted.filter(cat => cat.toLowerCase().includes(query));
@@ -244,7 +252,7 @@ export default function JeopardyPage() {
                                   if (e.key === "Enter" && searchQueries[index]?.trim()) {
                                     e.preventDefault();
                                     const query = searchQueries[index].trim();
-                                    const filtered = getFilteredCategories(query);
+                                    const filtered = getFilteredCategories(query, index);
                                     // Use first match or custom
                                     if (filtered.length > 0) {
                                       handleCategoryChange(index, filtered[0]);
@@ -300,7 +308,7 @@ export default function JeopardyPage() {
                               )}
 
                               {/* Filtered categories */}
-                              {getFilteredCategories(searchQueries[index] || "").map((category) => (
+                              {getFilteredCategories(searchQueries[index] || "", index).map((category) => (
                                 <button
                                   key={category}
                                   onClick={() => handleCategoryChange(index, category)}

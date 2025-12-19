@@ -417,10 +417,15 @@ export default function JeopardyPlayPage() {
         <Dialog open={isLoadingQuestion || !!activeQuestion} onOpenChange={() => handleCloseQuestion()}>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             {isLoadingQuestion ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-                <p className="text-muted-foreground">Generating question...</p>
-              </div>
+              <>
+                <DialogHeader>
+                  <DialogTitle>Loading Question</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                  <p className="text-muted-foreground">Generating question...</p>
+                </div>
+              </>
             ) : activeQuestion ? (
               <>
                 <DialogHeader>

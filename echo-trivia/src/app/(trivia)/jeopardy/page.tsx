@@ -129,38 +129,51 @@ export default function JeopardyPage() {
             <>
               {!mode ? (
                 /* Mode Selection */
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Select Board Size</CardTitle>
-                    <CardDescription>
-                      Each category has 5 questions of increasing difficulty (200-1000 points)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <Button
-                        onClick={() => handleSelectMode(3)}
-                        variant="outline"
-                        size="lg"
-                        className="h-24 flex-col gap-2"
-                      >
-                        <Grid3X3 className="h-6 w-6" />
-                        <span>3 Categories</span>
-                        <span className="text-xs text-muted-foreground">15 questions</span>
-                      </Button>
-                      <Button
-                        onClick={() => handleSelectMode(5)}
-                        variant="outline"
-                        size="lg"
-                        className="h-24 flex-col gap-2"
-                      >
-                        <LayoutGrid className="h-6 w-6" />
-                        <span>5 Categories</span>
-                        <span className="text-xs text-muted-foreground">25 questions</span>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                <>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Select Board Size</CardTitle>
+                      <CardDescription>
+                        Each category has 5 questions of increasing difficulty (200-1000 points)
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <Button
+                          onClick={() => handleSelectMode(3)}
+                          variant="outline"
+                          size="lg"
+                          className="h-24 flex-col gap-2"
+                        >
+                          <Grid3X3 className="h-6 w-6" />
+                          <span>3 Categories</span>
+                          <span className="text-xs text-muted-foreground">15 questions</span>
+                        </Button>
+                        <Button
+                          onClick={() => handleSelectMode(5)}
+                          variant="outline"
+                          size="lg"
+                          className="h-24 flex-col gap-2"
+                        >
+                          <LayoutGrid className="h-6 w-6" />
+                          <span>5 Categories</span>
+                          <span className="text-xs text-muted-foreground">25 questions</span>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* How It Works */}
+                  <div className="rounded-lg border border-border/50 bg-muted/30 px-4 py-3 sm:px-5 sm:py-4">
+                    <h3 className="text-xs font-medium mb-2.5">How It Works</h3>
+                    <ul className="text-xs text-muted-foreground space-y-1 list-disc list-outside ml-4">
+                      <li>A simplified version of the greatest trivia game of all time</li>
+                      <li>5 questions per category, ranging from 200–1,000 points</li>
+                      <li>Correct answers earn points, incorrect answers lose them</li>
+                      <li>No Double Jeopardy, Daily Double, or Final Jeopardy—yet</li>
+                    </ul>
+                  </div>
+                </>
               ) : (
                 /* Category Selection */
                 <Card>

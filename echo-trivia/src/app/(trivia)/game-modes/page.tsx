@@ -10,7 +10,7 @@ import { Illustration } from "@/components/ui/glowing-stars";
 import { ShootingStars } from "@/components/ui/shooting-stars";
 import { StarsBackground } from "@/components/ui/stars-background";
 import { InfiniteScrollBackground } from "@/components/ui/infinite-scroll-background";
-import { Calendar, Sparkles, Zap, Lock, Castle, Trophy, Star, Swords } from "lucide-react";
+import { Calendar, Sparkles, Zap, Lock, Castle, Trophy, Star, Swords, LayoutGrid } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface GameModeCardProps {
@@ -385,9 +385,10 @@ export default function GameModesPage() {
     },
     {
       title: "Jeopardy Mode",
-      description: "Answer in the form of a question. Choose categories and wager points in this classic game show format.",
-      icon: <Lock className="h-7 w-7 text-primary" />,
-      comingSoon: true,
+      description: "A simplified Jeopardy experience. Choose categories, answer questions worth 200-1000 points, and see how high you can score.",
+      icon: <LayoutGrid className="h-7 w-7 text-primary" />,
+      href: "/jeopardy",
+      beta: true,
       useStars: true,
     },
   ];
@@ -485,7 +486,6 @@ export default function GameModesPage() {
                     description={mode.description}
                     icon={mode.icon}
                     href={mode.href}
-                    comingSoon={mode.comingSoon}
                     beta={mode.beta}
                     delay={index * 100}
                     useVortex={mode.useVortex}
@@ -502,7 +502,6 @@ export default function GameModesPage() {
                   description={gameModes[2].description}
                   icon={gameModes[2].icon}
                   href={gameModes[2].href}
-                  comingSoon={gameModes[2].comingSoon}
                   beta={gameModes[2].beta}
                   delay={200}
                 />
@@ -517,7 +516,6 @@ export default function GameModesPage() {
                     description={mode.description}
                     icon={mode.icon}
                     href={mode.href}
-                    comingSoon={mode.comingSoon}
                     beta={mode.beta}
                     delay={(index + 3) * 100}
                     useStars={mode.useStars}

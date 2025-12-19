@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Trophy, Medal, Award, User, HelpCircle, Zap, Swords, Flame } from "lucide-react";
+import { Trophy, Medal, Award, User, HelpCircle, Zap, Swords, Flame, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import type { LeaderboardEntry } from "@/lib/supabase-types";
@@ -532,6 +532,12 @@ export default function LeaderboardPage() {
                   <Link href="/survival">
                     <Flame className="mr-2 h-4 w-4" />
                     Survival Leaderboards
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full sm:w-auto">
+                  <Link href="/jeopardy/leaderboard">
+                    <LayoutGrid className="mr-2 h-4 w-4" />
+                    Jeopardy Leaderboards
                   </Link>
                 </Button>
               </div>

@@ -13,6 +13,13 @@ export async function GET() {
 
     if (error) throw error
 
+    // Also get Jeopardy correct answers
+    const { data: jeopardyData, error: jeopardyError } = await supabase
+      .from('jeopardy_games')
+      .select('questions_correct')
+
+    if (jeopardyError) console.error('Error fetching jeopardy stats:', jeopardyError)
+
     // Count total users from users table
     const { count: totalUsers, error: usersError } = await supabase
       .from('users')
@@ -20,7 +27,9 @@ export async function GET() {
 
     if (usersError) console.error('Error counting users:', usersError)
 
-    const totalCorrectAnswers = data?.reduce((sum, session) => sum + (session.correct_answers || 0), 0) || 0
+    const quizCorrectAnswers = data?.reduce((sum, session) => sum + (session.correct_answers || 0), 0) || 0
+    const jeopardyCorrectAnswers = jeopardyData?.reduce((sum, game) => sum + (game.questions_correct || 0), 0) || 0
+    const totalCorrectAnswers = quizCorrectAnswers + jeopardyCorrectAnswers
 
     // Calculate current tier and progress
     const tiers = [

@@ -190,6 +190,12 @@ export function Footer() {
                 >
                   Faceoff
                 </Link>
+                <Link
+                  href="/jeopardy"
+                  className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  Jeopardy
+                </Link>
                 <button
                   onClick={handleCompassClick}
                   className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
@@ -245,6 +251,14 @@ export function Footer() {
                   className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
                 >
                   Survival
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/jeopardy"
+                  className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
+                >
+                  Jeopardy
                 </Link>
               </li>
               <li>
@@ -418,6 +432,12 @@ export function Footer() {
                 className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
               >
                 Faceoff
+              </Link>
+              <Link
+                href="/jeopardy"
+                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                Jeopardy
               </Link>
               <button
                 onClick={handleCompassClick}

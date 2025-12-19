@@ -216,3 +216,57 @@ export interface SurvivalLeaderboardResponse {
     rank: number
   }
 }
+
+// ============================================================================
+// JEOPARDY MODE TYPES
+// ============================================================================
+
+export interface JeopardyQuestionAttempt {
+  question_id: string
+  category: string
+  points: number
+  prompt: string
+  type: 'multiple_choice' | 'true_false'
+  choices?: Array<{ id: string; text: string }>
+  user_answer: string
+  correct_answer: string
+  is_correct: boolean
+  explanation: string
+  points_earned: number // positive if correct, negative if wrong
+}
+
+export interface JeopardyGame {
+  id: string
+  user_id: string | null
+  echo_user_id: string
+  board_size: 3 | 5
+  categories: string[]
+  score: number
+  questions_answered: number
+  questions_correct: number
+  board_state: Record<string, boolean> // "category-points" -> answered
+  questions_attempted: JeopardyQuestionAttempt[]
+  time_played_seconds: number
+  completed: boolean
+  ended_at: string | null
+  created_at: string
+}
+
+export interface JeopardyLeaderboardEntry {
+  echo_user_id: string
+  username: string | null
+  avatar_url: string | null
+  avatar_id: string | null
+  score: number
+  rank: number
+  board_size: 3 | 5
+  ended_at: string
+}
+
+export interface JeopardyLeaderboardResponse {
+  leaderboard: JeopardyLeaderboardEntry[]
+  userPosition?: {
+    score: number
+    rank: number
+  }
+}

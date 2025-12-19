@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, PlayCircle, Trophy, Clock, TrendingUp, Award, Cloud, Swords, Flame } from "lucide-react";
+import { Calendar, PlayCircle, Trophy, Clock, TrendingUp, Award, Cloud, Swords, Flame, LayoutGrid } from "lucide-react";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 import { motion } from "framer-motion";
 import { DotBackground } from "@/components/ui/dot-background";
@@ -153,7 +153,7 @@ export default function HomePage() {
               <p className="text-sm font-medium">
                 Help me test new game modes!
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-end">
                 <Button asChild variant="outline" size="sm" className="bg-background">
                   <Link href="/faceoff">
                     <Swords className="mr-1.5 h-3.5 w-3.5" />
@@ -164,6 +164,12 @@ export default function HomePage() {
                   <Link href="/survival">
                     <Flame className="mr-1.5 h-3.5 w-3.5" />
                     Survival
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="bg-background">
+                  <Link href="/jeopardy">
+                    <LayoutGrid className="mr-1.5 h-3.5 w-3.5" />
+                    Jeopardy
                   </Link>
                 </Button>
               </div>

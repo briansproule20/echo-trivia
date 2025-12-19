@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +14,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutGrid, Grid3X3, Lock, LogIn, ArrowLeft, Shuffle, Dices, ChevronDown, Check, Pencil } from "lucide-react";
+import { LayoutGrid, Grid3X3, LogIn, ArrowLeft, Shuffle, Dices, ChevronDown, Check, Pencil, Loader2, Play, Trophy } from "lucide-react";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 import { CATEGORIES } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -20,9 +22,11 @@ import { cn } from "@/lib/utils";
 type CategorySelection = string; // category name, "random", or custom value
 
 export default function JeopardyPage() {
+  const router = useRouter();
   const { user, signIn, isLoading: echoLoading } = useEcho();
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<3 | 5 | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
   const [categories, setCategories] = useState<CategorySelection[]>([]);
   const [openPopover, setOpenPopover] = useState<number | null>(null);
   const [focusedInput, setFocusedInput] = useState<number | null>(null);
@@ -93,9 +97,44 @@ export default function JeopardyPage() {
     return sorted.filter(cat => cat.toLowerCase().includes(query));
   };
 
-  const handleStartGame = () => {
-    // TODO: Start the game with selected categories
-    console.log("Starting game with categories:", categories);
+  const handleStartGame = async () => {
+    if (!user || !mode) return;
+
+    setIsStarting(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/jeopardy/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          echo_user_id: user.id,
+          board_size: mode,
+          categories,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to start game");
+      }
+
+      const data = await res.json();
+
+      // Store game data in sessionStorage for the play page
+      sessionStorage.setItem(`jeopardy-${data.game_id}`, JSON.stringify({
+        categories: data.categories,
+        board_size: data.board_size,
+        score: data.score,
+      }));
+
+      // Navigate to play page
+      router.push(`/jeopardy/play/${data.game_id}`);
+    } catch (error) {
+      console.error("Failed to start game:", error);
+      setError(error instanceof Error ? error.message : "Failed to start game");
+      setIsStarting(false);
+    }
   };
 
   return (
@@ -107,9 +146,8 @@ export default function JeopardyPage() {
             <div className="flex items-center justify-center gap-2">
               <LayoutGrid className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
               <h1 className="text-2xl sm:text-4xl font-bold">Triv Wiz Jeopardy</h1>
-              <Badge variant="secondary" className="text-xs">
-                <Lock className="h-3 w-3 mr-1" />
-                Dev
+              <Badge variant="default" className="text-xs">
+                Beta
               </Badge>
             </div>
           </div>
@@ -181,6 +219,14 @@ export default function JeopardyPage() {
                       <li>No Double Jeopardy, Daily Double, or Final Jeopardy—yet</li>
                     </ul>
                   </div>
+
+                  {/* Leaderboard Link */}
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/jeopardy/leaderboard">
+                      <Trophy className="mr-2 h-4 w-4" />
+                      Check out the Jeopardy Leaderboards
+                    </Link>
+                  </Button>
                 </>
               ) : (
                 /* Category Selection */
@@ -350,10 +396,14 @@ export default function JeopardyPage() {
                       <Button
                         onClick={handleStartGame}
                         className="flex-1"
-                        disabled
+                        disabled={isStarting}
                       >
-                        <Lock className="mr-2 h-4 w-4" />
-                        Coming Soon
+                        {isStarting ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Play className="mr-2 h-4 w-4" />
+                        )}
+                        {isStarting ? "Starting..." : "Start Game"}
                       </Button>
                     </div>
                   </CardContent>

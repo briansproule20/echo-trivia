@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Trophy, Target, Flame, Clock, Award, BarChart3, ArrowRight, Swords, Zap, Star, Castle, HelpCircle } from "lucide-react";
 import Link from "next/link";
 import type { UserStats, UserAchievement, DailyStreak, SurvivalStats } from "@/lib/supabase-types";
+import type { JeopardyStats } from "@/app/api/jeopardy/stats/route";
 import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
 
 export default function ProfilePage() {
@@ -22,6 +23,7 @@ export default function ProfilePage() {
   const [currentUsername, setCurrentUsername] = useState("");
   const [faceoffStats, setFaceoffStats] = useState({ played: 0 });
   const [survivalStats, setSurvivalStats] = useState<SurvivalStats | null>(null);
+  const [jeopardyStats, setJeopardyStats] = useState<JeopardyStats | null>(null);
 
   useEffect(() => {
     if (echo.user?.id) {
@@ -70,6 +72,13 @@ export default function ProfilePage() {
       if (survivalRes.ok) {
         const data = await survivalRes.json();
         setSurvivalStats(data);
+      }
+
+      // Fetch jeopardy stats
+      const jeopardyRes = await fetch(`/api/jeopardy/stats?echo_user_id=${echo.user.id}`);
+      if (jeopardyRes.ok) {
+        const data = await jeopardyRes.json();
+        setJeopardyStats(data);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -235,19 +244,29 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            <Card className="opacity-60">
+            <Card>
               <CardHeader className="pb-2 sm:pb-3">
-                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
-                  Jeopardy High Score
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+                    Jeopardy Best
+                  </CardTitle>
+                  <Badge variant="secondary" className="text-xs">Beta</Badge>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2">
                   <Star className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
-                  <span className="text-2xl sm:text-3xl font-bold">-</span>
+                  <span className="text-2xl sm:text-3xl font-bold">
+                    {jeopardyStats?.best_score_5 !== null
+                      ? jeopardyStats?.best_score_5
+                      : jeopardyStats?.best_score_3 !== null
+                        ? jeopardyStats?.best_score_3
+                        : 0}
+                  </span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Coming soon
+                  {jeopardyStats?.total_games ? `${jeopardyStats.total_games} games` : 'Best score'}
+                  {(jeopardyStats?.rank_5 || jeopardyStats?.rank_3) && ` · Rank #${jeopardyStats?.rank_5 || jeopardyStats?.rank_3}`}
                 </p>
               </CardContent>
             </Card>

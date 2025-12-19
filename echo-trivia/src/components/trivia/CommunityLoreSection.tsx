@@ -147,7 +147,7 @@ export function CommunityLoreSection() {
                   </div>
 
                   <p className="text-xs text-muted-foreground pt-2 border-t">
-                    All who answer correctly contribute: Daily Challenges, Freeplay, Faceoff, and beyond!
+                    All who answer correctly contribute: Daily Challenges, Freeplay, Faceoff, Survival, Jeopardy, and beyond!
                   </p>
                 </div>
               </PopoverContent>

@@ -171,11 +171,11 @@ export default function LeaderboardPage() {
                           <HelpCircle className="h-5 w-5" />
                         </button>
                       </PopoverTrigger>
-                      <PopoverContent align="end" className="w-[320px] sm:w-[380px]">
+                      <PopoverContent align="end" className="w-[300px] sm:w-[360px]">
                         <div className="space-y-3">
                           <div className="space-y-1">
-                            <h4 className="font-semibold text-base leading-none">How Leaderboards Work</h4>
-                            <p className="text-sm text-muted-foreground">
+                            <h4 className="font-semibold text-sm leading-none">How Leaderboards Work</h4>
+                            <p className="text-xs text-muted-foreground">
                               Compete with players around the world
                             </p>
                           </div>
@@ -183,22 +183,22 @@ export default function LeaderboardPage() {
                             <div className="flex gap-2">
                               <Trophy className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                               <div>
-                                <p className="font-medium">Daily Challenges Only</p>
+                                <p className="font-medium text-xs">Daily Challenges Only</p>
                                 <p className="text-xs text-muted-foreground">Only your daily challenge scores count toward leaderboard rankings</p>
                               </div>
                             </div>
                             <div className="flex gap-2">
                               <User className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                               <div>
-                                <p className="font-medium">Freeplay Tracking</p>
+                                <p className="font-medium text-xs">Freeplay Tracking</p>
                                 <p className="text-xs text-muted-foreground">Freeplay quizzes are tracked privately in your profile and dashboard</p>
                               </div>
                             </div>
                             <div className="flex gap-2">
                               <Award className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                               <div>
-                                <p className="font-medium">Qualification</p>
-                                <p className="text-xs text-muted-foreground">Minimum 5 daily challenges required for All Time, Monthly, and Weekly boards</p>
+                                <p className="font-medium text-xs">Qualification</p>
+                                <p className="text-xs text-muted-foreground">5 quizzes minimum for all-time leaderboards</p>
                               </div>
                             </div>
                           </div>
@@ -369,11 +369,11 @@ export default function LeaderboardPage() {
                           <HelpCircle className="h-5 w-5" />
                         </button>
                       </PopoverTrigger>
-                      <PopoverContent align="end" className="w-[320px] sm:w-[400px]">
+                      <PopoverContent align="end" className="w-[300px] sm:w-[360px]">
                         <div className="space-y-3">
                           <div className="space-y-1">
-                            <h4 className="font-semibold text-base leading-none">Skill Index Algorithm</h4>
-                            <p className="text-sm text-muted-foreground">
+                            <h4 className="font-semibold text-sm leading-none">Skill Index Algorithm</h4>
+                            <p className="text-xs text-muted-foreground">
                               An ELO-inspired rating system for trivia
                             </p>
                           </div>
@@ -381,28 +381,28 @@ export default function LeaderboardPage() {
                             <div className="flex gap-2">
                               <Zap className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                               <div>
-                                <p className="font-medium">Starting Rating: 1000</p>
+                                <p className="font-medium text-xs">Starting Rating: 1000</p>
                                 <p className="text-xs text-muted-foreground">Everyone begins at 1000 points</p>
                               </div>
                             </div>
                             <div className="flex gap-2">
                               <Award className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                               <div>
-                                <p className="font-medium">Difficulty Matters</p>
+                                <p className="font-medium text-xs">Difficulty Matters</p>
                                 <p className="text-xs text-muted-foreground">Hard quizzes: expected 45% (more points for beating it). Medium: 60%. Easy: 75%</p>
                               </div>
                             </div>
                             <div className="flex gap-2">
                               <Trophy className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                               <div>
-                                <p className="font-medium">Performance vs Expected</p>
+                                <p className="font-medium text-xs">Performance vs Expected</p>
                                 <p className="text-xs text-muted-foreground">Beat expectations = gain points. Underperform = lose points</p>
                               </div>
                             </div>
                             <div className="flex gap-2">
                               <User className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                               <div>
-                                <p className="font-medium">All Quizzes Count</p>
+                                <p className="font-medium text-xs">All Quizzes Count</p>
                                 <p className="text-xs text-muted-foreground">Unlike the leaderboard, freeplay and daily quizzes both affect your Skill Index</p>
                               </div>
                             </div>

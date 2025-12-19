@@ -34,6 +34,7 @@ interface CloudSession {
   completed_at: string;
   time_taken: number | null;
   game_mode: string | null;
+  jeopardy_score?: number;
 }
 
 export default function HomePage() {
@@ -56,6 +57,8 @@ export default function HomePage() {
       let url: string;
       if (pendingGameMode === "endless") {
         url = `/survival/results/${pendingResultsId}`;
+      } else if (pendingGameMode === "jeopardy") {
+        url = `/jeopardy/results/${pendingResultsId}`;
       } else {
         url = `/results/${pendingResultsId}?cloud=true`;
       }
@@ -207,6 +210,8 @@ export default function HomePage() {
                 const percentage = Math.round(session.score_percentage);
                 const timeElapsed = session.time_taken || 0;
                 const isSurvival = session.game_mode === "endless";
+                const isJeopardy = session.game_mode === "jeopardy";
+                const isFaceoff = session.game_mode === "faceoff";
 
                 const handleClick = () => {
                   handleViewResults(session.id, session.game_mode || "default");
@@ -229,10 +234,10 @@ export default function HomePage() {
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0 space-y-1">
                             <CardTitle className="text-base font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                              {isSurvival ? "Survival" : session.category}
+                              {isSurvival ? "Survival" : isJeopardy ? "Jeopardy" : isFaceoff ? "Face-Off" : session.category}
                             </CardTitle>
                             <CardDescription className="text-xs line-clamp-1">
-                              {isSurvival ? `${session.category} Mode` : session.title}
+                              {isSurvival ? `${session.category} Mode` : isJeopardy ? session.title : isFaceoff ? session.category : session.title}
                             </CardDescription>
                           </div>
                           {isSurvival ? (
@@ -242,6 +247,22 @@ export default function HomePage() {
                             >
                               <Flame className="h-3 w-3" />
                               {session.correct_answers}
+                            </Badge>
+                          ) : isJeopardy ? (
+                            <Badge
+                              variant={(session.jeopardy_score ?? 0) >= 0 ? "default" : "destructive"}
+                              className="flex items-center gap-1 px-2.5 py-1 text-sm font-semibold shrink-0"
+                            >
+                              <LayoutGrid className="h-3 w-3" />
+                              {(session.jeopardy_score ?? 0) >= 0 ? "+" : ""}{session.jeopardy_score ?? 0}
+                            </Badge>
+                          ) : isFaceoff ? (
+                            <Badge
+                              variant={percentage >= 70 ? "default" : "secondary"}
+                              className="flex items-center gap-1 px-2.5 py-1 text-sm font-semibold shrink-0"
+                            >
+                              <Swords className="h-3 w-3" />
+                              {percentage}%
                             </Badge>
                           ) : (
                             <Badge
@@ -259,12 +280,12 @@ export default function HomePage() {
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 text-sm">
                             <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 text-primary">
-                              {isSurvival ? <Flame className="h-4 w-4" /> : <Trophy className="h-4 w-4" />}
+                              {isSurvival ? <Flame className="h-4 w-4" /> : isJeopardy ? <LayoutGrid className="h-4 w-4" /> : isFaceoff ? <Swords className="h-4 w-4" /> : <Trophy className="h-4 w-4" />}
                             </div>
                             <div className="flex-1">
-                              <p className="text-xs text-muted-foreground">{isSurvival ? "Streak" : "Score"}</p>
+                              <p className="text-xs text-muted-foreground">{isSurvival ? "Streak" : isJeopardy ? "Correct" : "Score"}</p>
                               <p className="text-sm font-semibold">
-                                {isSurvival ? session.correct_answers : `${session.correct_answers} / ${session.total_questions}`}
+                                {isSurvival ? session.correct_answers : isJeopardy ? `${session.correct_answers} / ${session.total_questions}` : `${session.correct_answers} / ${session.total_questions}`}
                               </p>
                             </div>
                           </div>

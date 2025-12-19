@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Clock, AlertCircle, TrendingUp, Award, Cloud, HardDrive, Flame } from "lucide-react";
+import { Trophy, Clock, AlertCircle, TrendingUp, Award, Cloud, HardDrive, Flame, Swords, LayoutGrid } from "lucide-react";
 import { storage } from "@/lib/storage";
 import type { Session } from "@/lib/types";
 import { useEcho } from "@merit-systems/echo-react-sdk";
@@ -28,6 +28,7 @@ interface CloudSession {
   completed_at: string;
   time_taken: number | null;
   game_mode: string | null;
+  jeopardy_score?: number;
 }
 
 export default function HistoryPage() {
@@ -91,9 +92,41 @@ export default function HistoryPage() {
     const percentage = Math.round(session.score_percentage);
     const timeElapsed = session.time_taken || 0;
     const isSurvival = session.game_mode === "endless";
-    const resultsUrl = isSurvival
-      ? `/survival/results/${session.id}`
-      : `/results/${session.id}?cloud=true`;
+    const isJeopardy = session.game_mode === "jeopardy";
+    const isFaceoff = session.game_mode === "faceoff";
+
+    let resultsUrl: string;
+    if (isSurvival) {
+      resultsUrl = `/survival/results/${session.id}`;
+    } else if (isJeopardy) {
+      resultsUrl = `/jeopardy/results/${session.id}`;
+    } else {
+      resultsUrl = `/results/${session.id}?cloud=true`;
+    }
+
+    // Get the appropriate icon for the mode indicator
+    const getModeIcon = () => {
+      if (isSurvival) return <Flame className="h-4 w-4 text-orange-500" />;
+      if (isJeopardy) return <LayoutGrid className="h-4 w-4 text-primary" />;
+      if (isFaceoff) return <Swords className="h-4 w-4 text-primary" />;
+      return <Cloud className="h-4 w-4 text-muted-foreground" />;
+    };
+
+    // Get the title based on game mode
+    const getTitle = () => {
+      if (isSurvival) return "Survival";
+      if (isJeopardy) return "Jeopardy";
+      if (isFaceoff) return "Face-Off";
+      return session.category;
+    };
+
+    // Get the subtitle based on game mode
+    const getSubtitle = () => {
+      if (isSurvival) return `${session.category} Mode`;
+      if (isJeopardy) return session.title;
+      if (isFaceoff) return session.category;
+      return session.title || 'Quiz';
+    };
 
     return (
       <motion.div
@@ -110,21 +143,17 @@ export default function HistoryPage() {
 
           {/* Mode indicator */}
           <div className="absolute top-3 right-3 z-10">
-            {isSurvival ? (
-              <Flame className="h-4 w-4 text-orange-500" />
-            ) : (
-              <Cloud className="h-4 w-4 text-muted-foreground" />
-            )}
+            {getModeIcon()}
           </div>
 
           <CardHeader className="space-y-3 pb-4">
             <div className="flex items-start justify-between gap-3 pr-8">
               <div className="flex-1 min-w-0 space-y-1">
                 <CardTitle className="text-base font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                  {isSurvival ? "Survival" : session.category}
+                  {getTitle()}
                 </CardTitle>
                 <CardDescription className="text-xs line-clamp-1">
-                  {isSurvival ? `${session.category} Mode` : (session.title || 'Quiz')}
+                  {getSubtitle()}
                 </CardDescription>
                 <CardDescription className="text-xs">
                   {formatDate(session.completed_at)}
@@ -137,6 +166,22 @@ export default function HistoryPage() {
                 >
                   <Flame className="h-3 w-3" />
                   {session.correct_answers}
+                </Badge>
+              ) : isJeopardy ? (
+                <Badge
+                  variant={(session.jeopardy_score ?? 0) >= 0 ? "default" : "destructive"}
+                  className="flex items-center gap-1 px-2.5 py-1 text-sm font-semibold shrink-0"
+                >
+                  <LayoutGrid className="h-3 w-3" />
+                  {(session.jeopardy_score ?? 0) >= 0 ? "+" : ""}{session.jeopardy_score ?? 0}
+                </Badge>
+              ) : isFaceoff ? (
+                <Badge
+                  variant={percentage >= 70 ? "default" : "secondary"}
+                  className="flex items-center gap-1 px-2.5 py-1 text-sm font-semibold shrink-0"
+                >
+                  <Swords className="h-3 w-3" />
+                  {percentage}%
                 </Badge>
               ) : (
                 <Badge
@@ -154,10 +199,10 @@ export default function HistoryPage() {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm">
                 <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 text-primary">
-                  {isSurvival ? <Flame className="h-4 w-4" /> : <Trophy className="h-4 w-4" />}
+                  {isSurvival ? <Flame className="h-4 w-4" /> : isJeopardy ? <LayoutGrid className="h-4 w-4" /> : isFaceoff ? <Swords className="h-4 w-4" /> : <Trophy className="h-4 w-4" />}
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs text-muted-foreground">{isSurvival ? "Streak" : "Score"}</p>
+                  <p className="text-xs text-muted-foreground">{isSurvival ? "Streak" : isJeopardy ? "Correct" : "Score"}</p>
                   <p className="text-sm font-semibold">
                     {isSurvival ? session.correct_answers : `${session.correct_answers} / ${session.total_questions}`}
                   </p>

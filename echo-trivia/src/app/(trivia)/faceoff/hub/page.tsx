@@ -140,7 +140,8 @@ function ChallengeCard({
   };
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(shareUrl);
+    const shareMessage = `I challenge you to a faceoff in ${challenge.settings.category} on Trivia Wizard! ${shareUrl}`;
+    await navigator.clipboard.writeText(shareMessage);
     setCopied(true);
     onCopy(challenge.share_code);
     setTimeout(() => setCopied(false), 2000);

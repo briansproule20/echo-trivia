@@ -376,7 +376,9 @@ ${shareUrl}`;
     if (!shareUrl) return;
 
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      const category = session?.quiz?.category || "trivia";
+      const shareMessage = `I challenge you to a faceoff in ${category} on Trivia Wizard! ${shareUrl}`;
+      await navigator.clipboard.writeText(shareMessage);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {

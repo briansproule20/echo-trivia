@@ -103,12 +103,8 @@ export function Navbar() {
             </div>
           )}
 
-          {/* Right Side - Theme Toggle, Echo Account & Menu Button */}
+          {/* Right Side - Echo Account, Menu Button & Theme Toggle */}
           <div className="flex items-center gap-2">
-            {/* Desktop Theme Toggle - Hidden on mobile */}
-            <div className="hidden md:block" suppressHydrationWarning>
-              <ThemeToggle />
-            </div>
             <EchoAccount />
             <Sheet>
               <SheetTrigger asChild>
@@ -209,7 +205,7 @@ export function Navbar() {
                       <EchoBalance echo={echo} />
                     ) : null}
                     <div className="px-3">
-                      <EchoAccount />
+                      <EchoAccount hideStreak />
                     </div>
 
                     {/* More Dropdown */}

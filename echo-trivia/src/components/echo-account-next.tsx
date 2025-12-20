@@ -2,8 +2,18 @@
 
 import { useEcho } from '@merit-systems/echo-next-sdk/client';
 import { EchoAccountButton } from './echo-account';
+import { DailyStreak } from './daily-streak';
 
-export function EchoAccount() {
+interface EchoAccountProps {
+  hideStreak?: boolean;
+}
+
+export function EchoAccount({ hideStreak = false }: EchoAccountProps) {
   const echo = useEcho();
-  return <EchoAccountButton echo={echo} />;
+  return (
+    <div className="flex items-center gap-2">
+      {!hideStreak && <DailyStreak />}
+      <EchoAccountButton echo={echo} />
+    </div>
+  );
 }

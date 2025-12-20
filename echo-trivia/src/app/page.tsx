@@ -212,6 +212,36 @@ export default function HomePage() {
                 const isSurvival = session.game_mode === "endless";
                 const isJeopardy = session.game_mode === "jeopardy";
                 const isFaceoff = session.game_mode === "faceoff";
+                const isDaily = session.is_daily;
+
+                // Get game mode icon and label
+                const gameModeInfo = isSurvival
+                  ? { icon: Flame, label: "Survival" }
+                  : isJeopardy
+                  ? { icon: LayoutGrid, label: "Jeopardy" }
+                  : isFaceoff
+                  ? { icon: Swords, label: "Face-Off" }
+                  : isDaily
+                  ? { icon: Calendar, label: "Daily" }
+                  : { icon: PlayCircle, label: "Freeplay" };
+                const GameModeIcon = gameModeInfo.icon;
+
+                // Format relative time
+                const getRelativeTime = (dateString: string) => {
+                  const date = new Date(dateString);
+                  const now = new Date();
+                  const diffMs = now.getTime() - date.getTime();
+                  const diffMins = Math.floor(diffMs / 60000);
+                  const diffHours = Math.floor(diffMs / 3600000);
+                  const diffDays = Math.floor(diffMs / 86400000);
+
+                  if (diffMins < 1) return "Just now";
+                  if (diffMins < 60) return `${diffMins}m ago`;
+                  if (diffHours < 24) return `${diffHours}h ago`;
+                  if (diffDays === 1) return "Yesterday";
+                  if (diffDays < 7) return `${diffDays}d ago`;
+                  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                };
 
                 const handleClick = () => {
                   handleViewResults(session.id, session.game_mode || "default");
@@ -230,14 +260,20 @@ export default function HomePage() {
                       {/* Gradient overlay */}
                       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                      <CardHeader className="space-y-3 pb-4">
+                      <CardHeader className="space-y-2 pb-3">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <GameModeIcon className="h-3 w-3" />
+                          <span>{gameModeInfo.label}</span>
+                          <span className="mx-1">·</span>
+                          <span>{getRelativeTime(session.completed_at)}</span>
+                        </div>
                         <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0 space-y-1">
+                          <div className="flex-1 min-w-0 space-y-0.5">
                             <CardTitle className="text-base font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                              {isSurvival ? "Survival" : isJeopardy ? "Jeopardy" : isFaceoff ? "Face-Off" : session.category}
+                              {isSurvival ? session.category : isJeopardy ? session.title : isFaceoff ? session.category : session.category}
                             </CardTitle>
                             <CardDescription className="text-xs line-clamp-1">
-                              {isSurvival ? `${session.category} Mode` : isJeopardy ? session.title : isFaceoff ? session.category : session.title}
+                              {isSurvival ? "Endless Mode" : isJeopardy ? `${session.correct_answers}/${session.total_questions} correct` : isFaceoff ? session.title : session.title}
                             </CardDescription>
                           </div>
                           {isSurvival ? (
@@ -276,29 +312,18 @@ export default function HomePage() {
                         </div>
                       </CardHeader>
 
-                      <CardContent className="space-y-3 pt-0 flex-1 flex flex-col">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm">
-                            <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 text-primary">
-                              {isSurvival ? <Flame className="h-4 w-4" /> : isJeopardy ? <LayoutGrid className="h-4 w-4" /> : isFaceoff ? <Swords className="h-4 w-4" /> : <Trophy className="h-4 w-4" />}
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-xs text-muted-foreground">{isSurvival ? "Streak" : isJeopardy ? "Correct" : "Score"}</p>
-                              <p className="text-sm font-semibold">
-                                {isSurvival ? session.correct_answers : isJeopardy ? `${session.correct_answers} / ${session.total_questions}` : `${session.correct_answers} / ${session.total_questions}`}
-                              </p>
-                            </div>
+                      <CardContent className="pt-0 flex-1 flex flex-col">
+                        <div className="flex items-center justify-between text-sm mb-3">
+                          <div className="flex items-center gap-1.5">
+                            <Trophy className="h-3.5 w-3.5 text-primary" />
+                            <span className="font-medium">
+                              {isSurvival ? session.correct_answers : `${session.correct_answers}/${session.total_questions}`}
+                            </span>
                           </div>
-
                           {timeElapsed > 0 && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-muted text-muted-foreground">
-                                <Clock className="h-4 w-4" />
-                              </div>
-                              <div className="flex-1">
-                                <p className="text-xs text-muted-foreground">Time</p>
-                                <p className="text-sm font-semibold">{timeElapsed}s</p>
-                              </div>
+                            <div className="flex items-center gap-1.5 text-muted-foreground">
+                              <Clock className="h-3.5 w-3.5" />
+                              <span>{timeElapsed}s</span>
                             </div>
                           )}
                         </div>

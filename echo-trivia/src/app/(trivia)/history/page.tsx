@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Clock, AlertCircle, TrendingUp, Award, Cloud, HardDrive, Flame, Swords, LayoutGrid } from "lucide-react";
+import { Trophy, Clock, AlertCircle, TrendingUp, Award, Cloud, HardDrive, Flame, Swords, LayoutGrid, Calendar, PlayCircle } from "lucide-react";
 import { storage } from "@/lib/storage";
 import type { Session } from "@/lib/types";
 import { useEcho } from "@merit-systems/echo-react-sdk";
@@ -104,27 +104,33 @@ export default function HistoryPage() {
       resultsUrl = `/results/${session.id}?cloud=true`;
     }
 
-    // Get the appropriate icon for the mode indicator
-    const getModeIcon = () => {
-      if (isSurvival) return <Flame className="h-4 w-4 text-orange-500" />;
-      if (isJeopardy) return <LayoutGrid className="h-4 w-4 text-primary" />;
-      if (isFaceoff) return <Swords className="h-4 w-4 text-primary" />;
-      return <Cloud className="h-4 w-4 text-muted-foreground" />;
-    };
+    const isDaily = session.is_daily;
+
+    // Get game mode info
+    const gameModeInfo = isSurvival
+      ? { icon: Flame, label: "Survival" }
+      : isJeopardy
+      ? { icon: LayoutGrid, label: "Jeopardy" }
+      : isFaceoff
+      ? { icon: Swords, label: "Face-Off" }
+      : isDaily
+      ? { icon: Calendar, label: "Daily" }
+      : { icon: PlayCircle, label: "Freeplay" };
+    const GameModeIcon = gameModeInfo.icon;
 
     // Get the title based on game mode
     const getTitle = () => {
-      if (isSurvival) return "Survival";
-      if (isJeopardy) return "Jeopardy";
-      if (isFaceoff) return "Face-Off";
+      if (isSurvival) return session.category;
+      if (isJeopardy) return session.title || "Jeopardy";
+      if (isFaceoff) return session.category;
       return session.category;
     };
 
     // Get the subtitle based on game mode
     const getSubtitle = () => {
-      if (isSurvival) return `${session.category} Mode`;
-      if (isJeopardy) return session.title;
-      if (isFaceoff) return session.category;
+      if (isSurvival) return "Endless Mode";
+      if (isJeopardy) return `${session.correct_answers}/${session.total_questions} correct`;
+      if (isFaceoff) return session.title || 'Quiz';
       return session.title || 'Quiz';
     };
 
@@ -141,22 +147,20 @@ export default function HistoryPage() {
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          {/* Mode indicator */}
-          <div className="absolute top-3 right-3 z-10">
-            {getModeIcon()}
-          </div>
-
-          <CardHeader className="space-y-3 pb-4">
-            <div className="flex items-start justify-between gap-3 pr-8">
-              <div className="flex-1 min-w-0 space-y-1">
+          <CardHeader className="space-y-2 pb-3">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <GameModeIcon className="h-3 w-3" />
+              <span>{gameModeInfo.label}</span>
+              <span className="mx-1">·</span>
+              <span>{formatDate(session.completed_at)}</span>
+            </div>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0 space-y-0.5">
                 <CardTitle className="text-base font-semibold line-clamp-1 group-hover:text-primary transition-colors">
                   {getTitle()}
                 </CardTitle>
                 <CardDescription className="text-xs line-clamp-1">
                   {getSubtitle()}
-                </CardDescription>
-                <CardDescription className="text-xs">
-                  {formatDate(session.completed_at)}
                 </CardDescription>
               </div>
               {isSurvival ? (
@@ -195,29 +199,18 @@ export default function HistoryPage() {
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-3 pt-0 flex-1 flex flex-col">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 text-primary">
-                  {isSurvival ? <Flame className="h-4 w-4" /> : isJeopardy ? <LayoutGrid className="h-4 w-4" /> : isFaceoff ? <Swords className="h-4 w-4" /> : <Trophy className="h-4 w-4" />}
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs text-muted-foreground">{isSurvival ? "Streak" : isJeopardy ? "Correct" : "Score"}</p>
-                  <p className="text-sm font-semibold">
-                    {isSurvival ? session.correct_answers : `${session.correct_answers} / ${session.total_questions}`}
-                  </p>
-                </div>
+          <CardContent className="pt-0 flex-1 flex flex-col">
+            <div className="flex items-center justify-between text-sm mb-3">
+              <div className="flex items-center gap-1.5">
+                <Trophy className="h-3.5 w-3.5 text-primary" />
+                <span className="font-medium">
+                  {isSurvival ? session.correct_answers : `${session.correct_answers}/${session.total_questions}`}
+                </span>
               </div>
-
               {timeElapsed > 0 && (
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-muted text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-muted-foreground">Time</p>
-                    <p className="text-sm font-semibold">{timeElapsed}s</p>
-                  </div>
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>{timeElapsed}s</span>
                 </div>
               )}
             </div>
@@ -261,22 +254,20 @@ export default function HistoryPage() {
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          {/* Local indicator */}
-          <div className="absolute top-3 right-3 z-10">
-            <HardDrive className="h-4 w-4 text-muted-foreground" />
-          </div>
-
-          <CardHeader className="space-y-3 pb-4">
-            <div className="flex items-start justify-between gap-3 pr-8">
-              <div className="flex-1 min-w-0 space-y-1">
+          <CardHeader className="space-y-2 pb-3">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <HardDrive className="h-3 w-3" />
+              <span>Local</span>
+              <span className="mx-1">·</span>
+              <span>{formatDate(session.startedAt)}</span>
+            </div>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0 space-y-0.5">
                 <CardTitle className="text-base font-semibold line-clamp-1 group-hover:text-primary transition-colors">
                   {session.quiz.category}
                 </CardTitle>
                 <CardDescription className="text-xs line-clamp-1">
                   {session.quiz.title || 'Quiz'}
-                </CardDescription>
-                <CardDescription className="text-xs">
-                  {formatDate(session.startedAt)}
                 </CardDescription>
               </div>
               <Badge
@@ -289,29 +280,16 @@ export default function HistoryPage() {
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-3 pt-0 flex-1 flex flex-col">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 text-primary">
-                  <Trophy className="h-4 w-4" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs text-muted-foreground">Score</p>
-                  <p className="text-sm font-semibold">
-                    {score} / {session.quiz.questions.length}
-                  </p>
-                </div>
+          <CardContent className="pt-0 flex-1 flex flex-col">
+            <div className="flex items-center justify-between text-sm mb-3">
+              <div className="flex items-center gap-1.5">
+                <Trophy className="h-3.5 w-3.5 text-primary" />
+                <span className="font-medium">{score}/{session.quiz.questions.length}</span>
               </div>
-
               {timeElapsed > 0 && (
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-muted text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-muted-foreground">Time</p>
-                    <p className="text-sm font-semibold">{timeElapsed}s</p>
-                  </div>
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>{timeElapsed}s</span>
                 </div>
               )}
             </div>

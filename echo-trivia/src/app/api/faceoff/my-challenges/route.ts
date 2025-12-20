@@ -15,6 +15,7 @@ export interface FaceoffChallengeSummary {
     quiz_type: string
   }
   times_played: number
+  unique_players: number
   created_at: string
   expires_at: string
 }
@@ -68,6 +69,39 @@ export async function GET(request: NextRequest) {
       throw error
     }
 
+    // Get unique player counts for each challenge
+    const shareCodes = challenges?.map(c => c.share_code) || []
+    let playersByCode: Record<string, Set<string>> = {}
+
+    if (shareCodes.length > 0) {
+      const { data: sessions } = await supabase
+        .from('quiz_sessions')
+        .select('faceoff_share_code, echo_user_id')
+        .in('faceoff_share_code', shareCodes)
+        .eq('game_mode', 'faceoff')
+
+      // Count unique players per share_code
+      if (sessions) {
+        for (const session of sessions) {
+          if (!playersByCode[session.faceoff_share_code]) {
+            playersByCode[session.faceoff_share_code] = new Set()
+          }
+          playersByCode[session.faceoff_share_code].add(session.echo_user_id)
+        }
+      }
+    }
+
+    // Add unique_players to each challenge (include creator only if not already in sessions)
+    const challengesWithPlayers = challenges?.map(c => {
+      const players = playersByCode[c.share_code] || new Set()
+      // Add creator to the set (Set handles duplicates automatically)
+      players.add(c.creator_echo_user_id)
+      return {
+        ...c,
+        unique_players: players.size,
+      }
+    }) || []
+
     // Get total count for pagination
     let countQuery = supabase
       .from('faceoff_challenges')
@@ -85,7 +119,7 @@ export async function GET(request: NextRequest) {
     const { count: totalCount } = await countQuery
 
     return NextResponse.json({
-      challenges: challenges || [],
+      challenges: challengesWithPlayers,
       total: totalCount || 0,
       limit,
       offset,

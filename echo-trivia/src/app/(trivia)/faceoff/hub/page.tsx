@@ -71,8 +71,9 @@ interface FaceoffLeaderboardEntry {
   score: number;
   score_percentage: number;
   time_taken: number | null;
-  completed_at: string;
+  completed_at: string | null;
   rank: number;
+  isCreator?: boolean;
 }
 
 function ChallengeCard({
@@ -100,7 +101,29 @@ function ChallengeCard({
       const response = await fetch(`/api/faceoff/${challenge.share_code}/leaderboard?limit=10`);
       if (response.ok) {
         const data = await response.json();
-        setLeaderboard(data.leaderboard || []);
+        let entries = data.leaderboard || [];
+
+        // Add creator entry if provided and not already in leaderboard
+        if (data.creatorEntry) {
+          entries = [...entries, { ...data.creatorEntry, isCreator: true }];
+          // Re-sort by score_percentage desc, then time_taken asc
+          entries.sort((a: FaceoffLeaderboardEntry, b: FaceoffLeaderboardEntry) => {
+            if (b.score_percentage !== a.score_percentage) {
+              return b.score_percentage - a.score_percentage;
+            }
+            return (a.time_taken || 9999) - (b.time_taken || 9999);
+          });
+          // Re-assign ranks
+          entries = entries.map((e: FaceoffLeaderboardEntry, i: number) => ({ ...e, rank: i + 1 }));
+        }
+
+        // Mark creator in existing entries
+        entries = entries.map((e: FaceoffLeaderboardEntry) => ({
+          ...e,
+          isCreator: e.echo_user_id === challenge.creator_echo_user_id,
+        }));
+
+        setLeaderboard(entries);
       }
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
@@ -166,7 +189,7 @@ function ChallengeCard({
                 <span className="capitalize">{challenge.settings.difficulty}</span>
                 <span className="flex items-center gap-1">
                   <Users className="h-3 w-3" />
-                  {challenge.times_played} plays
+                  {challenge.unique_players} {challenge.unique_players === 1 ? "player" : "players"}
                 </span>
               </CardDescription>
             </div>
@@ -229,11 +252,16 @@ function ChallengeCard({
                       ? AVATAR_ICONS[entry.avatar_id] || Ghost
                       : Ghost;
                     const isCurrentUser = currentUserId === entry.echo_user_id;
+                    const isCreator = entry.isCreator;
                     return (
                       <div
                         key={entry.echo_user_id}
                         className={`flex items-center justify-between p-2 rounded-md border ${
-                          isCurrentUser ? "ring-1 ring-primary bg-primary/5" : "bg-background"
+                          isCurrentUser
+                            ? "ring-1 ring-primary bg-primary/5"
+                            : isCreator
+                            ? "ring-1 ring-green-500 bg-green-500/10"
+                            : "bg-background"
                         }`}
                       >
                         <div className="flex items-center gap-2">
@@ -244,13 +272,20 @@ function ChallengeCard({
                               </span>
                             )}
                           </div>
-                          <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
-                            <Icon className="h-3.5 w-3.5 text-primary" />
+                          <div className={`h-6 w-6 rounded-full flex items-center justify-center ${
+                            isCreator ? "bg-green-500/20" : "bg-primary/10"
+                          }`}>
+                            <Icon className={`h-3.5 w-3.5 ${isCreator ? "text-green-600" : "text-primary"}`} />
                           </div>
                           <span className="text-sm font-medium truncate max-w-[120px]">
                             {entry.username || "Anonymous"}
                           </span>
-                          {isCurrentUser && (
+                          {isCreator && (
+                            <Badge variant="outline" className="text-xs h-4 px-1 border-green-500 text-green-600">
+                              Creator
+                            </Badge>
+                          )}
+                          {isCurrentUser && !isCreator && (
                             <Badge variant="default" className="text-xs h-4 px-1">
                               You
                             </Badge>

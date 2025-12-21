@@ -154,7 +154,7 @@ export function Footer() {
                     height={18}
                     className="size-[18px] group-hover:scale-110 transition-transform"
                   />
-                  <span className="text-sm font-medium text-white">Cursor</span>
+                  <span className="text-sm font-medium text-muted-foreground">Cursor</span>
                 </a>
               </div>
             </div>
@@ -486,7 +486,7 @@ export function Footer() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <a href="https://cursor.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity">
             <img src="https://cursor.com/favicon.ico" alt="Cursor" width={14} height={14} className="size-3.5" />
-            <span className="text-xs font-medium text-white">Cursor</span>
+            <span className="text-xs font-medium text-muted-foreground">Cursor</span>
           </a>
         </div>
 

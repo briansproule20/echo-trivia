@@ -4,7 +4,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/utils/supabase/service";
 import { z } from "zod";
-import { getActiveGame, setActiveGame, deleteActiveGame, getCellKey, isBoardComplete } from "@/lib/jeopardy-state";
+import { getActiveGame, updateActiveGame, completeGame, getCellKey, isBoardComplete } from "@/lib/jeopardy-state";
 import type { JeopardyQuestionAttempt } from "@/lib/supabase-types";
 
 const RequestSchema = z.object({
@@ -43,86 +43,13 @@ async function getAnswerKey(gameId: string, questionId: string): Promise<AnswerK
   return answers.find((a) => a.question_id === questionId) || null;
 }
 
-// Save completed game to database
-async function saveGame(
-  gameId: string,
-  echoUserId: string,
-  boardSize: 3 | 5,
-  categories: string[],
-  score: number,
-  questionsAnswered: number,
-  questionsCorrect: number,
-  boardState: Record<string, boolean>,
-  questionsAttempted: JeopardyQuestionAttempt[],
-  timePlayed: number
-): Promise<{ rank: number | null; isPersonalBest: boolean }> {
-  const supabase = createServiceClient();
-
-  // Get user_id from echo_user_id
-  const { data: userData } = await supabase
-    .from("users")
-    .select("id")
-    .eq("echo_user_id", echoUserId)
-    .single();
-
-  // Save to jeopardy_games
-  const { error: gameError } = await supabase
-    .from("jeopardy_games")
-    .insert({
-      id: gameId,
-      user_id: userData?.id || null,
-      echo_user_id: echoUserId,
-      board_size: boardSize,
-      categories,
-      score,
-      questions_answered: questionsAnswered,
-      questions_correct: questionsCorrect,
-      board_state: boardState,
-      questions_attempted: questionsAttempted,
-      time_played_seconds: Math.floor(timePlayed / 1000),
-      completed: true,
-      ended_at: new Date().toISOString(),
-    });
-
-  if (gameError) {
-    console.error("Failed to save jeopardy game:", gameError);
-    throw new Error(`Failed to save jeopardy game: ${gameError.message}`);
-  }
-
-  // Calculate rank (how many have higher scores with same board size)
-  const { count } = await supabase
-    .from("jeopardy_games")
-    .select("*", { count: "exact", head: true })
-    .eq("board_size", boardSize)
-    .eq("completed", true)
-    .gt("score", score);
-
-  const rank = count !== null ? count + 1 : null;
-
-  // Check if personal best for this board size
-  const { data: bestData } = await supabase
-    .from("jeopardy_games")
-    .select("score")
-    .eq("echo_user_id", echoUserId)
-    .eq("board_size", boardSize)
-    .eq("completed", true)
-    .neq("id", gameId)
-    .order("score", { ascending: false })
-    .limit(1)
-    .single();
-
-  const isPersonalBest = !bestData || score > bestData.score;
-
-  return { rank, isPersonalBest };
-}
-
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { game_id, question_id, category, points, response, echo_user_id } = RequestSchema.parse(body);
 
-    // Get game state
-    const gameState = getActiveGame(game_id);
+    // Get game state from database
+    const gameState = await getActiveGame(game_id);
     if (!gameState) {
       return NextResponse.json(
         { error: "Game not found or expired" },
@@ -161,25 +88,25 @@ export async function POST(req: Request) {
     // Calculate points earned/lost
     const pointsEarned = correct ? points : -points;
 
-    // Update score
-    gameState.score += pointsEarned;
-
-    // Mark cell as answered
+    // Update game state
+    const newScore = gameState.score + pointsEarned;
     const cellKey = getCellKey(category, points);
-    gameState.board_state[cellKey] = true;
-
-    // Clear current question
-    gameState.current_question_id = null;
+    const newBoardState = { ...gameState.board_state, [cellKey]: true };
 
     // Find and update the question attempt (it was added when question was generated)
     // If not found, add it now
-    const existingAttempt = gameState.questions_attempted.find(q => q.question_id === question_id);
-    if (existingAttempt) {
-      existingAttempt.user_answer = response;
-      existingAttempt.correct_answer = answerKey.answer;
-      existingAttempt.is_correct = correct;
-      existingAttempt.explanation = answerKey.explanation || "";
-      existingAttempt.points_earned = pointsEarned;
+    const newQuestionsAttempted = [...gameState.questions_attempted];
+    const existingAttemptIndex = newQuestionsAttempted.findIndex(q => q.question_id === question_id);
+
+    if (existingAttemptIndex >= 0) {
+      newQuestionsAttempted[existingAttemptIndex] = {
+        ...newQuestionsAttempted[existingAttemptIndex],
+        user_answer: response,
+        correct_answer: answerKey.answer,
+        is_correct: correct,
+        explanation: answerKey.explanation || "",
+        points_earned: pointsEarned,
+      };
     } else {
       // Add the question attempt
       const questionAttempt: JeopardyQuestionAttempt = {
@@ -194,32 +121,35 @@ export async function POST(req: Request) {
         explanation: answerKey.explanation || "",
         points_earned: pointsEarned,
       };
-      gameState.questions_attempted.push(questionAttempt);
+      newQuestionsAttempted.push(questionAttempt);
     }
 
+    // Update state with new values
+    const updatedState = {
+      ...gameState,
+      score: newScore,
+      board_state: newBoardState,
+      questions_attempted: newQuestionsAttempted,
+      current_question_id: null,
+    };
+
     // Check if board is complete
-    const boardComplete = isBoardComplete(gameState);
+    const boardComplete = isBoardComplete(updatedState);
 
     if (boardComplete) {
-      // Auto-complete the game
+      // Complete the game
       const timePlayed = Date.now() - gameState.start_time;
-      const questionsCorrect = gameState.questions_attempted.filter(q => q.is_correct).length;
+      const questionsCorrect = newQuestionsAttempted.filter(q => q.is_correct).length;
 
-      const { rank, isPersonalBest } = await saveGame(
+      const { rank, isPersonalBest } = await completeGame(
         game_id,
-        echo_user_id,
-        gameState.board_size,
-        gameState.categories,
-        gameState.score,
-        gameState.questions_attempted.length,
+        newScore,
+        newQuestionsAttempted.length,
         questionsCorrect,
-        gameState.board_state,
-        gameState.questions_attempted,
-        timePlayed
+        newBoardState,
+        newQuestionsAttempted,
+        Math.floor(timePlayed / 1000)
       );
-
-      // Clean up
-      deleteActiveGame(game_id);
 
       // Clean up answer keys
       const supabase = createServiceClient();
@@ -233,11 +163,11 @@ export async function POST(req: Request) {
         explanation: answerKey.explanation || (correct ? "Correct!" : `The correct answer was: ${answerKey.answer}`),
         canonical_answer: answerKey.answer,
         points_earned: pointsEarned,
-        current_score: gameState.score,
+        current_score: newScore,
         game_over: true,
         final_stats: {
-          score: gameState.score,
-          questions_answered: gameState.questions_attempted.length,
+          score: newScore,
+          questions_answered: newQuestionsAttempted.length,
           questions_correct: questionsCorrect,
           categories: gameState.categories,
           rank,
@@ -248,17 +178,24 @@ export async function POST(req: Request) {
       });
     }
 
-    // Save updated state
-    setActiveGame(game_id, gameState);
+    // Save updated state to database
+    await updateActiveGame(game_id, {
+      score: newScore,
+      board_state: newBoardState,
+      questions_attempted: newQuestionsAttempted,
+      current_question_id: null,
+      questions_answered: newQuestionsAttempted.length,
+      questions_correct: newQuestionsAttempted.filter(q => q.is_correct).length,
+    });
 
     return NextResponse.json({
       correct,
       explanation: answerKey.explanation || (correct ? "Correct!" : `The correct answer was: ${answerKey.answer}`),
       canonical_answer: answerKey.answer,
       points_earned: pointsEarned,
-      current_score: gameState.score,
+      current_score: newScore,
       game_over: false,
-      cells_remaining: (gameState.board_size * 5) - Object.keys(gameState.board_state).length,
+      cells_remaining: (gameState.board_size * 5) - Object.keys(newBoardState).length,
     });
 
   } catch (error) {

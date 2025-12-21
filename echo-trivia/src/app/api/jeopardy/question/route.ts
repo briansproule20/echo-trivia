@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 import { generateId } from "@/lib/quiz-utils";
 import { createServiceClient } from "@/utils/supabase/service";
 import { z } from "zod";
-import { getActiveGame, setActiveGame, getCellKey, pointsToDifficulty } from "@/lib/jeopardy-state";
+import { getActiveGame, updateActiveGame, getCellKey, pointsToDifficulty } from "@/lib/jeopardy-state";
 
 const RequestSchema = z.object({
   game_id: z.string(),
@@ -98,8 +98,8 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { game_id, category, points, echo_user_id } = RequestSchema.parse(body);
 
-    // Get active game
-    const gameState = getActiveGame(game_id);
+    // Get active game from database
+    const gameState = await getActiveGame(game_id);
     if (!gameState) {
       return NextResponse.json(
         { error: "Game not found or expired" },
@@ -176,9 +176,10 @@ Make it appropriately ${difficulty} - ${points === 200 ? "accessible to most pla
       question.explanation || ""
     );
 
-    // Update game state with current question
-    gameState.current_question_id = questionId;
-    setActiveGame(game_id, gameState);
+    // Update game state with current question in database
+    await updateActiveGame(game_id, {
+      current_question_id: questionId,
+    });
 
     // Ensure choices are sorted for MCQ
     if (question.type === "multiple_choice" && question.choices) {

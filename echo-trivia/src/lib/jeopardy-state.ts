@@ -1,6 +1,7 @@
 // Shared state for jeopardy mode active games
-// In production, consider using Redis for multi-instance support
+// Uses Supabase for persistence to survive serverless cold starts
 
+import { createServiceClient } from "@/utils/supabase/service";
 import type { JeopardyQuestionAttempt } from "./supabase-types";
 
 export interface JeopardyGameState {
@@ -14,30 +15,196 @@ export interface JeopardyGameState {
   current_question_id: string | null;
 }
 
-// Use globalThis to persist state across hot reloads in development
-const globalKey = "__jeopardy_active_games__";
+// Get active game from database
+export async function getActiveGame(gameId: string): Promise<JeopardyGameState | null> {
+  const supabase = createServiceClient();
 
-function getActiveGamesMap(): Map<string, JeopardyGameState> {
-  if (!(globalThis as Record<string, unknown>)[globalKey]) {
-    (globalThis as Record<string, unknown>)[globalKey] = new Map<string, JeopardyGameState>();
+  const { data, error } = await supabase
+    .from("jeopardy_games")
+    .select("*")
+    .eq("id", gameId)
+    .eq("completed", false)
+    .single();
+
+  if (error || !data) {
+    return null;
   }
-  return (globalThis as Record<string, unknown>)[globalKey] as Map<string, JeopardyGameState>;
+
+  return {
+    echo_user_id: data.echo_user_id,
+    board_size: data.board_size as 3 | 5,
+    categories: data.categories,
+    score: data.score,
+    board_state: data.board_state as Record<string, boolean>,
+    questions_attempted: (data.questions_attempted || []) as JeopardyQuestionAttempt[],
+    start_time: data.start_time || data.created_at ? new Date(data.created_at).getTime() : Date.now(),
+    current_question_id: data.current_question_id,
+  };
 }
 
-export function getActiveGame(gameId: string): JeopardyGameState | undefined {
-  return getActiveGamesMap().get(gameId);
+// Create a new active game in database
+export async function createActiveGame(
+  gameId: string,
+  echoUserId: string,
+  boardSize: 3 | 5,
+  categories: string[]
+): Promise<boolean> {
+  const supabase = createServiceClient();
+
+  // Get user_id from echo_user_id if exists
+  const { data: userData } = await supabase
+    .from("users")
+    .select("id")
+    .eq("echo_user_id", echoUserId)
+    .single();
+
+  const { error } = await supabase
+    .from("jeopardy_games")
+    .insert({
+      id: gameId,
+      user_id: userData?.id || null,
+      echo_user_id: echoUserId,
+      board_size: boardSize,
+      categories,
+      score: 0,
+      questions_answered: 0,
+      questions_correct: 0,
+      board_state: {},
+      questions_attempted: [],
+      start_time: Date.now(),
+      current_question_id: null,
+      completed: false,
+    });
+
+  if (error) {
+    console.error("Failed to create active game:", error);
+    return false;
+  }
+
+  return true;
 }
 
-export function setActiveGame(gameId: string, state: JeopardyGameState): void {
-  getActiveGamesMap().set(gameId, state);
+// Update active game state in database
+export async function updateActiveGame(
+  gameId: string,
+  updates: Partial<{
+    score: number;
+    board_state: Record<string, boolean>;
+    questions_attempted: JeopardyQuestionAttempt[];
+    current_question_id: string | null;
+    questions_answered: number;
+    questions_correct: number;
+  }>
+): Promise<boolean> {
+  const supabase = createServiceClient();
+
+  const { error } = await supabase
+    .from("jeopardy_games")
+    .update(updates)
+    .eq("id", gameId)
+    .eq("completed", false);
+
+  if (error) {
+    console.error("Failed to update active game:", error);
+    return false;
+  }
+
+  return true;
 }
 
-export function deleteActiveGame(gameId: string): boolean {
-  return getActiveGamesMap().delete(gameId);
+// Complete a game (mark as finished)
+export async function completeGame(
+  gameId: string,
+  finalScore: number,
+  questionsAnswered: number,
+  questionsCorrect: number,
+  boardState: Record<string, boolean>,
+  questionsAttempted: JeopardyQuestionAttempt[],
+  timePlayedSeconds: number
+): Promise<{ rank: number | null; isPersonalBest: boolean }> {
+  const supabase = createServiceClient();
+
+  // Get the game to find echo_user_id and board_size
+  const { data: game } = await supabase
+    .from("jeopardy_games")
+    .select("echo_user_id, board_size")
+    .eq("id", gameId)
+    .single();
+
+  if (!game) {
+    throw new Error("Game not found");
+  }
+
+  // Update the game as completed
+  const { error } = await supabase
+    .from("jeopardy_games")
+    .update({
+      score: finalScore,
+      questions_answered: questionsAnswered,
+      questions_correct: questionsCorrect,
+      board_state: boardState,
+      questions_attempted: questionsAttempted,
+      time_played_seconds: timePlayedSeconds,
+      completed: true,
+      ended_at: new Date().toISOString(),
+      current_question_id: null,
+    })
+    .eq("id", gameId);
+
+  if (error) {
+    console.error("Failed to complete game:", error);
+    throw new Error("Failed to complete game");
+  }
+
+  // Calculate rank
+  const { count } = await supabase
+    .from("jeopardy_games")
+    .select("*", { count: "exact", head: true })
+    .eq("board_size", game.board_size)
+    .eq("completed", true)
+    .gt("score", finalScore);
+
+  const rank = count !== null ? count + 1 : null;
+
+  // Check if personal best
+  const { data: bestData } = await supabase
+    .from("jeopardy_games")
+    .select("score")
+    .eq("echo_user_id", game.echo_user_id)
+    .eq("board_size", game.board_size)
+    .eq("completed", true)
+    .neq("id", gameId)
+    .order("score", { ascending: false })
+    .limit(1)
+    .single();
+
+  const isPersonalBest = !bestData || finalScore > bestData.score;
+
+  return { rank, isPersonalBest };
 }
 
-export function hasActiveGame(gameId: string): boolean {
-  return getActiveGamesMap().has(gameId);
+// Delete/cleanup an active game (used if user abandons without ending)
+export async function deleteActiveGame(gameId: string): Promise<boolean> {
+  const supabase = createServiceClient();
+
+  // For active games that are abandoned, we can either delete or mark completed
+  // Let's mark as completed with current state so history is preserved
+  const { error } = await supabase
+    .from("jeopardy_games")
+    .update({
+      completed: true,
+      ended_at: new Date().toISOString(),
+      current_question_id: null,
+    })
+    .eq("id", gameId)
+    .eq("completed", false);
+
+  if (error) {
+    console.error("Failed to delete active game:", error);
+    return false;
+  }
+
+  return true;
 }
 
 // Helper to generate board cell key

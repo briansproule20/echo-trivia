@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 import { CATEGORIES } from "@/lib/types";
-import { setActiveGame, JEOPARDY_POINT_VALUES, type JeopardyGameState } from "@/lib/jeopardy-state";
+import { createActiveGame, JEOPARDY_POINT_VALUES } from "@/lib/jeopardy-state";
 
 const RequestSchema = z.object({
   echo_user_id: z.string(),
@@ -54,20 +54,15 @@ export async function POST(req: Request) {
     // Create game ID
     const gameId = randomUUID();
 
-    // Initialize game state
-    const gameState: JeopardyGameState = {
-      echo_user_id,
-      board_size,
-      categories: resolvedCategories,
-      score: 0,
-      board_state: {},
-      questions_attempted: [],
-      start_time: Date.now(),
-      current_question_id: null,
-    };
+    // Create game in database (persists across cold starts)
+    const success = await createActiveGame(gameId, echo_user_id, board_size, resolvedCategories);
 
-    // Store in memory
-    setActiveGame(gameId, gameState);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Failed to create game" },
+        { status: 500 }
+      );
+    }
 
     // Return game setup
     return NextResponse.json({

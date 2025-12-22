@@ -126,7 +126,7 @@ async function generateCustomCategoryQuiz(settings: any, preferredTone?: string,
   try {
     const typeInstruction =
       settings.type === "mixed"
-        ? "Mix of multiple choice, true/false, and short answer questions"
+        ? "EXACTLY 3 multiple choice questions, 1 true/false question, and 1 short answer question (5 total)"
         : settings.type === "multiple_choice"
         ? "All questions should be multiple choice with EXACTLY 4 options (A, B, C, D)"
         : settings.type === "true_false"
@@ -306,7 +306,7 @@ export async function POST(req: Request) {
     // Build generation prompt using recipe
     const typeInstruction =
       settings.type === "mixed"
-        ? "Mix of multiple choice, true/false, and short answer questions"
+        ? "EXACTLY 3 multiple choice questions, 1 true/false question, and 1 short answer question (5 total)"
         : settings.type === "multiple_choice"
         ? "All questions should be multiple choice with EXACTLY 4 options (A, B, C, D)"
         : settings.type === "true_false"

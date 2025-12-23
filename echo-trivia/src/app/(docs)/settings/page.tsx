@@ -119,11 +119,6 @@ const QUESTION_COUNTS = [
   { id: 10, name: '10 Questions' },
 ] as const
 
-const EXPLANATION_TIMINGS = [
-  { id: 'after_each', name: 'After each question' },
-  { id: 'at_end', name: 'All at the end' },
-] as const
-
 const TONES = [
   { id: 'scholarly', name: 'Scholarly', description: 'Academic and informative' },
   { id: 'playful', name: 'Playful', description: 'Fun and lighthearted' },
@@ -563,26 +558,6 @@ export default function SettingsPage() {
                       }`}
                     >
                       {q.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Explanation Timing */}
-              <div className="space-y-2">
-                <Label>Show Explanations</Label>
-                <div className="flex flex-wrap gap-2">
-                  {EXPLANATION_TIMINGS.map((e) => (
-                    <button
-                      key={e.id}
-                      onClick={() => quizPrefs.setExplanationTiming(e.id)}
-                      className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
-                        quizPrefs.explanationTiming === e.id
-                          ? 'border-primary bg-primary/10 text-primary'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      {e.name}
                     </button>
                   ))}
                 </div>

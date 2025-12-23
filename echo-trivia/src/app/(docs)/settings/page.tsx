@@ -155,6 +155,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (echo.user?.id) {
       fetchUserProfile()
+      fetchPreferences()
     } else {
       setLoading(false)
     }
@@ -181,6 +182,56 @@ export default function SettingsPage() {
       console.error('Error fetching user profile:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchPreferences = async () => {
+    if (!echo.user?.id) return
+
+    try {
+      const res = await fetch(`/api/preferences?echo_user_id=${echo.user.id}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.preferences) {
+          // Sync DB preferences to localStorage
+          if (data.preferences.difficulty) {
+            quizPrefs.setDifficulty(data.preferences.difficulty)
+          }
+          if (data.preferences.question_count) {
+            quizPrefs.setQuestionCount(data.preferences.question_count)
+          }
+          if (data.preferences.preferred_tone !== undefined) {
+            quizPrefs.setPreferredTone(data.preferences.preferred_tone)
+          }
+          if (data.preferences.explanation_style !== undefined) {
+            quizPrefs.setExplanationStyle(data.preferences.explanation_style)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching preferences:', error)
+    }
+  }
+
+  const syncPreferences = async (updates: {
+    difficulty?: string
+    question_count?: number
+    preferred_tone?: string | null
+    explanation_style?: string | null
+  }) => {
+    if (!echo.user?.id) return
+
+    try {
+      await fetch('/api/preferences', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          echo_user_id: echo.user.id,
+          ...updates,
+        }),
+      })
+    } catch (error) {
+      console.error('Error syncing preferences:', error)
     }
   }
 
@@ -530,7 +581,10 @@ export default function SettingsPage() {
                   {DIFFICULTIES.map((d) => (
                     <button
                       key={d.id}
-                      onClick={() => quizPrefs.setDifficulty(d.id)}
+                      onClick={() => {
+                        quizPrefs.setDifficulty(d.id)
+                        syncPreferences({ difficulty: d.id })
+                      }}
                       className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
                         quizPrefs.difficulty === d.id
                           ? 'border-primary bg-primary/10 text-primary'
@@ -550,7 +604,10 @@ export default function SettingsPage() {
                   {QUESTION_COUNTS.map((q) => (
                     <button
                       key={q.id}
-                      onClick={() => quizPrefs.setQuestionCount(q.id)}
+                      onClick={() => {
+                        quizPrefs.setQuestionCount(q.id)
+                        syncPreferences({ question_count: q.id })
+                      }}
                       className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
                         quizPrefs.questionCount === q.id
                           ? 'border-primary bg-primary/10 text-primary'
@@ -573,7 +630,11 @@ export default function SettingsPage() {
                   {TONES.map((t) => (
                     <button
                       key={t.id}
-                      onClick={() => quizPrefs.setPreferredTone(quizPrefs.preferredTone === t.id ? null : t.id)}
+                      onClick={() => {
+                        const newTone = quizPrefs.preferredTone === t.id ? null : t.id
+                        quizPrefs.setPreferredTone(newTone)
+                        syncPreferences({ preferred_tone: newTone })
+                      }}
                       className={`px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all text-left ${
                         quizPrefs.preferredTone === t.id
                           ? 'border-primary bg-primary/10 text-primary'
@@ -598,7 +659,11 @@ export default function SettingsPage() {
                   {EXPLANATION_STYLES.map((s) => (
                     <button
                       key={s.id}
-                      onClick={() => quizPrefs.setExplanationStyle(quizPrefs.explanationStyle === s.id ? null : s.id)}
+                      onClick={() => {
+                        const newStyle = quizPrefs.explanationStyle === s.id ? null : s.id
+                        quizPrefs.setExplanationStyle(newStyle)
+                        syncPreferences({ explanation_style: newStyle })
+                      }}
                       className={`px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all text-left ${
                         quizPrefs.explanationStyle === s.id
                           ? 'border-primary bg-primary/10 text-primary'

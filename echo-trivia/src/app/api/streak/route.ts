@@ -38,7 +38,26 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({ streak })
+    // Check if streak is still valid (last completed was today or yesterday)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    const lastCompleted = streak.last_completed_date
+      ? new Date(streak.last_completed_date + 'T00:00:00')
+      : null
+
+    // If last completed is older than yesterday, streak is broken
+    const isStreakValid = lastCompleted && lastCompleted >= yesterday
+
+    return NextResponse.json({
+      streak: {
+        ...streak,
+        current_streak: isStreakValid ? streak.current_streak : 0,
+      }
+    })
   } catch (error) {
     console.error('Error fetching streak:', error)
     return NextResponse.json(

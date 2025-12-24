@@ -227,7 +227,7 @@ export default function HomePage() {
                 const GameModeIcon = gameModeInfo.icon;
 
                 // Format relative time
-                const getRelativeTime = (dateString: string) => {
+                const getRelativeTime = (dateString: string, dailyDate: string | null) => {
                   const date = new Date(dateString);
                   const now = new Date();
                   const diffMs = now.getTime() - date.getTime();
@@ -238,7 +238,13 @@ export default function HomePage() {
                   if (diffMins < 1) return "Just now";
                   if (diffMins < 60) return `${diffMins}m ago`;
                   if (diffHours < 24) return `${diffHours}h ago`;
-                  if (diffDays === 1) return "Yesterday";
+                  // Only show "Yesterday" for daily quizzes from yesterday's date
+                  if (diffDays === 1 && dailyDate) {
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const yesterdayStr = yesterday.toISOString().split('T')[0];
+                    if (dailyDate === yesterdayStr) return "Yesterday";
+                  }
                   if (diffDays < 7) return `${diffDays}d ago`;
                   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
                 };
@@ -265,7 +271,7 @@ export default function HomePage() {
                           <GameModeIcon className="h-3 w-3" />
                           <span>{gameModeInfo.label}</span>
                           <span className="mx-1">·</span>
-                          <span>{getRelativeTime(session.completed_at)}</span>
+                          <span>{getRelativeTime(session.completed_at, session.daily_date)}</span>
                         </div>
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0 space-y-0.5">

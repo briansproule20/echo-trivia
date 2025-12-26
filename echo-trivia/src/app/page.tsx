@@ -124,9 +124,27 @@ export default function HomePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full" variant="default">
+              <motion.button
+                className="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 py-2 text-primary-foreground shadow bg-[length:200%_100%] bg-gradient-to-r from-primary via-primary/60 via-50% to-primary"
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                }}
+                whileHover={{
+                  scale: 1.02,
+                  boxShadow: "0 10px 20px -10px var(--primary)",
+                }}
+                whileTap={{ scale: 0.98 }}
+                transition={{
+                  duration: 4,
+                  ease: "easeInOut",
+                  repeat: Infinity,
+                  scale: { duration: 0.2 },
+                  boxShadow: { duration: 0.2 },
+                }}
+                onClick={() => router.push("/daily")}
+              >
                 Play Today's Quiz
-              </Button>
+              </motion.button>
             </CardContent>
           </Card>
 

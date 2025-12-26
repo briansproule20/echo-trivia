@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Edit2, Check, X, Settings, Sparkles, Palette, Accessibility, SlidersHorizontal, Monitor, Sun, Moon, Skull, Ghost, Cat, Swords, Shield, Target, Glasses, TreePine, Flame, Zap, Crown, Anchor, Bird, Bug, Snowflake, Cherry } from 'lucide-react'
+import { Edit2, Check, X, Settings, Sparkles, Palette, Eye, SlidersHorizontal, Monitor, Sun, Moon, Skull, Ghost, Cat, Swords, Shield, Target, Glasses, TreePine, Flame, Zap, Crown, Anchor, Bird, Bug, Snowflake, Cherry } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useFontStore, useQuizPreferencesStore, type FontFamily, type AvatarId } from '@/lib/store'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -684,7 +684,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Accessibility className="h-5 w-5" />
+                <Eye className="h-5 w-5" />
                 Accessibility
               </CardTitle>
             </CardHeader>

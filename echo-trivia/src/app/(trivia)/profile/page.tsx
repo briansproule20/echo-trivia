@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Trophy, Target, Flame, Clock, Award, BarChart3, ArrowRight, Swords, Zap, Star, Castle, HelpCircle } from "lucide-react";
 import Link from "next/link";
-import type { UserStats, UserAchievement, DailyStreak, SurvivalStats } from "@/lib/supabase-types";
+import type { UserStats, UserAchievement, DailyStreak, SurvivalStats, QuizSession } from "@/lib/supabase-types";
 import type { JeopardyStats } from "@/app/api/jeopardy/stats/route";
 import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
 
@@ -24,6 +24,8 @@ export default function ProfilePage() {
   const [faceoffStats, setFaceoffStats] = useState({ played: 0 });
   const [survivalStats, setSurvivalStats] = useState<SurvivalStats | null>(null);
   const [jeopardyStats, setJeopardyStats] = useState<JeopardyStats | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [categoryQuizzes, setCategoryQuizzes] = useState<QuizSession[]>([]);
 
   useEffect(() => {
     if (echo.user?.id) {
@@ -84,6 +86,22 @@ export default function ProfilePage() {
       console.error('Error fetching user data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCategoryClick = async (category: string) => {
+    if (!echo.user?.id) return;
+
+    setSelectedCategory(category);
+
+    try {
+      const response = await fetch(`/api/user/category-history?echo_user_id=${echo.user.id}&category=${encodeURIComponent(category)}`);
+      if (response.ok) {
+        const data = await response.json();
+        setCategoryQuizzes(data.quizzes || []);
+      }
+    } catch (error) {
+      console.error('Error fetching category quizzes:', error);
     }
   };
 
@@ -385,21 +403,33 @@ export default function ProfilePage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                     <div>
                       <div className="text-xs sm:text-sm text-muted-foreground mb-2">Recent Category</div>
-                      <Badge variant="outline" className="text-sm sm:text-base">
+                      <Badge
+                        variant="outline"
+                        className={`text-sm sm:text-base ${stats?.recent_category ? 'cursor-pointer hover:bg-accent transition-colors' : ''}`}
+                        onClick={() => stats?.recent_category && handleCategoryClick(stats.recent_category)}
+                      >
                         {stats?.recent_category || 'None yet'}
                       </Badge>
                       <p className="text-xs text-muted-foreground mt-1">Last played</p>
                     </div>
                     <div>
                       <div className="text-xs sm:text-sm text-muted-foreground mb-2">Favorite Category</div>
-                      <Badge variant="secondary" className="text-sm sm:text-base">
+                      <Badge
+                        variant="secondary"
+                        className={`text-sm sm:text-base ${stats?.favorite_category ? 'cursor-pointer hover:bg-accent transition-colors' : ''}`}
+                        onClick={() => stats?.favorite_category && handleCategoryClick(stats.favorite_category)}
+                      >
                         {stats?.favorite_category || 'None yet'}
                       </Badge>
                       <p className="text-xs text-muted-foreground mt-1">Most played</p>
                     </div>
                     <div>
                       <div className="text-xs sm:text-sm text-muted-foreground mb-2">Best Category</div>
-                      <Badge variant="default" className="text-sm sm:text-base">
+                      <Badge
+                        variant="default"
+                        className={`text-sm sm:text-base ${stats?.best_category ? 'cursor-pointer hover:bg-primary/80 transition-colors' : ''}`}
+                        onClick={() => stats?.best_category && handleCategoryClick(stats.best_category)}
+                      >
                         {stats?.best_category || 'None yet'}
                       </Badge>
                       <p className="text-xs text-muted-foreground mt-1">Highest accuracy</p>
@@ -412,7 +442,12 @@ export default function ProfilePage() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {stats?.categories_played.map((cat) => (
-                        <Badge key={cat} variant="outline" className="text-xs sm:text-sm">
+                        <Badge
+                          key={cat}
+                          variant="outline"
+                          className="text-xs sm:text-sm cursor-pointer hover:bg-accent transition-colors"
+                          onClick={() => handleCategoryClick(cat)}
+                        >
                           {cat}
                         </Badge>
                       ))}
@@ -485,6 +520,82 @@ export default function ProfilePage() {
           </Tabs>
         </div>
       </div>
+
+      {/* Category Quiz History Modal */}
+      <Dialog open={!!selectedCategory} onOpenChange={(open) => !open && setSelectedCategory(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">{selectedCategory}</DialogTitle>
+            <DialogDescription className="text-sm">
+              Your quiz history for this category
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto pr-2">
+            {categoryQuizzes.length > 0 ? (
+              <div className="space-y-3">
+                {categoryQuizzes.map((quiz) => (
+                  <div
+                    key={quiz.id}
+                    className="border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge
+                            variant={quiz.score_percentage === 100 ? "default" : quiz.score_percentage >= 70 ? "secondary" : "outline"}
+                            className="font-mono text-sm"
+                          >
+                            {quiz.score_percentage.toFixed(0)}%
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {quiz.correct_answers}/{quiz.total_questions} correct
+                          </span>
+                          {quiz.title && (
+                            <span className="text-xs text-muted-foreground">• {quiz.title}</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                          <span>
+                            {new Date(quiz.completed_at).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </span>
+                          <span>•</span>
+                          <span>{quiz.num_questions} questions</span>
+                          {quiz.time_taken && (
+                            <>
+                              <span>•</span>
+                              <span>{Math.floor(quiz.time_taken / 60)}:{(quiz.time_taken % 60).toString().padStart(2, '0')}</span>
+                            </>
+                          )}
+                          {quiz.difficulty && (
+                            <>
+                              <span>•</span>
+                              <span className="capitalize">{quiz.difficulty}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-2xl flex-shrink-0">
+                        {quiz.score_percentage === 100 ? '💯' :
+                         quiz.score_percentage >= 90 ? '🌟' :
+                         quiz.score_percentage >= 70 ? '👍' :
+                         quiz.score_percentage >= 50 ? '📈' : '💪'}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
+                No quizzes found for this category
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

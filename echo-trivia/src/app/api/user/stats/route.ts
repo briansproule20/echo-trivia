@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
         total_time_played: 0,
         favorite_category: null,
         best_category: null,
+        recent_category: null,
         daily_quizzes_completed: 0,
       }
       return NextResponse.json({ stats: emptyStats })
@@ -104,6 +105,12 @@ export async function GET(request: NextRequest) {
     const bestCategory =
       categoryAverages.sort((a, b) => b.average - a.average)[0]?.category ||
       null
+
+    // Find most recently played category - exclude "Mixed" (survival mode)
+    const recentSession = [...sessions]
+      .filter(s => s.category !== 'Mixed')
+      .sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())[0]
+    const recentCategory = recentSession?.category || null
 
     // Prepare data for charts
     // Category performance (for radial bar chart) - INCLUDE ALL CATEGORIES
@@ -226,6 +233,7 @@ export async function GET(request: NextRequest) {
       total_time_played: totalTimePlayed,
       favorite_category: favoriteCategory,
       best_category: bestCategory,
+      recent_category: recentCategory,
       daily_quizzes_completed: dailyQuizzesCompleted,
     }
 

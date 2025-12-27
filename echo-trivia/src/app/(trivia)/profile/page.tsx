@@ -382,7 +382,14 @@ export default function ProfilePage() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                    <div>
+                      <div className="text-xs sm:text-sm text-muted-foreground mb-2">Recent Category</div>
+                      <Badge variant="outline" className="text-sm sm:text-base">
+                        {stats?.recent_category || 'None yet'}
+                      </Badge>
+                      <p className="text-xs text-muted-foreground mt-1">Last played</p>
+                    </div>
                     <div>
                       <div className="text-xs sm:text-sm text-muted-foreground mb-2">Favorite Category</div>
                       <Badge variant="secondary" className="text-sm sm:text-base">

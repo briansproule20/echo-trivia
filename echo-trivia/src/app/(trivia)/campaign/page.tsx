@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, BookOpen } from "lucide-react";
 
 // Floating arcane runes that drift upward
 const ARCANE_GLYPHS = ["ᚠ", "ᚢ", "ᚦ", "ᚨ", "ᚱ", "ᚲ", "ᚷ", "ᚹ", "ᚺ", "ᚾ", "ᛁ", "ᛃ", "ᛈ", "ᛉ", "ᛊ", "ᛏ", "ᛒ", "ᛖ", "ᛗ", "ᛚ", "ᛜ", "ᛞ", "ᛟ"];
@@ -207,22 +207,38 @@ export default function CampaignPage() {
 
       {/* Main content */}
       <div className="relative z-20 min-h-screen flex flex-col">
-        {/* Back navigation */}
-        <motion.div
-          className="p-4 sm:p-6"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <Link
-            href="/game-modes"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-stone-950/60 backdrop-blur-sm border border-amber-500/30 text-amber-200 hover:bg-stone-950/80 hover:border-amber-500/50 transition-all text-sm"
-            style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}
+        {/* Navigation */}
+        <div className="flex items-center justify-between p-4 sm:p-6">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="font-serif">Return to Crossroads</span>
-          </Link>
-        </motion.div>
+            <Link
+              href="/game-modes"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-stone-950/60 backdrop-blur-sm border border-amber-500/30 text-amber-200 hover:bg-stone-950/80 hover:border-amber-500/50 transition-all text-sm"
+              style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="font-serif">Return to Crossroads</span>
+            </Link>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <Link
+              href="/lore"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-stone-950/60 backdrop-blur-sm border border-amber-500/30 text-amber-200 hover:bg-stone-950/80 hover:border-amber-500/50 transition-all text-sm"
+              style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span className="font-serif">Lore</span>
+            </Link>
+          </motion.div>
+        </div>
 
         {/* Hero content - text at bottom, image breathes */}
         <div className="flex-1 flex flex-col justify-end pb-12 sm:pb-16 px-4">

@@ -397,7 +397,7 @@ export default function CampaignLevelsPage() {
   const echo = useEcho();
 
   const isAuthenticated = !!echo.user;
-  const username = echo.user?.username || null;
+  const username = echo.user?.name || echo.user?.email || null;
 
   // Scroll to current floor on mount
   useEffect(() => {

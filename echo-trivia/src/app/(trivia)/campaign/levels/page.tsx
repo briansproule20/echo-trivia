@@ -282,7 +282,7 @@ function FloorRow({ floor, isCompleted, isCurrent, isLocked, index, onClick, flo
   isLocked: boolean;
   onClick: () => void;
   index: number;
-  floorRef?: React.RefObject<HTMLDivElement>;
+  floorRef?: React.RefObject<HTMLDivElement | null>;
 }) {
   const isTutorial = floor.isTutorial;
 

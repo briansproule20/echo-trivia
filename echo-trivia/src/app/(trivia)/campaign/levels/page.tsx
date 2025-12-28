@@ -7,6 +7,28 @@ import { ArrowLeft, Lock, Check, Sparkles, X, Play, Trophy, RotateCcw, BookOpen,
 import { CATEGORIES } from "@/lib/types";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 
+// Tower floor background images - cycle through these for each level
+const FLOOR_BACKGROUNDS = [
+  "/Tower Floors/FLOOR0.png",
+  "/Tower Floors/FLOOR1.png",
+  "/Tower Floors/FLOOR2.png",
+  "/Tower Floors/FLOOR3.png",
+  "/Tower Floors/FLOOR4.png",
+  "/Tower Floors/FLOOR5.png",
+  "/Tower Floors/FLOOR6.png",
+  "/Tower Floors/FLOOR7.png",
+  "/Tower Floors/FLOOR8.png",
+  "/Tower Floors/FLOOR9.png",
+  "/Tower Floors/FLOOR10.png",
+  "/Tower Floors/FLOOR11.png",
+  "/Tower Floors/FLOOR12.png",
+];
+
+// Get background image for a floor, cycling through available images
+export function getFloorBackground(floorId: number): string {
+  return FLOOR_BACKGROUNDS[floorId % FLOOR_BACKGROUNDS.length];
+}
+
 // Generate floors: all categories on Easy, then Medium, then Hard
 const CATEGORY_COUNT = CATEGORIES.length;
 const TOTAL_FLOORS = CATEGORY_COUNT * 3;
@@ -38,16 +60,18 @@ const TIERS = [
   },
 ];
 
-function generateFloors() {
-  const floors = [];
+function generateFloors(): Floor[] {
+  const floors: Floor[] = [];
 
   for (const tier of TIERS) {
     for (let i = 0; i < CATEGORY_COUNT; i++) {
+      const floorId = tier.start + i;
       floors.push({
-        id: tier.start + i,
+        id: floorId,
         category: CATEGORIES[i],
         difficulty: tier.difficulty,
         tier: tier.name,
+        background: getFloorBackground(floorId),
       });
     }
   }
@@ -73,6 +97,7 @@ interface Floor {
   difficulty: "Easy" | "Medium" | "Hard" | "Tutorial";
   tier: string;
   isTutorial?: boolean;
+  background: string;
 }
 
 // Floor 0 - Tutorial (must complete to unlock campaign)
@@ -82,6 +107,7 @@ const TUTORIAL_FLOOR: Floor = {
   difficulty: "Tutorial",
   tier: "Prologue",
   isTutorial: true,
+  background: getFloorBackground(0),
 };
 
 interface FloorStats {

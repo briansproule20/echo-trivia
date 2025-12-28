@@ -128,6 +128,72 @@ export default function LorePage() {
                   This isn't a war. There's no enemy to defeat, no final victory to claim. It's maintenance. The endless, necessary work of keeping shared systems legible. The Wizard's tools are simple: clarity, precision, the patient act of checking one thing against another.
                 </p>
 
+                {/* Mobile: Tower card on top */}
+                <div className="md:hidden flex justify-center items-center py-4">
+                  <CometCard className="w-full">
+                    <div
+                      className="flex w-full cursor-pointer flex-col items-stretch rounded-[16px] border-0 bg-card/80 backdrop-blur-sm p-8"
+                      style={{
+                        transformStyle: "preserve-3d",
+                        transform: "none",
+                        opacity: 1,
+                      }}
+                    >
+                      <div className="mx-2 flex-1">
+                        <div className="relative mt-2 aspect-[3/4] w-full">
+                          <Image
+                            src="/trivwiztower.png"
+                            alt="The Wizard's Tower"
+                            fill
+                            className="rounded-[16px] object-cover"
+                            style={{
+                              boxShadow: "rgba(0, 0, 0, 0.05) 0px 5px 6px 0px",
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-2 flex flex-shrink-0 items-center justify-center p-4 font-mono">
+                        <div className="text-sm font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                          The Wizard's Tower
+                        </div>
+                      </div>
+                    </div>
+                  </CometCard>
+                </div>
+
+                {/* Desktop: Tower card floated right */}
+                <div className="hidden md:block float-right ml-10 mb-6 -mr-4">
+                  <CometCard>
+                    <div
+                      className="flex w-72 cursor-pointer flex-col items-stretch rounded-[16px] border-0 bg-card/80 backdrop-blur-sm p-6"
+                      style={{
+                        transformStyle: "preserve-3d",
+                        transform: "none",
+                        opacity: 1,
+                      }}
+                    >
+                      <div className="mx-2 flex-1">
+                        <div className="relative mt-2 aspect-[3/4] w-full">
+                          <Image
+                            src="/trivwiztower.png"
+                            alt="The Wizard's Tower"
+                            fill
+                            className="rounded-[16px] object-cover"
+                            style={{
+                              boxShadow: "rgba(0, 0, 0, 0.05) 0px 5px 6px 0px",
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-2 flex flex-shrink-0 items-center justify-center p-4 font-mono">
+                        <div className="text-sm font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                          The Wizard's Tower
+                        </div>
+                      </div>
+                    </div>
+                  </CometCard>
+                </div>
+
                 <p className="text-foreground/90 leading-relaxed text-lg">
                   In the Tower's highest chamber, surrounded by the accumulated patterns of ages, the Wizard tends his signal garden. Each answer he verifies plants the seed for ten more checks. The work compounds. The work never ends. Below, the world continues. Its systems wobbling, its references slowly misaligning, but not yet collapsed. Not while someone still calibrates. Not while the questions keep running.
                 </p>

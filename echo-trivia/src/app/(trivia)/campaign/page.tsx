@@ -14,12 +14,12 @@ function FloatingRune({ delay, x }: { delay: number; x: number }) {
 
   return (
     <motion.span
-      className="absolute text-amber-400/30 text-2xl font-serif select-none pointer-events-none"
+      className="absolute text-amber-400 text-3xl font-serif select-none pointer-events-none drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]"
       style={{ left: `${x}%` }}
       initial={{ y: "100vh", opacity: 0, scale: 0.5 }}
       animate={{
         y: "-20vh",
-        opacity: [0, 0.6, 0.6, 0],
+        opacity: [0, 0.8, 0.8, 0],
         scale: [0.5, 1, 1, 0.8],
         rotate: [0, 10, -10, 0]
       }}
@@ -168,13 +168,22 @@ export default function CampaignPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-stone-950">
-      {/* Background image - cover on mobile, contain on desktop */}
+      {/* Background images - different for mobile vs desktop */}
       <div className="fixed inset-0 z-0">
+        {/* Mobile: Tower portrait image */}
         <Image
           src="/wizardstowerground floor.png"
           alt="The Wizard's Tower"
           fill
-          className="object-cover object-top md:object-contain"
+          className="object-cover object-top md:hidden"
+          priority
+        />
+        {/* Desktop: Study landscape image */}
+        <Image
+          src="/UPSCALED.png"
+          alt="The Wizard's Study"
+          fill
+          className="hidden md:block object-cover"
           priority
         />
         {/* Very subtle darkening for contrast */}

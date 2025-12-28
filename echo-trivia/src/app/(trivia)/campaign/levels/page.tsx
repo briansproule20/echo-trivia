@@ -2,10 +2,12 @@
 
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Lock, Check, Sparkles, X, Play, Trophy, RotateCcw, BookOpen, LogIn } from "lucide-react";
 import { CATEGORIES } from "@/lib/types";
 import { useEcho } from "@merit-systems/echo-react-sdk";
+import { AdventureFlurp } from "@/components/trivia/AdventureFlurp";
 
 // Tower floor background images - cycle through these for each level
 const FLOOR_BACKGROUNDS = [
@@ -124,7 +126,8 @@ function FloorDetailModal({
   isCurrent,
   isAuthenticated,
   username,
-  onClose
+  onClose,
+  onStartFloor
 }: {
   floor: Floor;
   stats: FloorStats | null;
@@ -134,6 +137,7 @@ function FloorDetailModal({
   isAuthenticated: boolean;
   username: string | null;
   onClose: () => void;
+  onStartFloor: (floor: Floor) => void;
 }) {
   const difficultyColors = {
     Easy: "text-emerald-400 bg-emerald-500/20",
@@ -263,6 +267,7 @@ function FloorDetailModal({
         <div className="px-5 pb-5">
           <button
             disabled={!canPlay}
+            onClick={() => canPlay && onStartFloor(floor)}
             className={`
               w-full py-3 rounded-lg font-serif text-sm flex items-center justify-center gap-2 transition-all
               ${canPlay
@@ -280,7 +285,7 @@ function FloorDetailModal({
               ) : (
                 <>
                   <Play className="w-4 h-4" />
-                  <span>Meet the Wizard</span>
+                  <span>Start Prologue</span>
                 </>
               )
             ) : isLocked && !isCurrent ? (
@@ -417,13 +422,29 @@ function TierHeader({ tier, isFirst }: { tier: typeof TIERS[number]; isFirst?: b
 }
 
 export default function CampaignLevelsPage() {
+  const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const currentFloorRef = useRef<HTMLDivElement>(null);
   const [selectedFloor, setSelectedFloor] = useState<Floor | null>(null);
+  const [showFlurp, setShowFlurp] = useState(false);
+  const [pendingFloor, setPendingFloor] = useState<Floor | null>(null);
   const echo = useEcho();
 
   const isAuthenticated = !!echo.user;
   const username = echo.user?.name || echo.user?.email || null;
+
+  const handleStartFloor = (floor: Floor) => {
+    setPendingFloor(floor);
+    setSelectedFloor(null); // Close modal
+    setShowFlurp(true);
+  };
+
+  const handleFlurpExpanded = () => {
+    if (pendingFloor) {
+      // Navigate to the floor play page (TODO: create this page)
+      router.push(`/campaign/play/${pendingFloor.id}`);
+    }
+  };
 
   // Scroll to current floor on mount
   useEffect(() => {
@@ -568,9 +589,17 @@ export default function CampaignLevelsPage() {
             isAuthenticated={isAuthenticated}
             username={username}
             onClose={() => setSelectedFloor(null)}
+            onStartFloor={handleStartFloor}
           />
         )}
       </AnimatePresence>
+
+      {/* Adventure Flurp - purple circle transition */}
+      <AdventureFlurp
+        isVisible={showFlurp}
+        onExpanded={handleFlurpExpanded}
+        onAnimationComplete={() => setShowFlurp(false)}
+      />
     </div>
   );
 }

@@ -165,7 +165,7 @@ export default function LorePage() {
                 <div className="hidden md:block float-right ml-10 mb-6 -mr-4">
                   <CometCard>
                     <div
-                      className="flex w-72 cursor-pointer flex-col items-stretch rounded-[16px] border-0 bg-card/80 backdrop-blur-sm p-6"
+                      className="flex w-96 cursor-pointer flex-col items-stretch rounded-[16px] border-0 bg-card/80 backdrop-blur-sm p-6"
                       style={{
                         transformStyle: "preserve-3d",
                         transform: "none",

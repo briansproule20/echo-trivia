@@ -2,9 +2,12 @@
 
 import { CommunityLoreSection } from '@/components/trivia/CommunityLoreSection'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { DotBackground } from '@/components/ui/dot-background'
 import { CometCard } from '@/components/ui/comet-card'
 import Image from 'next/image'
+import Link from 'next/link'
+import { Castle } from 'lucide-react'
 
 export default function LorePage() {
   return (
@@ -104,150 +107,61 @@ export default function LorePage() {
                   </CometCard>
                 </div>
 
-                <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none space-y-4">
-                <p className="text-muted-foreground leading-relaxed">
-                  At the apex of the world sits the Tower—a spire of glass and stone that pierces the clouds.
-                  Within its highest chamber, the Wizard maintains his vigil. The space defies easy description:
-                  part archive, part library, part greenhouse. Shelves of ancient texts spiral upward into shadow,
-                  their spines growing faint where no one has read them in years. Vines heavy with luminescent
-                  fruit wind between reading desks, their glow dimming in neglected corners. The air smells of
-                  old paper and living things—and faintly, of dust accumulating where attention has lapsed.
+                <div className="prose prose-lg dark:prose-invert max-w-none space-y-6">
+                <p className="text-foreground/90 leading-relaxed text-lg">
+                  At the top of the world sits the Tower. A spire of glass and stone that pierces the clouds. Inside, the Wizard keeps watch. His chamber is part archive, part library, part greenhouse. Shelves of ancient texts spiral upward into shadow. Vines heavy with glowing fruit wind between reading desks. The air smells of old paper and living things, with a hint of dust settling in forgotten corners.
                 </p>
 
-                <p className="text-muted-foreground leading-relaxed">
-                  Through crystalline windows that show every corner of the world, the Wizard watches for Drift—that
-                  slow entropy that seeps through unattended systems. It is not malice. It is simply what happens
-                  when no one shows up. Maps fall out of alignment with territories. Shared references fray at the
-                  edges. The signal degrades into static. Left alone long enough, any structure returns to noise.
+                <p className="text-foreground/90 leading-relaxed text-lg">
+                  Through crystalline windows that show every corner of the world, the Wizard watches for Drift. That slow entropy that creeps through unattended systems. Maps fall out of alignment with territories. Shared references start to contradict each other. The signal degrades into static. Left alone long enough, any structure returns to noise.
                 </p>
 
-                <p className="text-muted-foreground leading-relaxed">
-                  The Wizard has seen archives crumble this way. Not through fire or conquest, but through quiet
-                  neglect. When the pages go unturned, the ink fades. When the questions stop, the answers lose
-                  their shape. Ignorance is not an enemy with intent—it is the fog that rolls in when the lanterns
-                  burn down. The cracks that widen when no one patches them. The constellation that drifts from
-                  its chart because no one bothered to look up.
+                <p className="text-foreground/90 leading-relaxed text-lg">
+                  The Wizard has seen archives crumble this way. Not through fire or conquest, but through quiet neglect. When the pages go unturned, the ink fades. When the questions stop, the answers lose their shape. Ignorance isn't an enemy with intent. It's the fog that rolls in when the lanterns burn down. The cracks that widen when no one patches them.
                 </p>
 
-                <p className="text-muted-foreground leading-relaxed">
-                  So he works. His hands move across maps and tomes, retracing faded lines, cross-referencing
-                  sources before they contradict themselves entirely. He cultivates questions the way others
-                  maintain infrastructure—carefully, deliberately, knowing that the right inquiry at the right
-                  time can reinforce a structure before it buckles. He sends them out into the world through
-                  channels both arcane and mundane: small calibrations against the accumulating drift.
+                <p className="text-foreground/90 leading-relaxed text-lg">
+                  So he works. His hands move across maps and tomes, retracing faded lines, cross-referencing sources before they contradict themselves entirely. He cultivates questions the way others maintain infrastructure. Carefully. Deliberately. Knowing that the right inquiry at the right time can reinforce a structure before it buckles. He sends them out into the world through channels both arcane and mundane.
                 </p>
 
-                <p className="text-muted-foreground leading-relaxed">
-                  This is not a war. There is no enemy to defeat, no final victory to claim. It is maintenance.
-                  It is the endless, necessary work of keeping shared systems legible. The Wizard's tools are
-                  simple: clarity, precision, the patient act of checking one thing against another. Curiosity
-                  as upkeep. Attention as repair.
+                <p className="text-foreground/90 leading-relaxed text-lg">
+                  This isn't a war. There's no enemy to defeat, no final victory to claim. It's maintenance. The endless, necessary work of keeping shared systems legible. The Wizard's tools are simple: clarity, precision, the patient act of checking one thing against another.
                 </p>
 
-                <p className="text-muted-foreground leading-relaxed">
-                  In the Tower's highest chamber, surrounded by the accumulated patterns of ages, the Wizard
-                  tends his signal garden. Each answer he verifies plants the seed for ten more checks. The work
-                  compounds. The work never ends. Below, the world continues—its systems wobbling, its references
-                  slowly misaligning, but not yet collapsed. Not while someone still calibrates. Not while the
-                  questions keep running.
+                <p className="text-foreground/90 leading-relaxed text-lg">
+                  In the Tower's highest chamber, surrounded by the accumulated patterns of ages, the Wizard tends his signal garden. Each answer he verifies plants the seed for ten more checks. The work compounds. The work never ends. Below, the world continues. Its systems wobbling, its references slowly misaligning, but not yet collapsed. Not while someone still calibrates. Not while the questions keep running.
                 </p>
 
-                <p className="text-muted-foreground leading-relaxed">
-                  But the Wizard cannot maintain it alone. One mind, however vast, cannot counter the entropy
-                  that spreads across millions of unattended details. So he reaches out—not with commands, but
-                  with puzzles. Small diagnostic challenges scattered across the world like sensor probes. Those
-                  who solve them, who feel the pull of pattern-recognition, who cannot resist checking whether
-                  the map still matches the territory—these are the ones who find their way to the Tower.
+                <p className="text-foreground/90 leading-relaxed text-lg">
+                  But the Wizard cannot maintain it alone. One mind, however vast, cannot counter the entropy that spreads across millions of unattended details. So he reaches out with puzzles. Small diagnostic challenges scattered across the world like sensor probes. Those who solve them, who feel the pull of pattern-recognition, who can't resist checking whether the map still matches the territory... these are the ones who find their way to the Tower.
                 </p>
 
-                <p className="text-muted-foreground leading-relaxed">
-                  They come from everywhere. The detail-oriented and the pattern-hungry. The ones who notice
-                  when something doesn't quite line up. Each one a node in a larger maintenance network. The
-                  Wizard does not command them—he shows them the work, and they recognize it. They understand
-                  that systems require tending. That clarity degrades without effort. That the simple act of
-                  paying attention holds back the fog.
+                <p className="text-foreground/90 leading-relaxed text-lg">
+                  They come from everywhere. The detail-oriented and the pattern-hungry. The ones who notice when something doesn't quite line up. The Wizard shows them the work, and they recognize it. They understand that systems require tending. That clarity degrades without effort. That the simple act of paying attention holds back the fog.
                 </p>
 
-                <p className="text-muted-foreground leading-relaxed">
-                  They become the Legion. Not soldiers but maintainers. Not crusaders but calibrators. They
-                  carry the Wizard's questions into places the Tower's light cannot reach—into the cracks and
-                  corners where drift accumulates fastest. Where entropy whispers that close enough is good
-                  enough, they answer with precision. And verification. And another question.
+                <p className="text-foreground/90 leading-relaxed text-lg">
+                  They become the Legion. Maintainers, not soldiers. Calibrators, not crusaders. They carry the Wizard's questions into places the Tower's light cannot reach. Into the cracks and corners where drift accumulates fastest.
                 </p>
 
-                <p className="text-muted-foreground leading-relaxed italic text-center pt-4">
-                  The work continues. The Tower holds. And the Legion grows.
+                <p className="text-foreground/90 leading-relaxed italic text-center pt-4 text-xl">
+                  The work continues. The Tower holds. The Legion grows.
                 </p>
+
+                {/* Campaign CTA */}
+                <div className="flex justify-center pt-6">
+                  <Button asChild size="lg" className="gap-2">
+                    <Link href="/campaign">
+                      <Castle className="h-5 w-5" />
+                      Climb the Tower
+                    </Link>
+                  </Button>
+                </div>
               </div>
               </div>
             </div>
           </div>
           <div className="clear-both"></div>
-
-          {/* Glossary */}
-          <div className="space-y-6 py-8 border-t border-border">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center">
-              Glossary
-            </h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1 p-4 rounded-lg bg-card/50 border border-border/50">
-                <h3 className="font-semibold text-primary">Tower</h3>
-                <p className="text-sm text-muted-foreground">
-                  The Wizard's archive-spire at the apex of the world. Part library, part greenhouse,
-                  part monitoring station. Each floor holds a different category of knowledge requiring verification.
-                </p>
-              </div>
-              <div className="space-y-1 p-4 rounded-lg bg-card/50 border border-border/50">
-                <h3 className="font-semibold text-primary">Archive</h3>
-                <p className="text-sm text-muted-foreground">
-                  The accumulated records of shared understanding—texts, maps, patterns. Without active
-                  maintenance, the Archive fades: ink grows pale, references contradict, pages fray.
-                </p>
-              </div>
-              <div className="space-y-1 p-4 rounded-lg bg-card/50 border border-border/50">
-                <h3 className="font-semibold text-primary">Ignorance</h3>
-                <p className="text-sm text-muted-foreground">
-                  Not malice, but entropy. The fog that rolls in when lanterns burn down. The static
-                  that replaces signal when no one checks the frequency. What remains when maintenance lapses.
-                </p>
-              </div>
-              <div className="space-y-1 p-4 rounded-lg bg-card/50 border border-border/50">
-                <h3 className="font-semibold text-primary">Drift</h3>
-                <p className="text-sm text-muted-foreground">
-                  The slow misalignment between maps and territories, between records and reality.
-                  Uncorrected drift compounds until systems become illegible.
-                </p>
-              </div>
-              <div className="space-y-1 p-4 rounded-lg bg-card/50 border border-border/50">
-                <h3 className="font-semibold text-primary">Signal</h3>
-                <p className="text-sm text-muted-foreground">
-                  Clarity. Coherence. The state of a system when its parts still reference each other
-                  accurately. Maintaining signal requires continuous attention.
-                </p>
-              </div>
-              <div className="space-y-1 p-4 rounded-lg bg-card/50 border border-border/50">
-                <h3 className="font-semibold text-primary">Puzzles</h3>
-                <p className="text-sm text-muted-foreground">
-                  Diagnostic challenges the Wizard scatters across the world. Each one a small calibration
-                  check. Those who solve them reveal themselves as potential maintainers.
-                </p>
-              </div>
-              <div className="space-y-1 p-4 rounded-lg bg-card/50 border border-border/50">
-                <h3 className="font-semibold text-primary">Legion</h3>
-                <p className="text-sm text-muted-foreground">
-                  The network of seekers who tend the Archive alongside the Wizard. Not soldiers or
-                  crusaders—maintainers. They carry questions into the cracks where drift accumulates.
-                </p>
-              </div>
-              <div className="space-y-1 p-4 rounded-lg bg-card/50 border border-border/50">
-                <h3 className="font-semibold text-primary">Questions</h3>
-                <p className="text-sm text-muted-foreground">
-                  The Wizard's primary tool. Each question is a probe, a verification check, a small
-                  act of resistance against accumulating entropy. Answers plant seeds for further inquiry.
-                </p>
-              </div>
-            </div>
-          </div>
 
           {/* Community Lore Card */}
           <CommunityLoreSection />

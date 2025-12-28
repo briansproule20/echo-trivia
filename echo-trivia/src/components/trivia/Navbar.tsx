@@ -61,6 +61,11 @@ export function Navbar() {
     setMounted(true);
   }, []);
 
+  // Hide navbar on campaign page
+  if (pathname === "/campaign") {
+    return null;
+  }
+
   // Use the actual theme value (not 'system') for custom themes
   const currentTheme = mounted ? theme : undefined;
 

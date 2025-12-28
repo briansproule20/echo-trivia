@@ -194,6 +194,10 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
     });
   };
 
+  const handleClick = () => {
+    router.push("/campaign");
+  };
+
   return (
     <div
       ref={cardRef}
@@ -206,6 +210,7 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
+      onClick={handleClick}
     >
       {/* Shooting Stars and Stars Background */}
       <ShootingStars />
@@ -303,8 +308,15 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
 
             {/* Button */}
             <div className="pt-2">
-              <button className="group/btn relative overflow-hidden rounded-full border border-border bg-background px-8 py-3 text-sm font-medium transition-all hover:scale-105 opacity-60 cursor-not-allowed">
-                <span className="relative z-10">Adventure Awaits</span>
+              <button className="group/btn relative overflow-hidden rounded-full border border-border bg-background px-8 py-3 text-sm font-medium transition-all hover:scale-105 hover:border-primary/50">
+                <span className="relative z-10">Approach the Tower</span>
+                {/* Border beams on hover */}
+                <span className="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-500 group-hover/btn:opacity-100">
+                  <span className="absolute inset-[-1px] rounded-full blur-[0.5px] animate-[spin_6s_linear_infinite]" style={{
+                    background: 'conic-gradient(from 0deg, transparent 0%, transparent 15%, var(--primary) 25%, transparent 35%, transparent 50%, transparent 65%, var(--primary) 75%, transparent 85%, transparent 100%)'
+                  }} />
+                  <span className="absolute inset-[1px] rounded-full bg-background" />
+                </span>
               </button>
             </div>
           </div>

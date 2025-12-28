@@ -10,7 +10,7 @@ import { Illustration } from "@/components/ui/glowing-stars";
 import { ShootingStars } from "@/components/ui/shooting-stars";
 import { StarsBackground } from "@/components/ui/stars-background";
 import { InfiniteScrollBackground } from "@/components/ui/infinite-scroll-background";
-import { Calendar, Sparkles, Zap, Lock, Castle, Trophy, Star, Swords, LayoutGrid } from "lucide-react";
+import { Calendar, Sparkles, Zap, Lock, Castle, Trophy, Swords, LayoutGrid } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface GameModeCardProps {
@@ -239,10 +239,9 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
                     <Castle className="h-8 w-8 text-primary" />
                   </div>
                 </div>
-                <div className="flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary">
-                  <Star className="h-3 w-3" />
+                <Badge variant="default" className="rounded-full px-3 py-1 text-xs font-medium">
                   Beta
-                </div>
+                </Badge>
               </div>
 
               {/* Title */}
@@ -259,10 +258,10 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
             {/* Description */}
             <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
               <p>
-                The Wizard summons you to his Tower—a spire where knowledge is cultivated like rare fruit and questions grow wild between ancient texts. As you answer correctly, you ascend. Each floor brings a <span className="text-foreground font-medium">new category challenge</span> drawn from his vast archive.
+                The Wizard awaits atop his Tower. Begin with his introduction, then climb through three tiers: the <span className="text-foreground font-medium">Lower Archives</span>, the <span className="text-foreground font-medium">Middle Stacks</span>, and the <span className="text-foreground font-medium">Upper Sanctum</span>.
               </p>
               <p>
-                The climb is endless. The questions, relentless. <span className="text-foreground font-medium">How high can you ascend</span> before Ignorance catches up? Master categories, earn achievements, and prove yourself worthy of joining the Legion.
+                Each floor is a new category. Answer 3 of 5 questions correctly to advance. Over 1,000 floors await. How high can you climb?
               </p>
             </div>
 
@@ -270,20 +269,11 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <div className="flex items-start gap-2">
                 <div className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary/10">
-                  <Trophy className="h-3 w-3 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-foreground">25 New Achievements</p>
-                  <p className="text-xs text-muted-foreground">Milestone rewards & category mastery</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <div className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary/10">
                   <Castle className="h-3 w-3 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-foreground">Infinite Tower</p>
-                  <p className="text-xs text-muted-foreground">New floors unlock as you climb</p>
+                  <p className="text-xs font-medium text-foreground">1,000+ Floors</p>
+                  <p className="text-xs text-muted-foreground">Three tiers of increasing difficulty</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
@@ -291,8 +281,17 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
                   <Sparkles className="h-3 w-3 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-foreground">Progressive Difficulty</p>
-                  <p className="text-xs text-muted-foreground">Questions get harder as you climb</p>
+                  <p className="text-xs font-medium text-foreground">5 Questions Per Floor</p>
+                  <p className="text-xs text-muted-foreground">Score 3/5 to unlock the next floor</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary/10">
+                  <Trophy className="h-3 w-3 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-foreground">Track Your Progress</p>
+                  <p className="text-xs text-muted-foreground">Attempts, best scores, pass status</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
@@ -300,8 +299,8 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
                   <Zap className="h-3 w-3 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-foreground">Dynamic Categories</p>
-                  <p className="text-xs text-muted-foreground">Each floor brings new challenges</p>
+                  <p className="text-xs font-medium text-foreground">Retry Anytime</p>
+                  <p className="text-xs text-muted-foreground">No penalty for falling, climb again</p>
                 </div>
               </div>
             </div>

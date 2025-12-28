@@ -166,7 +166,7 @@ export default function HomePage() {
 
         {/* Beta Game Modes CTA */}
         <div className="max-w-3xl mx-auto mb-10">
-          <div className="relative rounded-lg border border-border px-6 py-4">
+          <Card className="relative px-6 py-4">
             <Badge className="absolute -top-2.5 left-4 text-xs">
               Beta
             </Badge>
@@ -175,19 +175,19 @@ export default function HomePage() {
                 Help me test new game modes!
               </p>
               <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-end">
-                <Button asChild variant="outline" size="sm" className="bg-background">
+                <Button asChild variant="outline" size="sm">
                   <Link href="/faceoff">
                     <Swords className="mr-1.5 h-3.5 w-3.5" />
                     Face-Off
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="sm" className="bg-background">
+                <Button asChild variant="outline" size="sm">
                   <Link href="/survival">
                     <Flame className="mr-1.5 h-3.5 w-3.5" />
                     Survival
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="sm" className="bg-background">
+                <Button asChild variant="outline" size="sm">
                   <Link href="/jeopardy">
                     <LayoutGrid className="mr-1.5 h-3.5 w-3.5" />
                     Jeopardy
@@ -195,7 +195,7 @@ export default function HomePage() {
                 </Button>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Mini Leaderboard */}

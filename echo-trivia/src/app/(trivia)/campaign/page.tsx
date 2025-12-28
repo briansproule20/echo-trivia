@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { ArrowLeft, BookOpen, LogIn } from "lucide-react";
+import { useEcho } from "@merit-systems/echo-react-sdk";
 
 // Floating arcane runes that drift upward
 const ARCANE_GLYPHS = ["ᚠ", "ᚢ", "ᚦ", "ᚨ", "ᚱ", "ᚲ", "ᚷ", "ᚹ", "ᚺ", "ᚾ", "ᛁ", "ᛃ", "ᛈ", "ᛉ", "ᛊ", "ᛏ", "ᛒ", "ᛖ", "ᛗ", "ᛚ", "ᛜ", "ᛞ", "ᛟ"];
@@ -155,10 +156,18 @@ function DustParticles() {
 
 export default function CampaignPage() {
   const [mounted, setMounted] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const echo = useEcho();
+  const isAuthenticated = !!echo.user;
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleSignIn = () => {
+    setIsSigningIn(true);
+    echo.signIn();
+  };
 
   // Generate random positions for floating runes
   const runePositions = [...Array(12)].map((_, i) => ({
@@ -261,22 +270,41 @@ export default function CampaignPage() {
               The Wizard's Tower
             </h1>
 
-            {/* Enter Tower button */}
-            <div className="flex justify-center pt-2">
-              <Link
-                href="/campaign/levels"
-                className="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-amber-500/40 bg-amber-500/10 backdrop-blur-sm hover:bg-amber-500/20 hover:border-amber-500/60 transition-all text-amber-200 text-sm font-serif tracking-wide"
-              >
-                <span>Enter the Tower</span>
-                <motion.div
-                  className="w-2 h-2 rounded-full bg-amber-400"
-                  animate={{
-                    opacity: [0.6, 1, 0.6],
-                    scale: [1, 1.2, 1],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-              </Link>
+            {/* Enter Tower button or Sign In */}
+            <div className="flex flex-col items-center gap-3 pt-2">
+              {isAuthenticated ? (
+                <Link
+                  href="/campaign/levels"
+                  className="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-amber-500/40 bg-amber-500/10 backdrop-blur-sm hover:bg-amber-500/20 hover:border-amber-500/60 transition-all text-amber-200 text-sm font-serif tracking-wide"
+                >
+                  <span>Enter the Tower</span>
+                  <motion.div
+                    className="w-2 h-2 rounded-full bg-amber-400"
+                    animate={{
+                      opacity: [0.6, 1, 0.6],
+                      scale: [1, 1.2, 1],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                </Link>
+              ) : (
+                <>
+                  <button
+                    onClick={handleSignIn}
+                    disabled={isSigningIn}
+                    className="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-amber-500/40 bg-amber-500/10 backdrop-blur-sm hover:bg-amber-500/20 hover:border-amber-500/60 transition-all text-amber-200 text-sm font-serif tracking-wide disabled:opacity-50"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    <span>{isSigningIn ? "Connecting..." : "Sign in with Echo"}</span>
+                  </button>
+                  <p
+                    className="text-xs text-amber-200/50 font-serif"
+                    style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}
+                  >
+                    Sign in to begin your journey
+                  </p>
+                </>
+              )}
             </div>
           </motion.div>
         </div>

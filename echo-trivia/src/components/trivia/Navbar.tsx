@@ -139,7 +139,6 @@ export function Navbar() {
                     </motion.button>
                   </SheetTitle>
                 </SheetHeader>
-                <audio ref={audioRef} src="/skyrim-i-used-to-be-an-adventure-like-you.mp3" />
 
                 {/* Theme Toggle - Fixed at top, outside scrollable area */}
                 <div className="flex items-center justify-between px-3 py-2 border-b mt-4 shrink-0" suppressHydrationWarning>
@@ -365,6 +364,9 @@ export function Navbar() {
 
       {/* Referral banner for authenticated users */}
       {isAuthenticated && pathname !== "/faqs-and-docs" && <ReferralBanner />}
+
+      {/* Audio for compass easter egg - outside Sheet so it persists */}
+      <audio ref={audioRef} src="/skyrim-i-used-to-be-an-adventure-like-you.mp3" />
     </>
   );
 }

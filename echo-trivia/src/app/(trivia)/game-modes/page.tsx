@@ -241,7 +241,7 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
                 </div>
                 <div className="flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary">
                   <Star className="h-3 w-3" />
-                  Coming Soon
+                  Beta
                 </div>
               </div>
 

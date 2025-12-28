@@ -61,8 +61,8 @@ export function Navbar() {
     setMounted(true);
   }, []);
 
-  // Hide navbar on campaign page
-  if (pathname === "/campaign") {
+  // Hide navbar on campaign pages
+  if (pathname?.startsWith("/campaign")) {
     return null;
   }
 

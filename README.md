@@ -40,7 +40,7 @@ Trivia Wizard uses **two generation modes**:
 
 ### 1. Recipe System (Preset Categories Only)
 
-For the 154 preset categories (History, Science, etc.), quizzes are generated deterministically:
+For the 400+ preset categories (History, Science, etc.), quizzes are generated deterministically:
 
 **Seed Generation:**
 - **Daily Quizzes**: `SHA256(date + category)` → Same recipe every time for that day/category
@@ -76,7 +76,7 @@ For custom user-entered topics (e.g., "Quantum Physics" or "1980s Movies"):
 
 ## Categories
 
-### Preset Categories (151)
+### Preset Categories (~400 and growing!)
 History, Science, Geography, Literature, Art & Culture, Music, Movies & TV, Sports, Technology, Food & Drink, Mythology, Politics, Nature & Animals, Mathematics, Philosophy, Video Games, Space & Astronomy, Medicine & Health, Economics, Language & Linguistics & More!
 
 **Note:** Custom categories can be anything you want!

@@ -1,11 +1,21 @@
 # Trivia Wizard 🧙‍♂️
 
-An AI-powered trivia platform built with Next.js, Echo billing integration, and the Vercel AI SDK.
+## Summon your inner genius.
+
+Daily trivia challenges, infinite customizable practice, and more.
+An AI trivia platform built with Next.js, Merit System's Echo billing integration, and the Vercel AI SDK.
+
+## Game Modes
+
+- **Daily Quiz** - One deterministic daily challenge per day with category rotation (EST timezone)
+- **Freeplay Mode** - AI-powered quizzes with infinite categories, replayability
+- **Faceoff**- Challenge your friends to a trivia battle3
+- **Survival** - How many can you answer correctly in a row?
+- **Jeopardy** - Our take on the most famous trivia game ever played... how high can you score?
+- **Campaign** - Play through our entire array of categories at your own pace, aiding the Trivia Wizard in his battle against the Drift
 
 ## Features
 
-- **Daily Quiz** - One deterministic daily challenge per day with category rotation (EST timezone)
-- **Practice Mode** - Unlimited AI-powered quizzes with infinite categories
 - **Quiz History** - Review up to 20 past quiz sessions with full answer details
 - **Results & Ranking** - Earn performance titles (120+ unique ranks across 6 tiers) and share your results
 - **Answer Review** - Detailed explanations for every question with correct answer display

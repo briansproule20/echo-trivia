@@ -9,7 +9,7 @@ An AI trivia platform built with Next.js, Merit System's Echo billing integratio
 
 - **Daily Quiz** - One deterministic daily challenge per day with category rotation (EST timezone)
 - **Freeplay Mode** - AI-powered quizzes with infinite categories, replayability
-- **Faceoff**- Challenge your friends to a trivia battle3
+- **Faceoff**- Challenge your friends to a trivia battle, facing the same 5 or 10 questions
 - **Survival** - How many can you answer correctly in a row?
 - **Jeopardy** - Our take on the most famous trivia game ever played... how high can you score?
 - **Campaign** - Play through our entire array of categories at your own pace, aiding the Trivia Wizard in his battle against the Drift

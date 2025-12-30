@@ -331,36 +331,25 @@ export default function ProfilePage() {
             </p>
           </div>
 
-          {/* Stats Overview Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="pt-4 text-center">
-                <Trophy className="h-6 w-6 text-primary mx-auto mb-2" />
-                <div className="text-2xl font-bold">{stats?.total_quizzes || 0}</div>
-                <div className="text-xs text-muted-foreground">Quizzes</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-4 text-center">
-                <Target className="h-6 w-6 text-green-500 mx-auto mb-2" />
-                <div className="text-2xl font-bold">{stats?.accuracy_rate.toFixed(1) || 0}%</div>
-                <div className="text-xs text-muted-foreground">Accuracy</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-4 text-center">
-                <Flame className="h-6 w-6 text-orange-500 mx-auto mb-2" />
-                <div className="text-2xl font-bold">{streak?.current_streak || 0}</div>
-                <div className="text-xs text-muted-foreground">Day Streak</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-4 text-center">
-                <Clock className="h-6 w-6 text-blue-500 mx-auto mb-2" />
-                <div className="text-2xl font-bold">{formatTime(stats?.total_time_played || 0)}</div>
-                <div className="text-xs text-muted-foreground">Time Played</div>
-              </CardContent>
-            </Card>
+          {/* Key Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+            <div className="text-center space-y-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Quizzes</p>
+              <p className="text-4xl font-bold tabular-nums">{stats?.total_quizzes || 0}</p>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Accuracy</p>
+              <p className="text-4xl font-bold tabular-nums">{stats?.accuracy_rate.toFixed(1) || 0}%</p>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Streak</p>
+              <p className="text-4xl font-bold tabular-nums text-orange-500">{streak?.current_streak || 0}</p>
+              <p className="text-xs text-muted-foreground">Best: {streak?.longest_streak || 0} days</p>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Time Played</p>
+              <p className="text-4xl font-bold tabular-nums">{formatTime(stats?.total_time_played || 0)}</p>
+            </div>
           </div>
 
           {/* Tabs for Statistics and Achievements */}

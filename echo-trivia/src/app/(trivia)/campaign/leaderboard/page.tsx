@@ -55,13 +55,13 @@ export default function TowerLeaderboardPage() {
   };
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen md:min-h-[300vh] relative">
       {/* Background Image */}
       <div
-        className="fixed inset-0 bg-cover bg-top bg-no-repeat"
+        className="fixed md:absolute inset-0 bg-cover md:bg-contain bg-top bg-no-repeat bg-background"
         style={{ backgroundImage: 'url(/trivwiztower.png)' }}
       />
-      <div className="fixed inset-0 bg-background/40 backdrop-blur-[2px]" />
+      <div className="fixed md:absolute inset-0 bg-background/40 backdrop-blur-[2px]" />
 
       {/* Content */}
       <div className="relative container mx-auto px-4 py-6 sm:py-12">

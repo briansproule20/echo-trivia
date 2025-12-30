@@ -102,10 +102,9 @@ export default function HistoryPage() {
       resultsUrl = `/survival/results/${session.id}`;
     } else if (isJeopardy) {
       resultsUrl = `/jeopardy/results/${session.id}`;
-    } else if (isCampaign && session.tower_attempt_id) {
-      resultsUrl = `/campaign/results/${session.tower_attempt_id}`;
     } else if (isCampaign) {
-      resultsUrl = `/campaign/levels`; // Fallback for old sessions without attempt ID
+      // Use tower_attempt_id if available, otherwise use session.id (API supports both)
+      resultsUrl = `/campaign/results/${session.tower_attempt_id || session.id}`;
     } else {
       resultsUrl = `/results/${session.id}?cloud=true`;
     }

@@ -278,10 +278,9 @@ export default function HomePage() {
                 };
 
                 const handleClick = () => {
-                  if (isCampaign && session.tower_attempt_id) {
-                    router.push(`/campaign/results/${session.tower_attempt_id}`);
-                  } else if (isCampaign) {
-                    router.push("/campaign/levels");
+                  if (isCampaign) {
+                    // Use tower_attempt_id if available, otherwise use session.id (API supports both)
+                    router.push(`/campaign/results/${session.tower_attempt_id || session.id}`);
                   } else {
                     handleViewResults(session.id, session.game_mode || "default");
                   }

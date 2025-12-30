@@ -415,7 +415,7 @@ export default function ProfilePage() {
                         </DialogHeader>
                         <div className="space-y-3 py-4 text-sm text-muted-foreground">
                           <p>
-                            Categories are tracked across all game modes, including Freeplay sessions and Daily Challenges.
+                            Categories are tracked across all game modes: Freeplay, Daily Challenges, Faceoff, and Campaign.
                           </p>
                         </div>
                       </DialogContent>

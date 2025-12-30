@@ -34,7 +34,7 @@ import {
   Scatter,
   ZAxis,
 } from "recharts";
-import { Trophy, Target, Flame, Clock, Award, HelpCircle, Shuffle, Zap, ChevronDown, Castle } from "lucide-react";
+import { Trophy, Target, Flame, Clock, Award, HelpCircle, Shuffle, Zap, ChevronDown, Castle, Grid3X3, Swords } from "lucide-react";
 import type { UserStats, UserAchievement, DailyStreak, QuizSession, Achievement, SurvivalStats } from "@/lib/supabase-types";
 import { CATEGORIES } from "@/lib/types";
 import {
@@ -122,6 +122,22 @@ export default function DashboardPage() {
     accuracy: number;
     hasStarted: boolean;
   } | null>(null);
+  const [jeopardyStats, setJeopardyStats] = useState<{
+    best_score_3: number | null;
+    best_score_5: number | null;
+    rank_3: number | null;
+    rank_5: number | null;
+    total_games: number;
+    total_questions_answered: number;
+    total_questions_correct: number;
+    total_time_played: number;
+  } | null>(null);
+  const [faceoffStats, setFaceoffStats] = useState<{
+    challenges_created: number;
+    challenges_played: number;
+    total_plays_received: number;
+    avg_score: number;
+  } | null>(null);
 
   useEffect(() => {
     if (echo.user?.id) {
@@ -199,6 +215,47 @@ export default function DashboardPage() {
         const data = await towerAchievementsRes.json();
         setTowerAchievements(data.achievements || []);
       }
+
+      // Fetch jeopardy stats
+      const jeopardyRes = await fetch(`/api/jeopardy/stats?echo_user_id=${echo.user.id}`);
+      if (jeopardyRes.ok) {
+        const data = await jeopardyRes.json();
+        setJeopardyStats(data);
+      }
+
+      // Fetch faceoff stats - created challenges
+      const faceoffRes = await fetch(`/api/faceoff/my-challenges?echo_user_id=${echo.user.id}&filter=mine&limit=100`);
+      // Fetch faceoff stats - played challenges from quiz history
+      const faceoffPlayedRes = await fetch(`/api/quiz/history?echo_user_id=${echo.user.id}&game_mode=faceoff&limit=100`);
+
+      let challengesCreated = 0;
+      let totalPlaysReceived = 0;
+      let challengesPlayed = 0;
+      let avgScore = 0;
+
+      if (faceoffRes.ok) {
+        const data = await faceoffRes.json();
+        const challenges = data.challenges || [];
+        challengesCreated = challenges.length;
+        totalPlaysReceived = challenges.reduce((sum: number, c: { times_played: number }) => sum + (c.times_played || 0), 0);
+      }
+
+      if (faceoffPlayedRes.ok) {
+        const data = await faceoffPlayedRes.json();
+        const sessions = data.sessions || [];
+        challengesPlayed = sessions.length;
+        if (sessions.length > 0) {
+          const totalScore = sessions.reduce((sum: number, s: { score_percentage: number }) => sum + (s.score_percentage || 0), 0);
+          avgScore = Math.round(totalScore / sessions.length);
+        }
+      }
+
+      setFaceoffStats({
+        challenges_created: challengesCreated,
+        challenges_played: challengesPlayed,
+        total_plays_received: totalPlaysReceived,
+        avg_score: avgScore,
+      });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -354,74 +411,189 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          {/* Survival Mode Stats */}
-          {survivalStats && survivalStats.total_runs > 0 && (
-            <Card className="border-2 border-primary/20">
+          {/* Game Modes */}
+          <div className="grid gap-4">
+            {/* Faceoff */}
+            <Link href="/faceoff">
+            <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-primary" />
-                    Endless Survival
-                  </CardTitle>
-                  <Badge variant="default" className="text-xs">Beta</Badge>
-                </div>
-                <CardDescription>Your survival mode performance</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Swords className="h-5 w-5 text-primary" />
+                  Faceoff
+                </CardTitle>
+                <CardDescription>
+                  Create and share challenges with friends
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center justify-center gap-1 text-2xl font-bold text-primary">
-                      <Flame className="h-5 w-5" />
-                      {survivalStats.mixed_best_streak}
+                {faceoffStats && (faceoffStats.challenges_created > 0 || faceoffStats.challenges_played > 0) ? (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold text-primary">
+                        {faceoffStats.challenges_created}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Created</div>
                     </div>
-                    <div className="text-xs text-muted-foreground">Best Mixed Streak</div>
-                    {survivalStats.mixed_rank && (
-                      <div className="text-xs text-muted-foreground">Rank #{survivalStats.mixed_rank}</div>
-                    )}
-                  </div>
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold">{survivalStats.total_runs}</div>
-                    <div className="text-xs text-muted-foreground">Total Runs</div>
-                  </div>
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold">{survivalStats.total_questions_survived}</div>
-                    <div className="text-xs text-muted-foreground">Questions Survived</div>
-                  </div>
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center justify-center gap-1 text-2xl font-bold">
-                      <Clock className="h-5 w-5" />
-                      {Math.floor(survivalStats.total_time_played / 60)}m
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold">
+                        {faceoffStats.challenges_played}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Played</div>
                     </div>
-                    <div className="text-xs text-muted-foreground">Time Survived</div>
-                  </div>
-                </div>
-
-                {survivalStats.category_bests.length > 0 && (
-                  <div className="mt-4 pt-4 border-t">
-                    <h4 className="text-sm font-medium mb-2">Category Bests</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {survivalStats.category_bests.slice(0, 5).map((cb) => (
-                        <Badge key={cb.category} variant="secondary" className="text-xs">
-                          {cb.category}: {cb.streak}
-                          {cb.rank && <span className="ml-1 opacity-60">#{cb.rank}</span>}
-                        </Badge>
-                      ))}
-                      {survivalStats.category_bests.length > 5 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{survivalStats.category_bests.length - 5} more
-                        </Badge>
-                      )}
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold">
+                        {faceoffStats.total_plays_received}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Plays Received</div>
                     </div>
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold">
+                        {faceoffStats.avg_score}%
+                      </div>
+                      <div className="text-xs text-muted-foreground">Avg Score</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-muted-foreground">
+                      Challenge friends to beat your score!
+                    </p>
                   </div>
                 )}
               </CardContent>
             </Card>
-          )}
+          </Link>
+
+          {/* Survival Mode Stats */}
+          <Link href="/survival">
+            <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-primary" />
+                  Endless Survival
+                </CardTitle>
+                <CardDescription>Your survival mode performance</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {survivalStats && survivalStats.total_runs > 0 ? (
+                  <>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                        <div className="flex items-center justify-center gap-1 text-2xl font-bold text-primary">
+                          <Flame className="h-5 w-5" />
+                          {survivalStats.mixed_best_streak}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Best Mixed Streak</div>
+                        {survivalStats.mixed_rank && (
+                          <div className="text-xs text-muted-foreground">Rank #{survivalStats.mixed_rank}</div>
+                        )}
+                      </div>
+                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold">{survivalStats.total_runs}</div>
+                        <div className="text-xs text-muted-foreground">Total Runs</div>
+                      </div>
+                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold">{survivalStats.total_questions_survived}</div>
+                        <div className="text-xs text-muted-foreground">Questions Survived</div>
+                      </div>
+                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                        <div className="flex items-center justify-center gap-1 text-2xl font-bold">
+                          <Clock className="h-5 w-5" />
+                          {Math.floor(survivalStats.total_time_played / 60)}m
+                        </div>
+                        <div className="text-xs text-muted-foreground">Time Survived</div>
+                      </div>
+                    </div>
+                    {survivalStats.category_bests.length > 0 && (
+                      <div className="mt-4 pt-4 border-t">
+                        <h4 className="text-sm font-medium mb-2">Category Bests</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {survivalStats.category_bests.slice(0, 5).map((cb) => (
+                            <Badge key={cb.category} variant="secondary" className="text-xs">
+                              {cb.category}: {cb.streak}
+                              {cb.rank && <span className="ml-1 opacity-60">#{cb.rank}</span>}
+                            </Badge>
+                          ))}
+                          {survivalStats.category_bests.length > 5 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{survivalStats.category_bests.length - 5} more
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-muted-foreground">
+                      Answer questions until you miss one!
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* Jeopardy */}
+          <Link href="/jeopardy">
+            <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                  <Grid3X3 className="h-5 w-5 text-primary" />
+                  Jeopardy
+                </CardTitle>
+                <CardDescription>
+                  Classic board-style trivia with wagering
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {jeopardyStats && jeopardyStats.total_games > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold text-primary">
+                        {jeopardyStats.best_score_3 !== null ? jeopardyStats.best_score_3.toLocaleString() : '-'}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Best (3-Cat)</div>
+                      {jeopardyStats.rank_3 && (
+                        <div className="text-xs text-muted-foreground">#{jeopardyStats.rank_3}</div>
+                      )}
+                    </div>
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold text-primary">
+                        {jeopardyStats.best_score_5 !== null ? jeopardyStats.best_score_5.toLocaleString() : '-'}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Best (5-Cat)</div>
+                      {jeopardyStats.rank_5 && (
+                        <div className="text-xs text-muted-foreground">#{jeopardyStats.rank_5}</div>
+                      )}
+                    </div>
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold">{jeopardyStats.total_games}</div>
+                      <div className="text-xs text-muted-foreground">Games Played</div>
+                    </div>
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold">
+                        {jeopardyStats.total_questions_answered > 0
+                          ? Math.round((jeopardyStats.total_questions_correct / jeopardyStats.total_questions_answered) * 100)
+                          : 0}%
+                      </div>
+                      <div className="text-xs text-muted-foreground">Accuracy</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-muted-foreground">
+                      Pick categories and wager on your knowledge!
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </Link>
 
           {/* Wizard's Tower Campaign */}
-          <div>
-            <Link href="/campaign">
-              <Card className="border-2 border-indigo-500/20 hover:border-indigo-500/40 transition-colors cursor-pointer">
+          <Link href="/campaign">
+            <Card className="border-2 border-indigo-500/20 hover:border-indigo-500/40 transition-colors cursor-pointer">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
@@ -501,8 +673,8 @@ export default function DashboardPage() {
                   </div>
                 )}
               </CardContent>
-              </Card>
-            </Link>
+            </Card>
+          </Link>
           </div>
 
           {/* Charts Row */}
@@ -1450,6 +1622,14 @@ export default function DashboardPage() {
                       diamond: achievement.unlocked ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-950/20' : 'border-gray-300 bg-gray-50 dark:bg-gray-900',
                     };
 
+                    // Progress for lifetime achievements
+                    let progress: number | null = null;
+                    if (!achievement.unlocked && achievement.id === 'pattern_seeker') {
+                      progress = Math.min(100, ((stats?.correct_answers || 0) / 1000) * 100);
+                    } else if (!achievement.unlocked && achievement.id === 'fog_dispeller') {
+                      progress = Math.min(100, ((stats?.correct_answers || 0) / 5000) * 100);
+                    }
+
                     return (
                       <div
                         key={achievement.id}
@@ -1470,6 +1650,11 @@ export default function DashboardPage() {
                               <Badge variant="secondary" className="text-xs leading-none">
                                 🔒
                               </Badge>
+                            )}
+                            {progress !== null && (
+                              <span className="text-xs text-muted-foreground">
+                                {progress.toFixed(0)}%
+                              </span>
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground leading-relaxed">

@@ -33,7 +33,7 @@ import {
   Scatter,
   ZAxis,
 } from "recharts";
-import { Trophy, Target, Flame, Clock, Award, HelpCircle, Shuffle, Zap, ChevronDown } from "lucide-react";
+import { Trophy, Target, Flame, Clock, Award, HelpCircle, Shuffle, Zap, ChevronDown, Castle } from "lucide-react";
 import type { UserStats, UserAchievement, DailyStreak, QuizSession, Achievement, SurvivalStats } from "@/lib/supabase-types";
 import { CATEGORIES } from "@/lib/types";
 import {
@@ -98,6 +98,20 @@ export default function DashboardPage() {
   const [dailyActivityMap, setDailyActivityMap] = useState<Record<string, { count: number; avgScore: number; totalScore: number }>>({});
   const [survivalStats, setSurvivalStats] = useState<SurvivalStats | null>(null);
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
+  const [towerProgress, setTowerProgress] = useState<{
+    currentFloor: number;
+    highestFloor: number;
+    tier: number;
+    tierName: string;
+    difficulty: string;
+    category: string;
+    totalFloors: number;
+    perfectFloors: number;
+    totalQuestions: number;
+    totalCorrect: number;
+    accuracy: number;
+    hasStarted: boolean;
+  } | null>(null);
 
   useEffect(() => {
     if (echo.user?.id) {
@@ -160,6 +174,13 @@ export default function DashboardPage() {
       if (survivalRes.ok) {
         const data = await survivalRes.json();
         setSurvivalStats(data);
+      }
+
+      // Fetch tower progress
+      const towerRes = await fetch(`/api/tower/progress?echo_user_id=${echo.user.id}`);
+      if (towerRes.ok) {
+        const data = await towerRes.json();
+        setTowerProgress(data);
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -379,6 +400,91 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           )}
+
+          {/* Wizard's Tower Campaign */}
+          <a href="/campaign">
+            <Card className="border-2 border-indigo-500/20 hover:border-indigo-500/40 transition-colors cursor-pointer">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Castle className="h-5 w-5 text-indigo-500" />
+                    The Wizard&apos;s Tower
+                  </CardTitle>
+                  {towerProgress?.hasStarted && (
+                    <Badge variant="secondary" className="text-xs capitalize">
+                      {towerProgress.difficulty}
+                    </Badge>
+                  )}
+                </div>
+                <CardDescription>
+                  {towerProgress?.hasStarted
+                    ? towerProgress.tierName
+                    : "Ascend the tower by mastering trivia across all categories"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center justify-center gap-1 text-2xl font-bold text-indigo-500">
+                      <Castle className="h-5 w-5" />
+                      {towerProgress?.currentFloor || 1}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Current Floor</div>
+                    <div className="text-xs text-muted-foreground">
+                      of {towerProgress?.totalFloors || 1008}
+                    </div>
+                  </div>
+                  <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <div className="text-2xl font-bold">{towerProgress?.highestFloor || 1}</div>
+                    <div className="text-xs text-muted-foreground">Highest Floor</div>
+                  </div>
+                  <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <div className="text-2xl font-bold">{towerProgress?.perfectFloors || 0}</div>
+                    <div className="text-xs text-muted-foreground">Perfect Floors</div>
+                  </div>
+                  <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <div className="text-2xl font-bold">{towerProgress?.accuracy || 0}%</div>
+                    <div className="text-xs text-muted-foreground">Accuracy</div>
+                  </div>
+                </div>
+
+                {towerProgress?.hasStarted && (
+                  <div className="mt-4 pt-4 border-t">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Next Category:</span>
+                      <Badge variant="outline">{towerProgress.category}</Badge>
+                    </div>
+                    <div className="mt-2">
+                      <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                        <span>Tier {towerProgress.tier} Progress</span>
+                        <span>
+                          {((towerProgress.currentFloor - 1) % Math.ceil(towerProgress.totalFloors / 3)) + 1} / {Math.ceil(towerProgress.totalFloors / 3)}
+                        </span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <div
+                          className="bg-indigo-500 h-2 rounded-full transition-all"
+                          style={{
+                            width: `${((((towerProgress.currentFloor - 1) % Math.ceil(towerProgress.totalFloors / 3)) + 1) / Math.ceil(towerProgress.totalFloors / 3)) * 100}%`
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!towerProgress?.hasStarted && (
+                  <div className="mt-4 pt-4 border-t text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Complete 5-question floors to climb the tower.
+                      <br />
+                      Score 3/5 or better to advance!
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </a>
 
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Trophy, Target, Flame, Clock, Award, BarChart3, ArrowRight, Swords, Zap, Star, Castle, HelpCircle } from "lucide-react";
+import { Trophy, Target, Flame, Clock, Award, BarChart3, ArrowRight, Swords, Zap, Star, Castle, HelpCircle, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import type { UserStats, UserAchievement, DailyStreak, SurvivalStats, QuizSession } from "@/lib/supabase-types";
 import type { JeopardyStats } from "@/app/api/jeopardy/stats/route";
@@ -26,6 +26,32 @@ export default function ProfilePage() {
   const [jeopardyStats, setJeopardyStats] = useState<JeopardyStats | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categoryQuizzes, setCategoryQuizzes] = useState<QuizSession[]>([]);
+  const [towerProgress, setTowerProgress] = useState<{
+    currentFloor: number;
+    highestFloor: number;
+    tier: number;
+    tierName: string;
+    totalFloors: number;
+    hasStarted: boolean;
+  } | null>(null);
+  const [towerAchievements, setTowerAchievements] = useState<{
+    achievements: Array<{
+      id: string;
+      name: string;
+      description: string;
+      lore_text: string;
+      category: string;
+      icon: string;
+      tier: string;
+      is_hidden: boolean;
+      unlocked: boolean;
+      earned_at: string | null;
+      floor_earned: number | null;
+    }>;
+    unlockedCount: number;
+    totalCount: number;
+  } | null>(null);
+  const [towerAchievementsExpanded, setTowerAchievementsExpanded] = useState(false);
 
   useEffect(() => {
     if (echo.user?.id) {
@@ -81,6 +107,20 @@ export default function ProfilePage() {
       if (jeopardyRes.ok) {
         const data = await jeopardyRes.json();
         setJeopardyStats(data);
+      }
+
+      // Fetch tower progress
+      const towerRes = await fetch(`/api/tower/progress?echo_user_id=${echo.user.id}`);
+      if (towerRes.ok) {
+        const data = await towerRes.json();
+        setTowerProgress(data);
+      }
+
+      // Fetch tower achievements
+      const towerAchievementsRes = await fetch(`/api/tower/achievements?echo_user_id=${echo.user.id}`);
+      if (towerAchievementsRes.ok) {
+        const data = await towerAchievementsRes.json();
+        setTowerAchievements(data);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -289,22 +329,35 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            <Card className="opacity-60">
-              <CardHeader className="pb-2 sm:pb-3">
-                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
-                  Campaign Level
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-2">
-                  <Castle className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-500" />
-                  <span className="text-2xl sm:text-3xl font-bold">-</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Coming soon
-                </p>
-              </CardContent>
-            </Card>
+            <Link href="/campaign">
+              <Card className="hover:bg-accent/50 transition-colors cursor-pointer">
+                <CardHeader className="pb-2 sm:pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+                      Tower Floor
+                    </CardTitle>
+                    {towerProgress?.hasStarted && (
+                      <Badge variant="secondary" className="text-xs">
+                        Tier {towerProgress.tier}
+                      </Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-2">
+                    <Castle className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-500" />
+                    <span className="text-2xl sm:text-3xl font-bold">
+                      {towerProgress?.currentFloor || 1}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {towerProgress?.hasStarted
+                      ? towerProgress.tierName
+                      : "Start your ascent"}
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
 
           {/* Dashboard CTA */}
@@ -516,8 +569,213 @@ export default function ProfilePage() {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Lifetime Achievements - from tower achievements */}
+              {towerAchievements?.achievements && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg sm:text-xl">Lifetime Achievements</CardTitle>
+                    <p className="text-xs text-muted-foreground">
+                      Based on total correct answers across all game modes
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                      {towerAchievements.achievements
+                        .filter((a) => a.category === 'lifetime')
+                        .map((achievement) => {
+                          const tierColors = {
+                            bronze: achievement.unlocked
+                              ? 'border-amber-700 bg-amber-50 dark:bg-amber-950/20'
+                              : 'border-gray-300 bg-gray-50 dark:bg-gray-900',
+                            silver: achievement.unlocked
+                              ? 'border-gray-400 bg-gray-100 dark:bg-gray-800/40'
+                              : 'border-gray-300 bg-gray-50 dark:bg-gray-900',
+                            gold: achievement.unlocked
+                              ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20'
+                              : 'border-gray-300 bg-gray-50 dark:bg-gray-900',
+                            platinum: achievement.unlocked
+                              ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/20'
+                              : 'border-gray-300 bg-gray-50 dark:bg-gray-900',
+                          };
+
+                          return (
+                            <div
+                              key={achievement.id}
+                              className={`p-3 sm:p-4 rounded-lg border ${
+                                tierColors[achievement.tier as keyof typeof tierColors]
+                              } ${!achievement.unlocked && 'opacity-60'}`}
+                            >
+                              <div className="flex items-start gap-2 sm:gap-3">
+                                <div className={`text-2xl sm:text-3xl ${!achievement.unlocked && 'grayscale'}`}>
+                                  {achievement.icon}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                    <h3 className="font-semibold text-sm sm:text-base">{achievement.name}</h3>
+                                    <Badge variant="outline" className="text-xs">
+                                      {achievement.tier}
+                                    </Badge>
+                                    {!achievement.unlocked && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        🔒
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">
+                                    {achievement.description}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground/70 italic">
+                                    &quot;{achievement.lore_text}&quot;
+                                  </p>
+                                  {achievement.unlocked && achievement.earned_at && (
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      Earned {new Date(achievement.earned_at).toLocaleDateString()}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
           </Tabs>
+
+          {/* Campaign Achievements Dropdown */}
+          <Card className="border-indigo-500/20">
+            <button
+              onClick={() => setTowerAchievementsExpanded(!towerAchievementsExpanded)}
+              className="w-full"
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Castle className="h-5 w-5 text-indigo-500" />
+                    <CardTitle className="text-lg sm:text-xl">
+                      Campaign Achievements
+                    </CardTitle>
+                    <Badge variant="secondary" className="text-xs">
+                      {towerAchievements?.unlockedCount || 0}/{towerAchievements?.totalCount || 25}
+                    </Badge>
+                  </div>
+                  <ChevronDown
+                    className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
+                      towerAchievementsExpanded ? 'rotate-180' : ''
+                    }`}
+                  />
+                </div>
+              </CardHeader>
+            </button>
+            {towerAchievementsExpanded && (
+              <CardContent className="pt-0">
+                {towerAchievements?.achievements && towerAchievements.achievements.length > 0 ? (
+                  <div className="space-y-6">
+                    {/* Group by category */}
+                    {(['milestone', 'performance', 'mastery', 'special'] as const).map((category) => {
+                      const categoryAchievements = towerAchievements.achievements.filter(
+                        (a) => a.category === category
+                      );
+                      if (categoryAchievements.length === 0) return null;
+
+                      const categoryLabels = {
+                        milestone: { title: 'Milestone Achievements', subtitle: 'Markers of your ascent through the Archive' },
+                        performance: { title: 'Performance Achievements', subtitle: 'Proof of precision in the work' },
+                        mastery: { title: 'Category Mastery', subtitle: 'Deep knowledge in the specialized stacks' },
+                        special: { title: 'Special Condition', subtitle: 'Achievements for the dedicated and the daring' },
+                      };
+
+                      return (
+                        <div key={category}>
+                          <div className="mb-3">
+                            <h3 className="text-sm font-semibold text-foreground">
+                              {categoryLabels[category].title}
+                            </h3>
+                            <p className="text-xs text-muted-foreground italic">
+                              {categoryLabels[category].subtitle}
+                            </p>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {categoryAchievements.map((achievement) => {
+                              const tierColors = {
+                                bronze: achievement.unlocked
+                                  ? 'border-amber-700 bg-amber-50 dark:bg-amber-950/20'
+                                  : 'border-gray-300 bg-gray-50 dark:bg-gray-900',
+                                silver: achievement.unlocked
+                                  ? 'border-gray-400 bg-gray-100 dark:bg-gray-800/40'
+                                  : 'border-gray-300 bg-gray-50 dark:bg-gray-900',
+                                gold: achievement.unlocked
+                                  ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20'
+                                  : 'border-gray-300 bg-gray-50 dark:bg-gray-900',
+                                platinum: achievement.unlocked
+                                  ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/20'
+                                  : 'border-gray-300 bg-gray-50 dark:bg-gray-900',
+                              };
+
+                              return (
+                                <div
+                                  key={achievement.id}
+                                  className={`p-3 rounded-lg border ${
+                                    tierColors[achievement.tier as keyof typeof tierColors]
+                                  } ${!achievement.unlocked && 'opacity-60'}`}
+                                >
+                                  <div className="flex items-start gap-2">
+                                    <div className={`text-2xl ${!achievement.unlocked && 'grayscale'}`}>
+                                      {achievement.icon}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                        <h4 className="font-semibold text-sm">{achievement.name}</h4>
+                                        <Badge variant="outline" className="text-xs">
+                                          {achievement.tier}
+                                        </Badge>
+                                        {!achievement.unlocked && (
+                                          <Badge variant="secondary" className="text-xs">
+                                            🔒
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      <p className="text-xs text-muted-foreground mb-1">
+                                        {achievement.description}
+                                      </p>
+                                      <p className="text-xs text-muted-foreground/70 italic">
+                                        &quot;{achievement.lore_text}&quot;
+                                      </p>
+                                      {achievement.unlocked && achievement.earned_at && (
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                          Earned {new Date(achievement.earned_at).toLocaleDateString()}
+                                          {achievement.floor_earned && ` on Floor ${achievement.floor_earned}`}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Castle className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                    <p className="text-sm">
+                      Start climbing the Tower to earn campaign achievements!
+                    </p>
+                    <Link href="/campaign">
+                      <Button variant="outline" size="sm" className="mt-3">
+                        Begin Your Ascent
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </CardContent>
+            )}
+          </Card>
         </div>
       </div>
 

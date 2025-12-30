@@ -24,7 +24,7 @@ interface EloEntry {
 
 export default function LeaderboardPage() {
   const echo = useEcho();
-  const [period, setPeriod] = useState<'all' | 'daily' | 'weekly' | 'monthly'>('all');
+  const [period, setPeriod] = useState<'all' | 'daily' | 'weekly' | 'monthly'>('daily');
   const [rankBy, setRankBy] = useState<'avg_score' | 'total_correct' | 'total_quizzes'>('avg_score');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [userPosition, setUserPosition] = useState<LeaderboardEntry | null>(null);
@@ -146,10 +146,10 @@ export default function LeaderboardPage() {
               {/* Period Tabs */}
               <Tabs value={period} onValueChange={(v) => setPeriod(v as typeof period)}>
                 <TabsList className="grid w-full grid-cols-4 h-auto p-1">
-                  <TabsTrigger value="all" className="text-xs sm:text-sm py-1.5 sm:py-2">All Time</TabsTrigger>
-                  <TabsTrigger value="monthly" className="text-xs sm:text-sm py-1.5 sm:py-2">Monthly</TabsTrigger>
-                  <TabsTrigger value="weekly" className="text-xs sm:text-sm py-1.5 sm:py-2">Weekly</TabsTrigger>
                   <TabsTrigger value="daily" className="text-xs sm:text-sm py-1.5 sm:py-2">Daily</TabsTrigger>
+                  <TabsTrigger value="weekly" className="text-xs sm:text-sm py-1.5 sm:py-2">Weekly</TabsTrigger>
+                  <TabsTrigger value="monthly" className="text-xs sm:text-sm py-1.5 sm:py-2">Monthly</TabsTrigger>
+                  <TabsTrigger value="all" className="text-xs sm:text-sm py-1.5 sm:py-2">All Time</TabsTrigger>
                 </TabsList>
 
             <TabsContent value={period} className="mt-4 sm:mt-6">

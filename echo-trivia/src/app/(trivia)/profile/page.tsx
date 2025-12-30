@@ -8,7 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Trophy, Target, Flame, Clock, Award, BarChart3, Swords, Zap, Star, Castle, HelpCircle, Lock, CheckCircle2 } from "lucide-react";
+import {
+  Trophy, Target, Flame, Clock, Award, BarChart3, Swords, Zap, Star, Castle, HelpCircle, Lock, CheckCircle2,
+  Skull, Ghost, Cat, Shield, Glasses, TreePine, Crown, Anchor, Bird, Bug, Snowflake, Cherry, Pencil
+} from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import Link from "next/link";
 import type { UserStats, UserAchievement, DailyStreak, SurvivalStats, QuizSession } from "@/lib/supabase-types";
 import type { JeopardyStats } from "@/app/api/jeopardy/stats/route";
@@ -27,6 +31,27 @@ interface TowerAchievement {
   earned_at: string | null;
   floor_earned: number | null;
 }
+
+const AVATAR_ICONS = {
+  skull: Skull,
+  ghost: Ghost,
+  cat: Cat,
+  swords: Swords,
+  shield: Shield,
+  target: Target,
+  glasses: Glasses,
+  tree: TreePine,
+  flame: Flame,
+  zap: Zap,
+  crown: Crown,
+  anchor: Anchor,
+  bird: Bird,
+  bug: Bug,
+  snowflake: Snowflake,
+  cherry: Cherry,
+} as const;
+
+type AvatarId = keyof typeof AVATAR_ICONS;
 
 export default function ProfilePage() {
   const echo = useEcho();
@@ -54,6 +79,8 @@ export default function ProfilePage() {
     totalCount: number;
   } | null>(null);
   const [selectedAchievementCategory, setSelectedAchievementCategory] = useState<string>("all");
+  const [avatarId, setAvatarId] = useState<AvatarId>("ghost");
+  const [avatarOpen, setAvatarOpen] = useState(false);
 
   useEffect(() => {
     if (echo.user?.id) {
@@ -72,6 +99,9 @@ export default function ProfilePage() {
         const data = await profileRes.json();
         if (data.user) {
           setCurrentUsername(data.user.username || "");
+          if (data.user.avatar_id && data.user.avatar_id in AVATAR_ICONS) {
+            setAvatarId(data.user.avatar_id as AvatarId);
+          }
         }
       }
 
@@ -150,6 +180,26 @@ export default function ProfilePage() {
       }
     } catch (error) {
       console.error('Error fetching category quizzes:', error);
+    }
+  };
+
+  const handleAvatarUpdate = async (newAvatarId: AvatarId) => {
+    if (!echo.user?.id) return;
+
+    setAvatarId(newAvatarId);
+    setAvatarOpen(false);
+
+    try {
+      await fetch('/api/user/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          echo_user_id: echo.user.id,
+          avatar_id: newAvatarId,
+        }),
+      });
+    } catch (error) {
+      console.error('Error updating avatar:', error);
     }
   };
 
@@ -236,9 +286,40 @@ export default function ProfilePage() {
         <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
           {/* Page Header */}
           <div className="text-center mb-6 space-y-4">
-            <Badge variant="secondary" className="mb-2">
-              Profile
-            </Badge>
+            <Popover open={avatarOpen} onOpenChange={setAvatarOpen}>
+              <PopoverTrigger asChild>
+                <button className="group relative mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors">
+                  {(() => {
+                    const Icon = AVATAR_ICONS[avatarId];
+                    return <Icon className="h-8 w-8 text-primary" />;
+                  })()}
+                  <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Pencil className="h-4 w-4 text-white" />
+                  </div>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-3" align="center">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-center">Choose your icon</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {(Object.keys(AVATAR_ICONS) as AvatarId[]).map((id) => {
+                      const Icon = AVATAR_ICONS[id];
+                      return (
+                        <button
+                          key={id}
+                          onClick={() => handleAvatarUpdate(id)}
+                          className={`p-2 rounded-lg hover:bg-accent transition-colors ${
+                            avatarId === id ? 'ring-2 ring-primary bg-primary/10' : ''
+                          }`}
+                        >
+                          <Icon className="h-5 w-5 mx-auto" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
               Welcome back,{' '}
               <AnimatedGradientText>

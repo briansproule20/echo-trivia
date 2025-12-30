@@ -406,10 +406,12 @@ function TierHeader({ tier, isFirst }: { tier: typeof TIERS[number]; isFirst?: b
 
   return (
     <div className={`
-      sticky top-0 z-10 px-4 py-4 border-b
+      sticky top-0 z-20 px-4 py-4 border-b backdrop-blur-none
       ${colorStyles[tier.color as keyof typeof colorStyles]}
       ${!isFirst ? "mt-6" : ""}
-    `}>
+    `}
+    style={{ backgroundColor: tier.color === 'emerald' ? '#022c22' : tier.color === 'amber' ? '#451a03' : '#4c0519' }}
+    >
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-serif text-lg font-medium text-stone-100">{tier.name}</h2>

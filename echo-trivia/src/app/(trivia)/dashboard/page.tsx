@@ -133,8 +133,8 @@ export default function DashboardPage() {
     total_time_played: number;
   } | null>(null);
   const [faceoffStats, setFaceoffStats] = useState<{
-    challenges_created: number;
     challenges_played: number;
+    challenges_created: number;
     total_plays_received: number;
     avg_score: number;
   } | null>(null);
@@ -161,6 +161,8 @@ export default function DashboardPage() {
 
       // Fetch stats
       const statsRes = await fetch(`/api/user/stats?echo_user_id=${echo.user.id}`);
+      let faceoffCount = 0;
+      let faceoffAvgScore = 0;
       if (statsRes.ok) {
         const data = await statsRes.json();
         setStats(data.stats);
@@ -172,6 +174,8 @@ export default function DashboardPage() {
         setScoreTrend(data.scoreTrend || []);
         setDifficultyPerformance(data.difficultyPerformance || []);
         setDailyActivityMap(data.dailyActivityMap || {});
+        faceoffCount = data.faceoffCount || 0;
+        faceoffAvgScore = data.faceoffAvgScore || 0;
       }
 
       // Fetch all achievements
@@ -223,15 +227,11 @@ export default function DashboardPage() {
         setJeopardyStats(data);
       }
 
-      // Fetch faceoff stats - created challenges
+      // Fetch faceoff stats - challenges created
       const faceoffRes = await fetch(`/api/faceoff/my-challenges?echo_user_id=${echo.user.id}&filter=mine&limit=100`);
-      // Fetch faceoff stats - played challenges from quiz history
-      const faceoffPlayedRes = await fetch(`/api/quiz/history?echo_user_id=${echo.user.id}&game_mode=faceoff&limit=100`);
 
       let challengesCreated = 0;
       let totalPlaysReceived = 0;
-      let challengesPlayed = 0;
-      let avgScore = 0;
 
       if (faceoffRes.ok) {
         const data = await faceoffRes.json();
@@ -240,21 +240,13 @@ export default function DashboardPage() {
         totalPlaysReceived = challenges.reduce((sum: number, c: { times_played: number }) => sum + (c.times_played || 0), 0);
       }
 
-      if (faceoffPlayedRes.ok) {
-        const data = await faceoffPlayedRes.json();
-        const sessions = data.sessions || [];
-        challengesPlayed = sessions.length;
-        if (sessions.length > 0) {
-          const totalScore = sessions.reduce((sum: number, s: { score_percentage: number }) => sum + (s.score_percentage || 0), 0);
-          avgScore = Math.round(totalScore / sessions.length);
-        }
-      }
-
+      // Get faceoff played count and avg score from difficultyPerformance (already fetched)
+      // We'll set this after we have the stats data
       setFaceoffStats({
+        challenges_played: 0, // Will be updated from stats.faceoffCount
         challenges_created: challengesCreated,
-        challenges_played: challengesPlayed,
         total_plays_received: totalPlaysReceived,
-        avg_score: avgScore,
+        avg_score: 0, // Will be updated from difficultyPerformance
       });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -350,331 +342,24 @@ export default function DashboardPage() {
           </div>
 
           {/* Key Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Trophy className="h-4 w-4" />
-                  Total Quizzes
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <span className="text-3xl font-bold">{stats?.total_quizzes || 0}</span>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Target className="h-4 w-4" />
-                  Accuracy Rate
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <span className="text-3xl font-bold text-green-600">
-                  {stats?.accuracy_rate.toFixed(1) || 0}%
-                </span>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Flame className="h-4 w-4" />
-                  Current Streak
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div>
-                  <span className="text-3xl font-bold text-orange-500">
-                    {streak?.current_streak || 0}
-                  </span>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Best: {streak?.longest_streak || 0} days
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Time Played
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <span className="text-3xl font-bold text-blue-600">
-                  {formatTime(stats?.total_time_played || 0)}
-                </span>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Game Modes */}
-          <div className="grid gap-4">
-            {/* Faceoff */}
-            <Link href="/faceoff">
-            <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  <Swords className="h-5 w-5 text-primary" />
-                  Faceoff
-                </CardTitle>
-                <CardDescription>
-                  Create and share challenges with friends
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {faceoffStats && (faceoffStats.challenges_created > 0 || faceoffStats.challenges_played > 0) ? (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
-                      <div className="text-2xl font-bold text-primary">
-                        {faceoffStats.challenges_created}
-                      </div>
-                      <div className="text-xs text-muted-foreground">Created</div>
-                    </div>
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
-                      <div className="text-2xl font-bold">
-                        {faceoffStats.challenges_played}
-                      </div>
-                      <div className="text-xs text-muted-foreground">Played</div>
-                    </div>
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
-                      <div className="text-2xl font-bold">
-                        {faceoffStats.total_plays_received}
-                      </div>
-                      <div className="text-xs text-muted-foreground">Plays Received</div>
-                    </div>
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
-                      <div className="text-2xl font-bold">
-                        {faceoffStats.avg_score}%
-                      </div>
-                      <div className="text-xs text-muted-foreground">Avg Score</div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <p className="text-sm text-muted-foreground">
-                      Challenge friends to beat your score!
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </Link>
-
-          {/* Survival Mode Stats */}
-          <Link href="/survival">
-            <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-primary" />
-                  Endless Survival
-                </CardTitle>
-                <CardDescription>Your survival mode performance</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {survivalStats && survivalStats.total_runs > 0 ? (
-                  <>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-center justify-center gap-1 text-2xl font-bold text-primary">
-                          <Flame className="h-5 w-5" />
-                          {survivalStats.mixed_best_streak}
-                        </div>
-                        <div className="text-xs text-muted-foreground">Best Mixed Streak</div>
-                        {survivalStats.mixed_rank && (
-                          <div className="text-xs text-muted-foreground">Rank #{survivalStats.mixed_rank}</div>
-                        )}
-                      </div>
-                      <div className="text-center p-3 bg-muted/50 rounded-lg">
-                        <div className="text-2xl font-bold">{survivalStats.total_runs}</div>
-                        <div className="text-xs text-muted-foreground">Total Runs</div>
-                      </div>
-                      <div className="text-center p-3 bg-muted/50 rounded-lg">
-                        <div className="text-2xl font-bold">{survivalStats.total_questions_survived}</div>
-                        <div className="text-xs text-muted-foreground">Questions Survived</div>
-                      </div>
-                      <div className="text-center p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-center justify-center gap-1 text-2xl font-bold">
-                          <Clock className="h-5 w-5" />
-                          {Math.floor(survivalStats.total_time_played / 60)}m
-                        </div>
-                        <div className="text-xs text-muted-foreground">Time Survived</div>
-                      </div>
-                    </div>
-                    {survivalStats.category_bests.length > 0 && (
-                      <div className="mt-4 pt-4 border-t">
-                        <h4 className="text-sm font-medium mb-2">Category Bests</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {survivalStats.category_bests.slice(0, 5).map((cb) => (
-                            <Badge key={cb.category} variant="secondary" className="text-xs">
-                              {cb.category}: {cb.streak}
-                              {cb.rank && <span className="ml-1 opacity-60">#{cb.rank}</span>}
-                            </Badge>
-                          ))}
-                          {survivalStats.category_bests.length > 5 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{survivalStats.category_bests.length - 5} more
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-center py-4">
-                    <p className="text-sm text-muted-foreground">
-                      Answer questions until you miss one!
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </Link>
-
-          {/* Jeopardy */}
-          <Link href="/jeopardy">
-            <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  <Grid3X3 className="h-5 w-5 text-primary" />
-                  Jeopardy
-                </CardTitle>
-                <CardDescription>
-                  Classic board-style trivia with wagering
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {jeopardyStats && jeopardyStats.total_games > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
-                      <div className="text-2xl font-bold text-primary">
-                        {jeopardyStats.best_score_3 !== null ? jeopardyStats.best_score_3.toLocaleString() : '-'}
-                      </div>
-                      <div className="text-xs text-muted-foreground">Best (3-Cat)</div>
-                      {jeopardyStats.rank_3 && (
-                        <div className="text-xs text-muted-foreground">#{jeopardyStats.rank_3}</div>
-                      )}
-                    </div>
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
-                      <div className="text-2xl font-bold text-primary">
-                        {jeopardyStats.best_score_5 !== null ? jeopardyStats.best_score_5.toLocaleString() : '-'}
-                      </div>
-                      <div className="text-xs text-muted-foreground">Best (5-Cat)</div>
-                      {jeopardyStats.rank_5 && (
-                        <div className="text-xs text-muted-foreground">#{jeopardyStats.rank_5}</div>
-                      )}
-                    </div>
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
-                      <div className="text-2xl font-bold">{jeopardyStats.total_games}</div>
-                      <div className="text-xs text-muted-foreground">Games Played</div>
-                    </div>
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
-                      <div className="text-2xl font-bold">
-                        {jeopardyStats.total_questions_answered > 0
-                          ? Math.round((jeopardyStats.total_questions_correct / jeopardyStats.total_questions_answered) * 100)
-                          : 0}%
-                      </div>
-                      <div className="text-xs text-muted-foreground">Accuracy</div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <p className="text-sm text-muted-foreground">
-                      Pick categories and wager on your knowledge!
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </Link>
-
-          {/* Wizard's Tower Campaign */}
-          <Link href="/campaign">
-            <Card className="border-2 border-indigo-500/20 hover:border-indigo-500/40 transition-colors cursor-pointer">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <Castle className="h-5 w-5 text-indigo-500" />
-                    The Wizard&apos;s Tower
-                  </CardTitle>
-                  {towerProgress?.hasStarted && (
-                    <Badge variant="secondary" className="text-xs capitalize">
-                      {towerProgress.difficulty}
-                    </Badge>
-                  )}
-                </div>
-                <CardDescription>
-                  {towerProgress?.hasStarted
-                    ? towerProgress.tierName
-                    : "Ascend the tower by mastering trivia across all categories"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center justify-center gap-1 text-2xl font-bold text-indigo-500">
-                      <Castle className="h-5 w-5" />
-                      {towerProgress?.currentFloor || 1}
-                    </div>
-                    <div className="text-xs text-muted-foreground">Current Floor</div>
-                    <div className="text-xs text-muted-foreground">
-                      of {towerProgress?.totalFloors || 1008}
-                    </div>
-                  </div>
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold">{towerProgress?.highestFloor || 1}</div>
-                    <div className="text-xs text-muted-foreground">Highest Floor</div>
-                  </div>
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold">{towerProgress?.perfectFloors || 0}</div>
-                    <div className="text-xs text-muted-foreground">Perfect Floors</div>
-                  </div>
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold">{towerProgress?.accuracy || 0}%</div>
-                    <div className="text-xs text-muted-foreground">Accuracy</div>
-                  </div>
-                </div>
-
-                {towerProgress?.hasStarted && (
-                  <div className="mt-4 pt-4 border-t">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Next Category:</span>
-                      <Badge variant="outline">{towerProgress.category}</Badge>
-                    </div>
-                    <div className="mt-2">
-                      <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                        <span>Tier {towerProgress.tier} Progress</span>
-                        <span>
-                          {((towerProgress.currentFloor - 1) % Math.ceil(towerProgress.totalFloors / 3)) + 1} / {Math.ceil(towerProgress.totalFloors / 3)}
-                        </span>
-                      </div>
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div
-                          className="bg-indigo-500 h-2 rounded-full transition-all"
-                          style={{
-                            width: `${((((towerProgress.currentFloor - 1) % Math.ceil(towerProgress.totalFloors / 3)) + 1) / Math.ceil(towerProgress.totalFloors / 3)) * 100}%`
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {!towerProgress?.hasStarted && (
-                  <div className="mt-4 pt-4 border-t text-center">
-                    <p className="text-sm text-muted-foreground">
-                      Complete 5-question floors to climb the tower.
-                      <br />
-                      Score 3/5 or better to advance!
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </Link>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+            <div className="text-center space-y-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Quizzes</p>
+              <p className="text-4xl font-bold tabular-nums">{stats?.total_quizzes || 0}</p>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Accuracy</p>
+              <p className="text-4xl font-bold tabular-nums">{stats?.accuracy_rate.toFixed(1) || 0}%</p>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Streak</p>
+              <p className="text-4xl font-bold tabular-nums text-orange-500">{streak?.current_streak || 0}</p>
+              <p className="text-xs text-muted-foreground">Best: {streak?.longest_streak || 0} days</p>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Time Played</p>
+              <p className="text-4xl font-bold tabular-nums">{formatTime(stats?.total_time_played || 0)}</p>
+            </div>
           </div>
 
           {/* Charts Row */}
@@ -1749,6 +1434,272 @@ export default function DashboardPage() {
 
           {/* Activity Heatmap */}
           <ActivityHeatmap dailyActivityMap={dailyActivityMap} />
+
+          {/* Game Modes */}
+          <div className="grid gap-4">
+            {/* Faceoff */}
+            <Link href="/faceoff">
+              <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2">
+                    <Swords className="h-5 w-5 text-primary" />
+                    Faceoff
+                  </CardTitle>
+                  <CardDescription>
+                    Create and share challenges with friends
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {faceoffStats && (faceoffStats.challenges_created > 0 || faceoffStats.challenges_played > 0) ? (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold text-primary">
+                          {faceoffStats.challenges_played}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Played</div>
+                      </div>
+                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold">
+                          {faceoffStats.challenges_created}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Created</div>
+                      </div>
+                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold">
+                          {faceoffStats.total_plays_received}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Plays</div>
+                      </div>
+                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold">
+                          {faceoffStats.avg_score}%
+                        </div>
+                        <div className="text-xs text-muted-foreground">Avg Score</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-muted-foreground">
+                        Challenge friends to beat your score!
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
+
+            {/* Survival Mode Stats */}
+            <Link href="/survival">
+              <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-primary" />
+                    Endless Survival
+                  </CardTitle>
+                  <CardDescription>Your survival mode performance</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {survivalStats && survivalStats.total_runs > 0 ? (
+                    <>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="text-center p-3 bg-muted/50 rounded-lg">
+                          <div className="flex items-center justify-center gap-1 text-2xl font-bold text-primary">
+                            <Flame className="h-5 w-5" />
+                            {survivalStats.mixed_best_streak}
+                          </div>
+                          <div className="text-xs text-muted-foreground">Best Mixed Streak</div>
+                          {survivalStats.mixed_rank && (
+                            <div className="text-xs text-muted-foreground">Rank #{survivalStats.mixed_rank}</div>
+                          )}
+                        </div>
+                        <div className="text-center p-3 bg-muted/50 rounded-lg">
+                          <div className="text-2xl font-bold">{survivalStats.total_runs}</div>
+                          <div className="text-xs text-muted-foreground">Total Runs</div>
+                        </div>
+                        <div className="text-center p-3 bg-muted/50 rounded-lg">
+                          <div className="text-2xl font-bold">{survivalStats.total_questions_survived}</div>
+                          <div className="text-xs text-muted-foreground">Questions Survived</div>
+                        </div>
+                        <div className="text-center p-3 bg-muted/50 rounded-lg">
+                          <div className="flex items-center justify-center gap-1 text-2xl font-bold">
+                            <Clock className="h-5 w-5" />
+                            {Math.floor(survivalStats.total_time_played / 60)}m
+                          </div>
+                          <div className="text-xs text-muted-foreground">Time Survived</div>
+                        </div>
+                      </div>
+                      {survivalStats.category_bests.length > 0 && (
+                        <div className="mt-4 pt-4 border-t">
+                          <h4 className="text-sm font-medium mb-2">Category Bests</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {survivalStats.category_bests.slice(0, 5).map((cb) => (
+                              <Badge key={cb.category} variant="secondary" className="text-xs">
+                                {cb.category}: {cb.streak}
+                                {cb.rank && <span className="ml-1 opacity-60">#{cb.rank}</span>}
+                              </Badge>
+                            ))}
+                            {survivalStats.category_bests.length > 5 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{survivalStats.category_bests.length - 5} more
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-muted-foreground">
+                        Answer questions until you miss one!
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
+
+            {/* Jeopardy */}
+            <Link href="/jeopardy">
+              <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2">
+                    <Grid3X3 className="h-5 w-5 text-primary" />
+                    Jeopardy
+                  </CardTitle>
+                  <CardDescription>
+                    Classic board-style trivia with wagering
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {jeopardyStats && jeopardyStats.total_games > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold text-primary">
+                          {jeopardyStats.best_score_3 !== null ? jeopardyStats.best_score_3.toLocaleString() : '-'}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Best (3-Cat)</div>
+                        {jeopardyStats.rank_3 && (
+                          <div className="text-xs text-muted-foreground">#{jeopardyStats.rank_3}</div>
+                        )}
+                      </div>
+                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold text-primary">
+                          {jeopardyStats.best_score_5 !== null ? jeopardyStats.best_score_5.toLocaleString() : '-'}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Best (5-Cat)</div>
+                        {jeopardyStats.rank_5 && (
+                          <div className="text-xs text-muted-foreground">#{jeopardyStats.rank_5}</div>
+                        )}
+                      </div>
+                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold">{jeopardyStats.total_games}</div>
+                        <div className="text-xs text-muted-foreground">Games Played</div>
+                      </div>
+                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold">
+                          {jeopardyStats.total_questions_answered > 0
+                            ? Math.round((jeopardyStats.total_questions_correct / jeopardyStats.total_questions_answered) * 100)
+                            : 0}%
+                        </div>
+                        <div className="text-xs text-muted-foreground">Accuracy</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-muted-foreground">
+                        Pick categories and wager on your knowledge!
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
+
+            {/* Wizard's Tower Campaign */}
+            <Link href="/campaign">
+              <Card className="border-2 border-indigo-500/20 hover:border-indigo-500/40 transition-colors cursor-pointer">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Castle className="h-5 w-5 text-indigo-500" />
+                      The Wizard&apos;s Tower
+                    </CardTitle>
+                    {towerProgress?.hasStarted && (
+                      <Badge variant="secondary" className="text-xs capitalize">
+                        {towerProgress.difficulty}
+                      </Badge>
+                    )}
+                  </div>
+                  <CardDescription>
+                    {towerProgress?.hasStarted
+                      ? towerProgress.tierName
+                      : "Ascend the tower by mastering trivia across all categories"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center justify-center gap-1 text-2xl font-bold text-indigo-500">
+                        <Castle className="h-5 w-5" />
+                        {towerProgress?.currentFloor || 1}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Current Floor</div>
+                      <div className="text-xs text-muted-foreground">
+                        of {towerProgress?.totalFloors || 1008}
+                      </div>
+                    </div>
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold">{towerProgress?.highestFloor || 1}</div>
+                      <div className="text-xs text-muted-foreground">Highest Floor</div>
+                    </div>
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold">{towerProgress?.perfectFloors || 0}</div>
+                      <div className="text-xs text-muted-foreground">Perfect Floors</div>
+                    </div>
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold">{towerProgress?.accuracy || 0}%</div>
+                      <div className="text-xs text-muted-foreground">Accuracy</div>
+                    </div>
+                  </div>
+
+                  {towerProgress?.hasStarted && (
+                    <div className="mt-4 pt-4 border-t">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Next Category:</span>
+                        <Badge variant="outline">{towerProgress.category}</Badge>
+                      </div>
+                      <div className="mt-2">
+                        <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                          <span>Tier {towerProgress.tier} Progress</span>
+                          <span>
+                            {((towerProgress.currentFloor - 1) % Math.ceil(towerProgress.totalFloors / 3)) + 1} / {Math.ceil(towerProgress.totalFloors / 3)}
+                          </span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                          <div
+                            className="bg-indigo-500 h-2 rounded-full transition-all"
+                            style={{
+                              width: `${((((towerProgress.currentFloor - 1) % Math.ceil(towerProgress.totalFloors / 3)) + 1) / Math.ceil(towerProgress.totalFloors / 3)) * 100}%`
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {!towerProgress?.hasStarted && (
+                    <div className="mt-4 pt-4 border-t text-center">
+                      <p className="text-sm text-muted-foreground">
+                        Complete 5-question floors to climb the tower.
+                        <br />
+                        Score 3/5 or better to advance!
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
         </div>
 
         {/* Category Quiz History Modal */}

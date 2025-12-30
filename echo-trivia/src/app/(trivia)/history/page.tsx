@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Clock, AlertCircle, TrendingUp, Award, Cloud, HardDrive, Flame, Swords, LayoutGrid, Calendar, PlayCircle } from "lucide-react";
+import { Trophy, Clock, AlertCircle, TrendingUp, Award, Cloud, HardDrive, Flame, Swords, LayoutGrid, Calendar, PlayCircle, Castle } from "lucide-react";
 import { storage } from "@/lib/storage";
 import type { Session } from "@/lib/types";
 import { useEcho } from "@merit-systems/echo-react-sdk";
@@ -94,12 +94,15 @@ export default function HistoryPage() {
     const isSurvival = session.game_mode === "endless";
     const isJeopardy = session.game_mode === "jeopardy";
     const isFaceoff = session.game_mode === "faceoff";
+    const isCampaign = session.game_mode === "campaign";
 
     let resultsUrl: string;
     if (isSurvival) {
       resultsUrl = `/survival/results/${session.id}`;
     } else if (isJeopardy) {
       resultsUrl = `/jeopardy/results/${session.id}`;
+    } else if (isCampaign) {
+      resultsUrl = `/campaign/levels`; // Campaign results go back to levels page
     } else {
       resultsUrl = `/results/${session.id}?cloud=true`;
     }
@@ -113,6 +116,8 @@ export default function HistoryPage() {
       ? { icon: LayoutGrid, label: "Jeopardy" }
       : isFaceoff
       ? { icon: Swords, label: "Face-Off" }
+      : isCampaign
+      ? { icon: Castle, label: "Campaign" }
       : isDaily
       ? { icon: Calendar, label: "Daily" }
       : { icon: PlayCircle, label: "Freeplay" };
@@ -123,6 +128,7 @@ export default function HistoryPage() {
       if (isSurvival) return session.category;
       if (isJeopardy) return session.title || "Jeopardy";
       if (isFaceoff) return session.category;
+      if (isCampaign) return session.category;
       return session.category;
     };
 
@@ -131,6 +137,7 @@ export default function HistoryPage() {
       if (isSurvival) return "Endless Mode";
       if (isJeopardy) return `${session.correct_answers}/${session.total_questions} correct`;
       if (isFaceoff) return session.title || 'Quiz';
+      if (isCampaign) return session.title || "The Wizard's Tower";
       return session.title || 'Quiz';
     };
 
@@ -143,13 +150,21 @@ export default function HistoryPage() {
         onClick={() => router.push(resultsUrl)}
         className="cursor-pointer"
       >
-        <Card className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-border hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+        <Card className={`group relative overflow-hidden backdrop-blur-sm hover:shadow-lg transition-all duration-300 h-full flex flex-col ${
+          isCampaign
+            ? "border-indigo-500/30 bg-indigo-950/20 hover:border-indigo-500/50"
+            : "border-border/50 bg-card/50 hover:border-border"
+        }`}>
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+            isCampaign
+              ? "bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent"
+              : "bg-gradient-to-br from-primary/5 via-transparent to-transparent"
+          }`} />
 
           <CardHeader className="space-y-2 pb-3">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <GameModeIcon className="h-3 w-3" />
+            <div className={`flex items-center gap-1.5 text-xs ${isCampaign ? "text-indigo-400" : "text-muted-foreground"}`}>
+              <GameModeIcon className={`h-3 w-3 ${isCampaign ? "text-indigo-400" : ""}`} />
               <span>{gameModeInfo.label}</span>
               <span className="mx-1">·</span>
               <span>{formatDate(session.completed_at)}</span>
@@ -187,6 +202,14 @@ export default function HistoryPage() {
                   <Swords className="h-3 w-3" />
                   {percentage}%
                 </Badge>
+              ) : isCampaign ? (
+                <Badge
+                  variant="secondary"
+                  className="flex items-center gap-1 px-2.5 py-1 text-sm font-semibold shrink-0 bg-indigo-500/20 text-indigo-300 border-indigo-500/30"
+                >
+                  <Castle className="h-3 w-3" />
+                  {session.correct_answers}/5
+                </Badge>
               ) : (
                 <Badge
                   variant={percentage >= 70 ? "default" : "secondary"}
@@ -202,7 +225,7 @@ export default function HistoryPage() {
           <CardContent className="pt-0 flex-1 flex flex-col">
             <div className="flex items-center justify-between text-sm mb-3">
               <div className="flex items-center gap-1.5">
-                <Trophy className="h-3.5 w-3.5 text-primary" />
+                <Trophy className={`h-3.5 w-3.5 ${isCampaign ? "text-indigo-400" : "text-primary"}`} />
                 <span className="font-medium">
                   {isSurvival ? session.correct_answers : `${session.correct_answers}/${session.total_questions}`}
                 </span>
@@ -218,13 +241,17 @@ export default function HistoryPage() {
             <Button
               variant="outline"
               size="sm"
-              className="w-full mt-auto group-hover:bg-primary group-hover:text-primary-foreground transition-colors pointer-events-none md:pointer-events-auto"
+              className={`w-full mt-auto transition-colors pointer-events-none md:pointer-events-auto ${
+                isCampaign
+                  ? "border-indigo-500/30 group-hover:bg-indigo-500 group-hover:text-white group-hover:border-indigo-500"
+                  : "group-hover:bg-primary group-hover:text-primary-foreground"
+              }`}
               onClick={(e) => {
                 e.stopPropagation();
                 router.push(resultsUrl);
               }}
             >
-              View Results
+              {isCampaign ? "View Tower" : "View Results"}
               <TrendingUp className="ml-2 h-3.5 w-3.5" />
             </Button>
           </CardContent>

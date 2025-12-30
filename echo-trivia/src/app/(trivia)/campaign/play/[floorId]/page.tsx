@@ -58,6 +58,8 @@ export default function CampaignPlayPage() {
     isPerfect: boolean;
     results: SubmitResult[];
     nextFloorUnlocked: boolean;
+    bestScore: number;
+    attemptCount: number;
   } | null>(null);
   const [startTime] = useState(Date.now());
 
@@ -450,13 +452,27 @@ export default function CampaignPlayPage() {
               </div>
 
               {/* Score */}
-              <div className="flex justify-center">
-                <div className="bg-stone-800/50 rounded-xl px-8 py-4 text-center">
-                  <div className="text-4xl font-mono font-bold text-amber-200">
+              <div className="flex justify-center gap-4">
+                <div className="bg-stone-800/50 rounded-xl px-6 py-4 text-center">
+                  <div className="text-3xl font-mono font-bold text-amber-200">
                     {results.score}/5
                   </div>
-                  <div className="text-xs text-stone-500 mt-1">SCORE</div>
+                  <div className="text-xs text-stone-500 mt-1">THIS ATTEMPT</div>
                 </div>
+                <div className="bg-stone-800/50 rounded-xl px-6 py-4 text-center">
+                  <div className="text-3xl font-mono font-bold text-emerald-300">
+                    {results.bestScore}/5
+                  </div>
+                  <div className="text-xs text-stone-500 mt-1">BEST SCORE</div>
+                </div>
+                {results.attemptCount > 1 && (
+                  <div className="bg-stone-800/50 rounded-xl px-6 py-4 text-center">
+                    <div className="text-3xl font-mono font-bold text-stone-300">
+                      {results.attemptCount}
+                    </div>
+                    <div className="text-xs text-stone-500 mt-1">ATTEMPTS</div>
+                  </div>
+                )}
               </div>
 
               {/* Question results */}

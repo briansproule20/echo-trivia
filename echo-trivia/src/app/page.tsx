@@ -236,6 +236,7 @@ export default function HomePage() {
                 const isSurvival = session.game_mode === "endless";
                 const isJeopardy = session.game_mode === "jeopardy";
                 const isFaceoff = session.game_mode === "faceoff";
+                const isCampaign = session.game_mode === "campaign";
                 const isDaily = session.is_daily;
 
                 // Get game mode icon and label
@@ -245,6 +246,8 @@ export default function HomePage() {
                   ? { icon: LayoutGrid, label: "Jeopardy" }
                   : isFaceoff
                   ? { icon: Swords, label: "Face-Off" }
+                  : isCampaign
+                  ? { icon: Castle, label: "Campaign" }
                   : isDaily
                   ? { icon: Calendar, label: "Daily" }
                   : { icon: PlayCircle, label: "Freeplay" };
@@ -274,7 +277,11 @@ export default function HomePage() {
                 };
 
                 const handleClick = () => {
-                  handleViewResults(session.id, session.game_mode || "default");
+                  if (isCampaign) {
+                    router.push("/campaign/levels");
+                  } else {
+                    handleViewResults(session.id, session.game_mode || "default");
+                  }
                 };
 
                 return (
@@ -286,24 +293,32 @@ export default function HomePage() {
                     onClick={handleClick}
                     className="cursor-pointer"
                   >
-                    <Card className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-border hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                    <Card className={`group relative overflow-hidden backdrop-blur-sm hover:shadow-lg transition-all duration-300 h-full flex flex-col ${
+                      isCampaign
+                        ? "border-indigo-500/30 bg-indigo-950/20 hover:border-indigo-500/50"
+                        : "border-border/50 bg-card/50 hover:border-border"
+                    }`}>
                       {/* Gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                        isCampaign
+                          ? "bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent"
+                          : "bg-gradient-to-br from-primary/5 via-transparent to-transparent"
+                      }`} />
 
                       <CardHeader className="space-y-2 pb-3">
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <GameModeIcon className="h-3 w-3" />
+                        <div className={`flex items-center gap-1.5 text-xs ${isCampaign ? "text-indigo-400" : "text-muted-foreground"}`}>
+                          <GameModeIcon className={`h-3 w-3 ${isCampaign ? "text-indigo-400" : ""}`} />
                           <span>{gameModeInfo.label}</span>
                           <span className="mx-1">·</span>
                           <span>{getRelativeTime(session.completed_at, session.daily_date)}</span>
                         </div>
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0 space-y-0.5">
-                            <CardTitle className="text-base font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                              {isSurvival ? session.category : isJeopardy ? session.title : isFaceoff ? session.category : session.category}
+                            <CardTitle className={`text-base font-semibold line-clamp-1 transition-colors ${isCampaign ? "group-hover:text-indigo-400" : "group-hover:text-primary"}`}>
+                              {isSurvival ? session.category : isJeopardy ? session.title : isFaceoff ? session.category : isCampaign ? session.category : session.category}
                             </CardTitle>
                             <CardDescription className="text-xs line-clamp-1">
-                              {isSurvival ? "Endless Mode" : isJeopardy ? `${session.correct_answers}/${session.total_questions} correct` : isFaceoff ? session.title : session.title}
+                              {isSurvival ? "Endless Mode" : isJeopardy ? `${session.correct_answers}/${session.total_questions} correct` : isFaceoff ? session.title : isCampaign ? session.title || "The Wizard's Tower" : session.title}
                             </CardDescription>
                           </div>
                           {isSurvival ? (
@@ -330,6 +345,14 @@ export default function HomePage() {
                               <Swords className="h-3 w-3" />
                               {percentage}%
                             </Badge>
+                          ) : isCampaign ? (
+                            <Badge
+                              variant="secondary"
+                              className="flex items-center gap-1 px-2.5 py-1 text-sm font-semibold shrink-0 bg-indigo-500/20 text-indigo-300 border-indigo-500/30"
+                            >
+                              <Castle className="h-3 w-3" />
+                              {session.correct_answers}/5
+                            </Badge>
                           ) : (
                             <Badge
                               variant={percentage >= 70 ? "default" : "secondary"}
@@ -345,7 +368,7 @@ export default function HomePage() {
                       <CardContent className="pt-0 flex-1 flex flex-col">
                         <div className="flex items-center justify-between text-sm mb-3">
                           <div className="flex items-center gap-1.5">
-                            <Trophy className="h-3.5 w-3.5 text-primary" />
+                            <Trophy className={`h-3.5 w-3.5 ${isCampaign ? "text-indigo-400" : "text-primary"}`} />
                             <span className="font-medium">
                               {isSurvival ? session.correct_answers : `${session.correct_answers}/${session.total_questions}`}
                             </span>
@@ -361,13 +384,17 @@ export default function HomePage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full mt-auto group-hover:bg-primary group-hover:text-primary-foreground transition-colors pointer-events-none md:pointer-events-auto"
+                          className={`w-full mt-auto transition-colors pointer-events-none md:pointer-events-auto ${
+                            isCampaign
+                              ? "border-indigo-500/30 group-hover:bg-indigo-500 group-hover:text-white group-hover:border-indigo-500"
+                              : "group-hover:bg-primary group-hover:text-primary-foreground"
+                          }`}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleClick();
                           }}
                         >
-                          View Results
+                          {isCampaign ? "View Tower" : "View Results"}
                           <TrendingUp className="ml-2 h-3.5 w-3.5" />
                         </Button>
                       </CardContent>

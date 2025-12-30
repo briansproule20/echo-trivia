@@ -462,17 +462,9 @@ export default function CampaignLevelsPage() {
             tutorialCompleted: data.hasStarted || data.highestFloor > 1 || data.totalQuestions > 0,
           });
 
-          // Build floor stats from floor_attempts if available
-          if (data.progress?.floor_attempts) {
-            const stats: FloorStatsMap = {};
-            for (const [floorId, attempts] of Object.entries(data.progress.floor_attempts)) {
-              stats[parseInt(floorId)] = {
-                attempts: attempts as number,
-                bestScore: 0, // Would need more data to track this
-                passed: parseInt(floorId) < data.highestFloor,
-              };
-            }
-            setFloorStats(stats);
+          // Use floor stats from API (includes best scores)
+          if (data.floorStats) {
+            setFloorStats(data.floorStats);
           }
         }
       } catch (error) {

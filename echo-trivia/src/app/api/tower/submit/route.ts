@@ -210,12 +210,24 @@ export async function POST(request: NextRequest) {
         title: `Tower Floor ${floorNumber} - ${floorData.category}`,
       });
 
+    // Fetch best score and attempt count for this floor
+    const { data: floorHistory } = await serviceClient
+      .from("tower_floor_attempts")
+      .select("score")
+      .eq("echo_user_id", echoUserId)
+      .eq("floor_number", floorNumber);
+
+    const attemptCount = floorHistory?.length || 1;
+    const bestScore = floorHistory?.reduce((max, a) => Math.max(max, a.score), 0) || correctCount;
+
     return NextResponse.json({
       passed,
       score: correctCount,
       totalQuestions: QUESTIONS_PER_FLOOR,
       isPerfect,
       results,
+      bestScore, // Best score for this floor
+      attemptCount, // Total attempts on this floor
       progress: {
         currentFloor: newCurrentFloor,
         highestFloor: newHighestFloor,

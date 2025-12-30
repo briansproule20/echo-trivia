@@ -75,6 +75,28 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Failed to fetch progress" }, { status: 500 });
     }
 
+    // Fetch best scores per floor from tower_floor_attempts
+    const { data: floorAttempts } = await supabase
+      .from("tower_floor_attempts")
+      .select("floor_number, score, passed")
+      .eq("echo_user_id", echoUserId);
+
+    // Build floor stats map with best scores
+    const floorStats: Record<number, { attempts: number; bestScore: number; passed: boolean }> = {};
+    if (floorAttempts) {
+      for (const attempt of floorAttempts) {
+        const floorId = attempt.floor_number;
+        if (!floorStats[floorId]) {
+          floorStats[floorId] = { attempts: 0, bestScore: 0, passed: false };
+        }
+        floorStats[floorId].attempts += 1;
+        floorStats[floorId].bestScore = Math.max(floorStats[floorId].bestScore, attempt.score);
+        if (attempt.passed) {
+          floorStats[floorId].passed = true;
+        }
+      }
+    }
+
     const tierInfo = getTierInfo(progress.current_floor);
     const accuracy = progress.total_questions > 0
       ? (progress.total_correct / progress.total_questions) * 100
@@ -96,6 +118,7 @@ export async function GET(request: NextRequest) {
       accuracy: Math.round(accuracy * 10) / 10,
       achievements: progress.achievements || [],
       hasStarted: progress.highest_floor > 1 || progress.total_questions > 0,
+      floorStats, // Best scores and attempts per floor
     });
   } catch (error) {
     console.error("Tower progress error:", error);

@@ -60,6 +60,10 @@ export default function CampaignPlayPage() {
     nextFloorUnlocked: boolean;
     bestScore: number;
     attemptCount: number;
+    attemptId?: string;
+    floorNumber: number;
+    category: string;
+    difficulty: string;
   } | null>(null);
   const [startTime] = useState(Date.now());
 
@@ -137,6 +141,12 @@ export default function CampaignPlayPage() {
           floorNumber: floorId,
           quizId: floorData.quizId,
           answers: finalAnswers,
+          // Pass question prompts and choices for results display
+          questions: floorData.questions.map((q: { id: string; prompt: string; choices?: { id: string; text: string }[] }) => ({
+            id: q.id,
+            prompt: q.prompt,
+            choices: q.choices,
+          })),
           timeTaken,
           echo_user_id: echo.user?.id,
         }),
@@ -161,7 +171,12 @@ export default function CampaignPlayPage() {
   };
 
   const handleFlurpExpanded = () => {
-    router.push("/campaign/levels");
+    // Navigate to results page if we have an attemptId
+    if (results?.attemptId) {
+      router.push(`/campaign/results/${results.attemptId}`);
+    } else {
+      router.push("/campaign/levels");
+    }
   };
 
   const handleRetry = () => {

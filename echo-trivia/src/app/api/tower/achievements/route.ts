@@ -42,7 +42,28 @@ export async function GET(request: NextRequest) {
 
     if (achievementsError) {
       console.error("Error fetching tower achievements:", achievementsError);
-      return NextResponse.json({ error: "Failed to fetch achievements" }, { status: 500 });
+      // Return empty achievements if table doesn't exist yet
+      if (achievementsError.code === "42P01") {
+        return NextResponse.json({
+          achievements: [],
+          byCategory: { milestone: [], performance: [], mastery: [], special: [], lifetime: [] },
+          unlockedCount: 0,
+          totalCount: 0,
+          visibleCount: 0,
+        });
+      }
+      return NextResponse.json({ error: "Failed to fetch achievements", details: achievementsError.message }, { status: 500 });
+    }
+
+    // If no achievements found (table exists but empty), return empty state
+    if (!allAchievements || allAchievements.length === 0) {
+      return NextResponse.json({
+        achievements: [],
+        byCategory: { milestone: [], performance: [], mastery: [], special: [], lifetime: [] },
+        unlockedCount: 0,
+        totalCount: 0,
+        visibleCount: 0,
+      });
     }
 
     // If no user ID, return all achievements without unlock status

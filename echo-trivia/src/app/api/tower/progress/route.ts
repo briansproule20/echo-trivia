@@ -75,19 +75,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Failed to fetch progress" }, { status: 500 });
     }
 
-    // Fetch best scores per floor from tower_floor_attempts
+    // Fetch best scores per floor from tower_floor_attempts (ordered by created_at to get latest)
     const { data: floorAttempts } = await supabase
       .from("tower_floor_attempts")
-      .select("floor_number, score, passed")
-      .eq("echo_user_id", echoUserId);
+      .select("id, floor_number, score, passed, created_at")
+      .eq("echo_user_id", echoUserId)
+      .order("created_at", { ascending: false });
 
-    // Build floor stats map with best scores
-    const floorStats: Record<number, { attempts: number; bestScore: number; passed: boolean }> = {};
+    // Build floor stats map with best scores and last attempt ID
+    const floorStats: Record<number, { attempts: number; bestScore: number; passed: boolean; lastAttemptId: string | null }> = {};
     if (floorAttempts) {
       for (const attempt of floorAttempts) {
         const floorId = attempt.floor_number;
         if (!floorStats[floorId]) {
-          floorStats[floorId] = { attempts: 0, bestScore: 0, passed: false };
+          // First attempt we see is the most recent (due to ordering)
+          floorStats[floorId] = { attempts: 0, bestScore: 0, passed: false, lastAttemptId: attempt.id };
         }
         floorStats[floorId].attempts += 1;
         floorStats[floorId].bestScore = Math.max(floorStats[floorId].bestScore, attempt.score);

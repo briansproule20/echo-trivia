@@ -41,7 +41,8 @@ export async function GET(request: NextRequest) {
         title,
         completed_at,
         time_taken,
-        game_mode
+        game_mode,
+        tower_attempt_id
       `)
       .eq('echo_user_id', echoUserId)
       .order('completed_at', { ascending: false })

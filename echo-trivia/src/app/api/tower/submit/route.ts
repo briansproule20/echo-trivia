@@ -18,6 +18,15 @@ const TowerSubmitRequestSchema = z.object({
     question_id: z.string(),
     user_answer: z.string(),
   })),
+  // Full questions data for results display
+  questions: z.array(z.object({
+    id: z.string(),
+    prompt: z.string(),
+    choices: z.array(z.object({
+      id: z.string(),
+      text: z.string(),
+    })).optional(),
+  })).optional(),
   timeTaken: z.number().optional(), // seconds
   echo_user_id: z.string(),
 });
@@ -78,7 +87,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { floorNumber, quizId, answers, timeTaken, echo_user_id: echoUserId } = parsed.data;
+    const { floorNumber, quizId, answers, questions: submittedQuestions, timeTaken, echo_user_id: echoUserId } = parsed.data;
 
     if (!echoUserId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -95,13 +104,17 @@ export async function POST(request: NextRequest) {
 
     // Score the answers server-side
     const answerKeyMap = new Map(answerKeys.map(ak => [ak.question_id, ak]));
+    const questionMap = new Map(submittedQuestions?.map(q => [q.id, q]) || []);
     let correctCount = 0;
     const results = answers.map(answer => {
       const key = answerKeyMap.get(answer.question_id);
+      const question = questionMap.get(answer.question_id);
       const isCorrect = key?.answer === answer.user_answer;
       if (isCorrect) correctCount++;
       return {
         question_id: answer.question_id,
+        prompt: question?.prompt || "",
+        choices: question?.choices || [],
         user_answer: answer.user_answer,
         correct_answer: key?.answer || "",
         is_correct: isCorrect,
@@ -178,7 +191,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Record the floor attempt
-    await serviceClient
+    const { data: attemptData } = await serviceClient
       .from("tower_floor_attempts")
       .insert({
         echo_user_id: echoUserId,
@@ -190,9 +203,12 @@ export async function POST(request: NextRequest) {
         passed,
         attempt_duration: timeTaken || null,
         quiz_id: quizId,
-      });
+      })
+      .select("id")
+      .single();
 
     // Also record as quiz_session for Wizard's Legion tracking (community lore tier + lifetime achievements)
+    // Include tower_attempt_id for linking to results from history
     await serviceClient
       .from("quiz_sessions")
       .insert({
@@ -208,6 +224,7 @@ export async function POST(request: NextRequest) {
         is_daily: false,
         time_taken: timeTaken || null,
         title: `Tower Floor ${floorNumber} - ${floorData.category}`,
+        tower_attempt_id: attemptData?.id,
       });
 
     // Fetch best score and attempt count for this floor
@@ -220,6 +237,219 @@ export async function POST(request: NextRequest) {
     const attemptCount = floorHistory?.length || 1;
     const bestScore = floorHistory?.reduce((max, a) => Math.max(max, a.score), 0) || correctCount;
 
+    // Check and award achievements
+    const earnedAchievements: string[] = [];
+
+    // Helper to award achievement if not already earned
+    const awardAchievement = async (achievementId: string) => {
+      const { error } = await serviceClient
+        .from("user_tower_achievements")
+        .upsert({
+          echo_user_id: echoUserId,
+          achievement_id: achievementId,
+          floor_earned: floorNumber,
+        }, { onConflict: "echo_user_id,achievement_id" });
+
+      if (!error) {
+        earnedAchievements.push(achievementId);
+      }
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // MILESTONE ACHIEVEMENTS (7)
+    // ═══════════════════════════════════════════════════════════════
+
+    // First Steps - Complete Floor 1
+    if (passed && floorNumber === 1) {
+      await awardAchievement("first_steps");
+    }
+
+    // Milestone achievements based on highest floor reached
+    if (passed) {
+      if (newHighestFloor >= 25) await awardAchievement("apprentice");
+      if (newHighestFloor >= 100) await awardAchievement("scholar");
+      if (newHighestFloor >= 300) await awardAchievement("archivist");
+      if (newHighestFloor >= 600) await awardAchievement("signal_bearer");
+      if (newHighestFloor >= 900) await awardAchievement("tower_master");
+      if (newHighestFloor >= 1008) await awardAchievement("wizards_chosen");
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PERFORMANCE ACHIEVEMENTS (6)
+    // ═══════════════════════════════════════════════════════════════
+
+    // Perfect Signal - Score 5/5 on any floor
+    if (isPerfect) {
+      await awardAchievement("perfect_signal");
+    }
+
+    // Clarity - Score 5/5 on 10 different floors
+    if (isPerfect && perfectFloors.length >= 10) {
+      await awardAchievement("clarity");
+    }
+
+    // Precision - Score 5/5 on 50 different floors
+    if (isPerfect && perfectFloors.length >= 50) {
+      await awardAchievement("precision");
+    }
+
+    // Calibrator - 5/5 on 5 consecutive floors
+    if (isPerfect && perfectFloors.length >= 5) {
+      const sortedPerfect = [...perfectFloors].sort((a, b) => a - b);
+      for (let i = 0; i <= sortedPerfect.length - 5; i++) {
+        if (sortedPerfect[i + 4] - sortedPerfect[i] === 4) {
+          await awardAchievement("calibrator");
+          break;
+        }
+      }
+    }
+
+    // Streak Keeper & Unshakeable - Pass X floors without failing
+    if (passed) {
+      // Get recent attempts ordered by time to check streak
+      const { data: recentAttempts } = await serviceClient
+        .from("tower_floor_attempts")
+        .select("passed, floor_number")
+        .eq("echo_user_id", echoUserId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (recentAttempts) {
+        let currentStreak = 0;
+        for (const attempt of recentAttempts) {
+          if (attempt.passed) {
+            currentStreak++;
+          } else {
+            break;
+          }
+        }
+        if (currentStreak >= 25) await awardAchievement("streak_keeper");
+        if (currentStreak >= 50) await awardAchievement("unshakeable");
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // CATEGORY MASTERY ACHIEVEMENTS (5)
+    // ═══════════════════════════════════════════════════════════════
+
+    if (isPerfect) {
+      // Get all perfect floors with their categories and difficulties
+      const { data: perfectAttempts } = await serviceClient
+        .from("tower_floor_attempts")
+        .select("category, difficulty")
+        .eq("echo_user_id", echoUserId)
+        .eq("score", 5);
+
+      if (perfectAttempts) {
+        // Track perfect scores by category
+        const categoryPerfects: Record<string, Set<string>> = {};
+        const perfectCategories = new Set<string>();
+
+        for (const attempt of perfectAttempts) {
+          if (!categoryPerfects[attempt.category]) {
+            categoryPerfects[attempt.category] = new Set();
+          }
+          categoryPerfects[attempt.category].add(attempt.difficulty);
+          perfectCategories.add(attempt.category);
+        }
+
+        // Specialist - 5/5 on same category at all 3 difficulties
+        let specialistCount = 0;
+        for (const [, difficulties] of Object.entries(categoryPerfects)) {
+          if (difficulties.has("easy") && difficulties.has("medium") && difficulties.has("hard")) {
+            specialistCount++;
+            if (specialistCount === 1) await awardAchievement("specialist");
+          }
+        }
+
+        // Triple Crown - Specialist in 3 categories
+        if (specialistCount >= 3) await awardAchievement("triple_crown");
+
+        // Polymath - 5/5 on 25 different categories
+        if (perfectCategories.size >= 25) await awardAchievement("polymath");
+
+        // Renaissance Mind - 5/5 on 50 different categories
+        if (perfectCategories.size >= 50) await awardAchievement("renaissance");
+
+        // Universal Maintainer - 5/5 on 100 different categories
+        if (perfectCategories.size >= 100) await awardAchievement("universal");
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SPECIAL CONDITION ACHIEVEMENTS (5)
+    // ═══════════════════════════════════════════════════════════════
+
+    // Night Owl - Complete a floor between 12am-4am local time
+    // Note: Using server time, ideally would use client timezone
+    const hour = new Date().getHours();
+    if (passed && hour >= 0 && hour < 4) {
+      await awardAchievement("night_owl");
+    }
+
+    // Marathon - Complete 10 floors in one session (within 2 hours)
+    if (passed) {
+      const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+      const { count: sessionCount } = await serviceClient
+        .from("tower_floor_attempts")
+        .select("*", { count: "exact", head: true })
+        .eq("echo_user_id", echoUserId)
+        .eq("passed", true)
+        .gte("created_at", twoHoursAgo);
+
+      if ((sessionCount || 0) >= 10) await awardAchievement("marathon");
+    }
+
+    // Sprint - Complete 10 floors in under 15 minutes
+    if (passed) {
+      const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+      const { count: sprintCount } = await serviceClient
+        .from("tower_floor_attempts")
+        .select("*", { count: "exact", head: true })
+        .eq("echo_user_id", echoUserId)
+        .eq("passed", true)
+        .gte("created_at", fifteenMinsAgo);
+
+      if ((sprintCount || 0) >= 10) await awardAchievement("sprint");
+    }
+
+    // Persistence - Pass a floor after 5+ failed attempts
+    if (passed && attemptCount >= 6) {
+      await awardAchievement("persistence");
+    }
+
+    // Clutch - Pass 10 floors with exactly 3/5
+    if (passed && correctCount === 3) {
+      const { count } = await serviceClient
+        .from("tower_floor_attempts")
+        .select("*", { count: "exact", head: true })
+        .eq("echo_user_id", echoUserId)
+        .eq("passed", true)
+        .eq("score", 3);
+
+      if ((count || 0) >= 10) await awardAchievement("clutch");
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // LIFETIME ACHIEVEMENTS (2) - Based on total correct across all modes
+    // ═══════════════════════════════════════════════════════════════
+
+    // Get total correct answers across all quiz sessions
+    const { data: totalStats } = await serviceClient
+      .from("quiz_sessions")
+      .select("correct_answers")
+      .eq("echo_user_id", echoUserId);
+
+    if (totalStats) {
+      const totalCorrect = totalStats.reduce((sum, s) => sum + (s.correct_answers || 0), 0);
+
+      // Pattern Seeker - 1000 correct answers
+      if (totalCorrect >= 1000) await awardAchievement("pattern_seeker");
+
+      // Fog Dispeller - 5000 correct answers
+      if (totalCorrect >= 5000) await awardAchievement("fog_dispeller");
+    }
+
     return NextResponse.json({
       passed,
       score: correctCount,
@@ -228,6 +458,10 @@ export async function POST(request: NextRequest) {
       results,
       bestScore, // Best score for this floor
       attemptCount, // Total attempts on this floor
+      attemptId: attemptData?.id, // For linking to results page
+      floorNumber,
+      category: floorData.category,
+      difficulty: floorData.difficulty,
       progress: {
         currentFloor: newCurrentFloor,
         highestFloor: newHighestFloor,
@@ -236,6 +470,7 @@ export async function POST(request: NextRequest) {
         perfectFloors: perfectFloors.length,
       },
       nextFloorUnlocked: passed && floorNumber >= currentHighestFloor,
+      earnedAchievements, // New achievements earned this submission
     });
   } catch (error) {
     console.error("Tower submit error:", error);

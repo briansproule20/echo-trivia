@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -402,8 +403,9 @@ export default function DashboardPage() {
           )}
 
           {/* Wizard's Tower Campaign */}
-          <a href="/campaign">
-            <Card className="border-2 border-indigo-500/20 hover:border-indigo-500/40 transition-colors cursor-pointer">
+          <div>
+            <Link href="/campaign">
+              <Card className="border-2 border-indigo-500/20 hover:border-indigo-500/40 transition-colors cursor-pointer">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
@@ -483,8 +485,9 @@ export default function DashboardPage() {
                   </div>
                 )}
               </CardContent>
-            </Card>
-          </a>
+              </Card>
+            </Link>
+          </div>
 
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">

@@ -35,6 +35,7 @@ interface CloudSession {
   time_taken: number | null;
   game_mode: string | null;
   jeopardy_score?: number;
+  tower_attempt_id?: string;
 }
 
 export default function HomePage() {
@@ -277,7 +278,9 @@ export default function HomePage() {
                 };
 
                 const handleClick = () => {
-                  if (isCampaign) {
+                  if (isCampaign && session.tower_attempt_id) {
+                    router.push(`/campaign/results/${session.tower_attempt_id}`);
+                  } else if (isCampaign) {
                     router.push("/campaign/levels");
                   } else {
                     handleViewResults(session.id, session.game_mode || "default");
@@ -394,7 +397,7 @@ export default function HomePage() {
                             handleClick();
                           }}
                         >
-                          {isCampaign ? "View Tower" : "View Results"}
+                          View Results
                           <TrendingUp className="ml-2 h-3.5 w-3.5" />
                         </Button>
                       </CardContent>

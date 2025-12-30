@@ -116,7 +116,13 @@ export default function ProfilePage() {
         setTowerProgress(data);
       }
 
-      // Fetch tower achievements
+      // Sync and fetch tower achievements
+      await fetch('/api/tower/sync-achievements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ echo_user_id: echo.user.id }),
+      });
+
       const towerAchievementsRes = await fetch(`/api/tower/achievements?echo_user_id=${echo.user.id}`);
       if (towerAchievementsRes.ok) {
         const data = await towerAchievementsRes.json();

@@ -29,6 +29,7 @@ interface CloudSession {
   time_taken: number | null;
   game_mode: string | null;
   jeopardy_score?: number;
+  tower_attempt_id?: string;
 }
 
 export default function HistoryPage() {
@@ -101,8 +102,10 @@ export default function HistoryPage() {
       resultsUrl = `/survival/results/${session.id}`;
     } else if (isJeopardy) {
       resultsUrl = `/jeopardy/results/${session.id}`;
+    } else if (isCampaign && session.tower_attempt_id) {
+      resultsUrl = `/campaign/results/${session.tower_attempt_id}`;
     } else if (isCampaign) {
-      resultsUrl = `/campaign/levels`; // Campaign results go back to levels page
+      resultsUrl = `/campaign/levels`; // Fallback for old sessions without attempt ID
     } else {
       resultsUrl = `/results/${session.id}?cloud=true`;
     }
@@ -251,7 +254,7 @@ export default function HistoryPage() {
                 router.push(resultsUrl);
               }}
             >
-              {isCampaign ? "View Tower" : "View Results"}
+              View Results
               <TrendingUp className="ml-2 h-3.5 w-3.5" />
             </Button>
           </CardContent>

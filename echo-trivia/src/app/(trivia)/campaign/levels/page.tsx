@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Lock, Check, Sparkles, X, Play, Trophy, RotateCcw, BookOpen, LogIn } from "lucide-react";
+import { ArrowLeft, Lock, Check, Sparkles, X, Play, Trophy, RotateCcw, BookOpen, LogIn, Eye } from "lucide-react";
 import { CATEGORIES } from "@/lib/types";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 import { AdventureFlurp } from "@/components/trivia/AdventureFlurp";
@@ -85,7 +85,7 @@ const FLOORS = generateFloors();
 
 // Floor stats type
 interface FloorStatsMap {
-  [floorId: number]: { attempts: number; bestScore: number; passed: boolean };
+  [floorId: number]: { attempts: number; bestScore: number; passed: boolean; lastAttemptId?: string | null };
 }
 
 interface Floor {
@@ -111,6 +111,7 @@ interface FloorStats {
   attempts: number;
   bestScore: number;
   passed: boolean;
+  lastAttemptId?: string | null;
 }
 
 function FloorDetailModal({
@@ -259,7 +260,7 @@ function FloorDetailModal({
         )}
 
         {/* Action */}
-        <div className="px-5 pb-5">
+        <div className="px-5 pb-5 space-y-2">
           <button
             disabled={!canPlay}
             onClick={() => canPlay && onStartFloor(floor)}
@@ -295,6 +296,17 @@ function FloorDetailModal({
               </>
             )}
           </button>
+
+          {/* View Results button - only show if there are attempts */}
+          {!isTutorial && stats && stats.attempts > 0 && stats.lastAttemptId && (
+            <Link
+              href={`/campaign/results/${stats.lastAttemptId}`}
+              className="w-full py-2.5 rounded-lg font-serif text-sm flex items-center justify-center gap-2 transition-all bg-indigo-500/20 text-indigo-200 border border-indigo-500/30 hover:bg-indigo-500/30"
+            >
+              <Eye className="w-4 h-4" />
+              <span>View Last Results</span>
+            </Link>
+          )}
         </div>
       </motion.div>
     </motion.div>

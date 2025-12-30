@@ -1,9 +1,7 @@
 // Submit tower floor results and unlock next floor if passed
 
-import { isSignedIn } from "@/echo";
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/utils/supabase/service";
-import { createClient } from "@/utils/supabase/server";
 import { CATEGORIES } from "@/lib/types";
 import { z } from "zod";
 
@@ -21,6 +19,7 @@ const TowerSubmitRequestSchema = z.object({
     user_answer: z.string(),
   })),
   timeTaken: z.number().optional(), // seconds
+  echo_user_id: z.string(),
 });
 
 // Get answer keys from server
@@ -68,22 +67,6 @@ function getFloorData(floorNumber: number) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Authentication check
-    const signedIn = await isSignedIn();
-    if (!signedIn) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Get user info
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 401 });
-    }
-
-    const echoUserId = user.id;
-
     // Parse and validate request body
     const body = await request.json();
     const parsed = TowerSubmitRequestSchema.safeParse(body);
@@ -95,7 +78,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { floorNumber, quizId, answers, timeTaken } = parsed.data;
+    const { floorNumber, quizId, answers, timeTaken, echo_user_id: echoUserId } = parsed.data;
+
+    if (!echoUserId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Get answer keys from server
     const answerKeys = await getAnswerKeys(quizId);
@@ -203,6 +190,24 @@ export async function POST(request: NextRequest) {
         passed,
         attempt_duration: timeTaken || null,
         quiz_id: quizId,
+      });
+
+    // Also record as quiz_session for Wizard's Legion tracking (community lore tier + lifetime achievements)
+    await serviceClient
+      .from("quiz_sessions")
+      .insert({
+        echo_user_id: echoUserId,
+        category: floorData.category,
+        num_questions: QUESTIONS_PER_FLOOR,
+        correct_answers: correctCount,
+        total_questions: QUESTIONS_PER_FLOOR,
+        score_percentage: (correctCount / QUESTIONS_PER_FLOOR) * 100,
+        difficulty: floorData.difficulty,
+        quiz_type: "tower",
+        game_mode: "campaign",
+        is_daily: false,
+        time_taken: timeTaken || null,
+        title: `Tower Floor ${floorNumber} - ${floorData.category}`,
       });
 
     return NextResponse.json({

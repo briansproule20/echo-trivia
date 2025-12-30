@@ -72,11 +72,16 @@ export default function CampaignPlayPage() {
         return; // Prologue doesn't need quiz data
       }
 
+      // Wait for user to be loaded
+      if (!echo.user?.id) {
+        return;
+      }
+
       try {
         const res = await fetch("/api/tower/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ floorNumber: floorId }),
+          body: JSON.stringify({ floorNumber: floorId, echo_user_id: echo.user.id }),
         });
 
         if (!res.ok) {
@@ -94,7 +99,7 @@ export default function CampaignPlayPage() {
     }
 
     fetchFloor();
-  }, [floorId]);
+  }, [floorId, echo.user?.id]);
 
   const handleSelectAnswer = (answerId: string) => {
     if (results) return; // Don't allow changes after submission
@@ -131,6 +136,7 @@ export default function CampaignPlayPage() {
           quizId: floorData.quizId,
           answers: finalAnswers,
           timeTaken,
+          echo_user_id: echo.user?.id,
         }),
       });
 
@@ -170,7 +176,7 @@ export default function CampaignPlayPage() {
     fetch("/api/tower/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ floorNumber: floorId }),
+      body: JSON.stringify({ floorNumber: floorId, echo_user_id: echo.user?.id }),
     })
       .then(res => res.json())
       .then(data => {

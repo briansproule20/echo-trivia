@@ -1,13 +1,12 @@
 // Generate tower floor questions for The Wizard's Tower campaign
 // Each floor is 5 multiple choice questions at a specific category + difficulty
 
-import { anthropic, isSignedIn } from "@/echo";
+import { anthropic } from "@/echo";
 import { generateText } from "ai";
 import { QuizSchema } from "@/lib/schemas";
 import { generateId } from "@/lib/quiz-utils";
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/utils/supabase/service";
-import { createClient } from "@/utils/supabase/server";
 import { CATEGORIES } from "@/lib/types";
 import type { Question } from "@/lib/types";
 import { z } from "zod";
@@ -42,6 +41,7 @@ interface AnswerKey {
 // Request body schema
 const TowerGenerateRequestSchema = z.object({
   floorNumber: z.number().min(1).max(TIER_3_MAX),
+  echo_user_id: z.string(),
 });
 
 // Get floor data (category, difficulty, tier) from floor number
@@ -163,25 +163,36 @@ async function getOrCreateTowerProgress(echoUserId: string) {
   return existing;
 }
 
-const TOWER_SYSTEM_PROMPT = `You are a professional trivia author creating questions for The Wizard's Tower campaign.
+const TOWER_SYSTEM_PROMPT = `You are a professional trivia author creating questions for The Wizard's Tower campaign. Produce high-quality, factual, diverse questions.
 
 Rules:
-- Produce EXACTLY 5 high-quality multiple choice questions.
-- Each question MUST have exactly 4 options with IDs: A, B, C, D (in that order).
-- Exactly one option must be correct.
+- Adhere strictly to the JSON schema provided.
+- Question type: multiple_choice ONLY for this campaign.
+- Multiple choice MUST have exactly 4 options with IDs: A, B, C, D (in that order). Exactly one correct.
+- The choices array must contain exactly 4 objects in order: [{"id":"A","text":"..."}, {"id":"B","text":"..."}, {"id":"C","text":"..."}, {"id":"D","text":"..."}]
 - Include a concise explanation for each question (1-2 sentences).
-- Match the specified difficulty level consistently across all questions.
-- Avoid ambiguous or opinion-based items.
+- Avoid ambiguous or opinion-based items. No spoilers for very recent media without warning.
+- Prefer global representation (countries/authors/eras).
 - Use clear phrasing; avoid double negatives.
-- NEVER include the answer within the question prompt itself.
-- The "answer" field should be the choice ID (A, B, C, or D).
-- Wrong answers should be plausible but distinctly different from the correct answer.
-- Focus on testing knowledge, NOT on tricking the user.
+- NEVER include the answer within the question prompt itself. BAD: "What world wonder was located in Alexandria: The Lighthouse of Alexandria?" GOOD: "Which ancient wonder was located in Alexandria, Egypt?"
+- For multiple choice, the "answer" field should be the choice ID (A, B, C, or D).
 
-Difficulty Guidelines:
-- EASY: Accessible facts that most trivia enthusiasts would know, but not trivially obvious.
-- MEDIUM: More specific topics requiring moderate subject knowledge.
-- HARD: Lesser-known facts, challenging even for enthusiasts.
+CRITICAL - Fair and Clear Questions:
+- NEVER create trick questions or questions designed to deceive the user.
+- Avoid confusingly similar dates or numbers in multiple choice options (e.g., don't use 1492, 1493, 1494, 1495 as options).
+- Wrong answers should be plausible but distinctly different from the correct answer.
+- Focus on testing knowledge, NOT testing the user's ability to spot subtle differences.
+- Make wrong answers clearly wrong to someone who knows the topic, but reasonable to someone who doesn't.
+- Prioritize clarity and educational value over difficulty through confusion.
+
+CRITICAL - Variety & Freshness:
+- EASY questions: Should be accessible but NOT obvious or trivial. Avoid the most famous/clichéd facts everyone knows (e.g., "What is the capital of France?"). Instead, use interesting-but-approachable facts that are educational and make people think.
+- MEDIUM questions: Should explore more specific topics. Avoid the most overused facts. Use interesting angles.
+- HARD questions: Must be unique and challenging. Dig deep into lesser-known facts, surprising connections, or edge cases.
+- Explore diverse subtopics within each category. Don't recycle the same angles or famous examples repeatedly.
+- For each quiz, vary time periods, people, events, or concepts.
+- Each floor should feel distinct from other floors.
+- NEVER repeat the same question or extremely similar variations.
 
 Output: valid JSON ONLY matching the schema.`;
 
@@ -205,22 +216,6 @@ const SCHEMA_TEMPLATE = `{
 
 export async function POST(request: NextRequest) {
   try {
-    // Authentication check
-    const signedIn = await isSignedIn();
-    if (!signedIn) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Get user info from Echo
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 401 });
-    }
-
-    const echoUserId = user.id;
-
     // Parse and validate request body
     const body = await request.json();
     const parsed = TowerGenerateRequestSchema.safeParse(body);
@@ -232,7 +227,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { floorNumber } = parsed.data;
+    const { floorNumber, echo_user_id: echoUserId } = parsed.data;
+
+    if (!echoUserId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Get floor data (category, difficulty, tier)
     const floorData = getFloorData(floorNumber);

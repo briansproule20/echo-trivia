@@ -14,14 +14,83 @@ import { z } from "zod";
 // Constants for tower structure
 const TOTAL_CATEGORIES = CATEGORIES.length;
 const QUESTIONS_PER_FLOOR = 5;
+const BOSS_INTERVAL = 10; // Mini-boss every 10 regular floors
 
-// Tier thresholds based on categories count
-// Tier 1 (Easy): floors 1 to TOTAL_CATEGORIES
-// Tier 2 (Medium): floors TOTAL_CATEGORIES+1 to TOTAL_CATEGORIES*2
-// Tier 3 (Hard): floors TOTAL_CATEGORIES*2+1 to TOTAL_CATEGORIES*3
-const TIER_1_MAX = TOTAL_CATEGORIES;
-const TIER_2_MAX = TOTAL_CATEGORIES * 2;
-const TIER_3_MAX = TOTAL_CATEGORIES * 3;
+// Calculate total floors including mini-bosses
+const REGULAR_FLOORS = TOTAL_CATEGORIES * 3;
+const MINI_BOSS_COUNT = Math.floor(REGULAR_FLOORS / BOSS_INTERVAL);
+const TOTAL_FLOORS = REGULAR_FLOORS + MINI_BOSS_COUNT;
+
+// Helper to check if a floor is a mini-boss
+function isMiniBossFloor(floorNumber: number): boolean {
+  // Mini-bosses are inserted after every 10 regular floors
+  // Floor sequence: 1-10 (regular), 11 (boss), 12-21 (regular), 22 (boss), etc.
+  // So boss floors are at positions: 11, 22, 33, 44...
+  if (floorNumber <= 0) return false;
+
+  // Count how many regular floors come before this floor
+  // Each "block" is 10 regular + 1 boss = 11 floors
+  const blockSize = BOSS_INTERVAL + 1;
+  const positionInBlock = floorNumber % blockSize;
+
+  return positionInBlock === 0;
+}
+
+// Get the categories covered by a mini-boss floor
+function getMiniBossCategories(floorNumber: number): string[] {
+  // Find which regular floors this boss covers (the 10 before it)
+  const categories: string[] = [];
+
+  // Work backwards to find the 10 regular floors before this boss
+  let regularFloorCount = 0;
+  let checkFloor = floorNumber - 1;
+
+  while (regularFloorCount < BOSS_INTERVAL && checkFloor > 0) {
+    if (!isMiniBossFloor(checkFloor)) {
+      // This is a regular floor, get its category
+      const floorData = getRegularFloorData(checkFloor);
+      if (floorData) {
+        categories.unshift(floorData.category);
+      }
+      regularFloorCount++;
+    }
+    checkFloor--;
+  }
+
+  return categories;
+}
+
+// Get data for a regular (non-boss) floor
+function getRegularFloorData(floorNumber: number): { category: string; difficulty: "easy" | "medium" | "hard"; tier: 1 | 2 | 3 } | null {
+  if (isMiniBossFloor(floorNumber)) return null;
+
+  // Count regular floors up to this point
+  let regularCount = 0;
+  for (let i = 1; i <= floorNumber; i++) {
+    if (!isMiniBossFloor(i)) regularCount++;
+  }
+
+  // Determine tier based on regular floor count
+  let tier: 1 | 2 | 3;
+  let difficulty: "easy" | "medium" | "hard";
+
+  if (regularCount <= TOTAL_CATEGORIES) {
+    tier = 1;
+    difficulty = "easy";
+  } else if (regularCount <= TOTAL_CATEGORIES * 2) {
+    tier = 2;
+    difficulty = "medium";
+  } else {
+    tier = 3;
+    difficulty = "hard";
+  }
+
+  // Get category index
+  const categoryIndex = (regularCount - 1) % TOTAL_CATEGORIES;
+  const category = CATEGORIES[categoryIndex];
+
+  return { category, difficulty, tier };
+}
 
 // Lore frames for each tier
 const TIER_LORE = {
@@ -40,37 +109,68 @@ interface AnswerKey {
 
 // Request body schema
 const TowerGenerateRequestSchema = z.object({
-  floorNumber: z.number().min(1).max(TIER_3_MAX),
+  floorNumber: z.number().min(1).max(TOTAL_FLOORS),
   echo_user_id: z.string(),
 });
 
 // Get floor data (category, difficulty, tier) from floor number
 function getFloorData(floorNumber: number) {
-  let tier: 1 | 2 | 3;
-  let difficulty: "easy" | "medium" | "hard";
+  const isMiniBoss = isMiniBossFloor(floorNumber);
 
-  if (floorNumber <= TIER_1_MAX) {
-    tier = 1;
-    difficulty = "easy";
-  } else if (floorNumber <= TIER_2_MAX) {
-    tier = 2;
-    difficulty = "medium";
-  } else {
-    tier = 3;
-    difficulty = "hard";
+  if (isMiniBoss) {
+    // Mini-boss floor - get categories from prior 10 floors
+    const bossCategories = getMiniBossCategories(floorNumber);
+
+    // Determine tier based on where we are in the tower
+    // Count regular floors up to this boss
+    let regularCount = 0;
+    for (let i = 1; i < floorNumber; i++) {
+      if (!isMiniBossFloor(i)) regularCount++;
+    }
+
+    let tier: 1 | 2 | 3;
+    let baseDifficulty: "easy" | "medium" | "hard";
+
+    if (regularCount <= TOTAL_CATEGORIES) {
+      tier = 1;
+      baseDifficulty = "easy";
+    } else if (regularCount <= TOTAL_CATEGORIES * 2) {
+      tier = 2;
+      baseDifficulty = "medium";
+    } else {
+      tier = 3;
+      baseDifficulty = "hard";
+    }
+
+    // Boss difficulty is one level harder (easy->medium, medium->hard, hard->hard)
+    const bossDifficulty: "medium" | "hard" = baseDifficulty === "easy" ? "medium" : "hard";
+
+    return {
+      floorNumber,
+      tier,
+      difficulty: bossDifficulty,
+      category: "Guardian's Challenge",
+      isMiniBoss: true,
+      bossCategories,
+      tierLore: TIER_LORE[tier],
+      totalFloors: TOTAL_FLOORS,
+    };
   }
 
-  // Get category index (0-based, wrapping within tier)
-  const categoryIndex = (floorNumber - 1) % TOTAL_CATEGORIES;
-  const category = CATEGORIES[categoryIndex];
+  // Regular floor
+  const regularData = getRegularFloorData(floorNumber);
+  if (!regularData) {
+    throw new Error(`Invalid floor number: ${floorNumber}`);
+  }
 
   return {
     floorNumber,
-    tier,
-    difficulty,
-    category,
-    tierLore: TIER_LORE[tier],
-    totalFloors: TIER_3_MAX,
+    tier: regularData.tier,
+    difficulty: regularData.difficulty,
+    category: regularData.category,
+    isMiniBoss: false,
+    tierLore: TIER_LORE[regularData.tier],
+    totalFloors: TOTAL_FLOORS,
   };
 }
 
@@ -250,8 +350,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate questions
-    const prompt = `Generate ${QUESTIONS_PER_FLOOR} multiple choice trivia questions about "${floorData.category}".
+    // Generate questions - different prompt for mini-boss floors
+    let prompt: string;
+
+    if (floorData.isMiniBoss && floorData.bossCategories) {
+      // Mini-boss: questions from multiple categories
+      const categoriesList = floorData.bossCategories.join(", ");
+      prompt = `Generate ${QUESTIONS_PER_FLOOR} multiple choice trivia questions for a MINI-BOSS challenge.
+
+This is a Guardian's Challenge floor that tests knowledge across multiple categories.
+
+Floor: ${floorNumber} of ${floorData.totalFloors}
+Tier: ${floorData.tierLore.name}
+Difficulty: ALL questions must be ${floorData.difficulty.toUpperCase()}
+
+CATEGORIES TO DRAW FROM (pick one question from each of 5 different categories):
+${categoriesList}
+
+CRITICAL: The "category" field in your response MUST be "Guardian's Challenge"
+Each question's individual category should reflect which topic it covers.
+
+INSTRUCTIONS:
+- Create EXACTLY ${QUESTIONS_PER_FLOOR} questions at ${floorData.difficulty} difficulty
+- Draw questions from 5 DIFFERENT categories from the list above (one question per category)
+- ALL questions must be multiple_choice with exactly 4 options (A, B, C, D)
+- Match the ${floorData.difficulty} difficulty level for all questions
+- Include concise explanations (1-2 sentences) for each question
+- Make each question feel distinct and challenging
+
+Return ONLY valid JSON matching this schema:
+${SCHEMA_TEMPLATE}`;
+    } else {
+      // Regular floor: single category
+      prompt = `Generate ${QUESTIONS_PER_FLOOR} multiple choice trivia questions about "${floorData.category}".
 
 Floor: ${floorNumber} of ${floorData.totalFloors}
 Tier: ${floorData.tierLore.name}
@@ -269,6 +400,7 @@ INSTRUCTIONS:
 
 Return ONLY valid JSON matching this schema:
 ${SCHEMA_TEMPLATE}`;
+    }
 
     const result = await generateText({
       model: anthropic("claude-sonnet-4-20250514"),

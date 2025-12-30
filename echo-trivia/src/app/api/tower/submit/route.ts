@@ -9,6 +9,7 @@ import { z } from "zod";
 const TOTAL_CATEGORIES = CATEGORIES.length;
 const QUESTIONS_PER_FLOOR = 5;
 const PASSING_SCORE = 3; // 3/5 to pass
+const BOSS_INTERVAL = 10; // Mini-boss every 10 regular floors
 
 // Request body schema
 const TowerSubmitRequestSchema = z.object({
@@ -54,24 +55,105 @@ async function getAnswerKeys(quizId: string) {
   }>;
 }
 
-// Get floor data from floor number
-function getFloorData(floorNumber: number) {
-  const TIER_1_MAX = TOTAL_CATEGORIES;
-  const TIER_2_MAX = TOTAL_CATEGORIES * 2;
+// Helper to check if a floor is a mini-boss
+function isMiniBossFloor(floorNumber: number): boolean {
+  if (floorNumber <= 0) return false;
+  const blockSize = BOSS_INTERVAL + 1;
+  const positionInBlock = floorNumber % blockSize;
+  return positionInBlock === 0;
+}
+
+// Get data for a regular (non-boss) floor
+function getRegularFloorData(floorNumber: number): { category: string; difficulty: "easy" | "medium" | "hard" } | null {
+  if (isMiniBossFloor(floorNumber)) return null;
+
+  // Count regular floors up to this point
+  let regularCount = 0;
+  for (let i = 1; i <= floorNumber; i++) {
+    if (!isMiniBossFloor(i)) regularCount++;
+  }
 
   let difficulty: "easy" | "medium" | "hard";
-  if (floorNumber <= TIER_1_MAX) {
+  if (regularCount <= TOTAL_CATEGORIES) {
     difficulty = "easy";
-  } else if (floorNumber <= TIER_2_MAX) {
+  } else if (regularCount <= TOTAL_CATEGORIES * 2) {
     difficulty = "medium";
   } else {
     difficulty = "hard";
   }
 
-  const categoryIndex = (floorNumber - 1) % TOTAL_CATEGORIES;
+  const categoryIndex = (regularCount - 1) % TOTAL_CATEGORIES;
   const category = CATEGORIES[categoryIndex];
 
-  return { difficulty, category };
+  return { category, difficulty };
+}
+
+// Get the categories covered by a mini-boss floor
+function getMiniBossCategories(floorNumber: number): string[] {
+  const categories: string[] = [];
+  let regularFloorCount = 0;
+  let checkFloor = floorNumber - 1;
+
+  while (regularFloorCount < BOSS_INTERVAL && checkFloor > 0) {
+    if (!isMiniBossFloor(checkFloor)) {
+      const floorData = getRegularFloorData(checkFloor);
+      if (floorData) {
+        categories.unshift(floorData.category);
+      }
+      regularFloorCount++;
+    }
+    checkFloor--;
+  }
+
+  return categories;
+}
+
+// Get floor data from floor number
+function getFloorData(floorNumber: number) {
+  const isMiniBoss = isMiniBossFloor(floorNumber);
+
+  if (isMiniBoss) {
+    // Mini-boss floor - get categories from prior 10 floors
+    const bossCategories = getMiniBossCategories(floorNumber);
+
+    // Determine tier based on where we are in the tower
+    let regularCount = 0;
+    for (let i = 1; i < floorNumber; i++) {
+      if (!isMiniBossFloor(i)) regularCount++;
+    }
+
+    let baseDifficulty: "easy" | "medium" | "hard";
+    if (regularCount <= TOTAL_CATEGORIES) {
+      baseDifficulty = "easy";
+    } else if (regularCount <= TOTAL_CATEGORIES * 2) {
+      baseDifficulty = "medium";
+    } else {
+      baseDifficulty = "hard";
+    }
+
+    // Boss difficulty is one level harder
+    const bossDifficulty: "medium" | "hard" = baseDifficulty === "easy" ? "medium" : "hard";
+
+    return {
+      difficulty: bossDifficulty,
+      category: "Guardian's Challenge",
+      isMiniBoss: true,
+      bossCategories,
+    };
+  }
+
+  // Regular floor
+  const regularData = getRegularFloorData(floorNumber);
+  if (!regularData) {
+    throw new Error(`Invalid floor number: ${floorNumber}`);
+  }
+
+  return {
+    difficulty: regularData.difficulty,
+    category: regularData.category,
+    isMiniBoss: false,
+    bossCategories: undefined,
+  };
 }
 
 export async function POST(request: NextRequest) {
@@ -161,12 +243,27 @@ export async function POST(request: NextRequest) {
 
     // Update category stats
     const categoryStats = progress?.category_stats || {};
-    if (!categoryStats[floorData.category]) {
-      categoryStats[floorData.category] = { attempts: 0, correct: 0, perfect: 0 };
+    if (floorData.isMiniBoss && floorData.bossCategories) {
+      // Mini-boss: distribute stats across all covered categories
+      const questionsPerCategory = Math.floor(QUESTIONS_PER_FLOOR / floorData.bossCategories.length);
+      const correctPerCategory = Math.floor(correctCount / floorData.bossCategories.length);
+      for (const cat of floorData.bossCategories) {
+        if (!categoryStats[cat]) {
+          categoryStats[cat] = { attempts: 0, correct: 0, perfect: 0 };
+        }
+        categoryStats[cat].attempts += questionsPerCategory;
+        categoryStats[cat].correct += correctPerCategory;
+        // Don't count perfect for boss floors on individual categories
+      }
+    } else {
+      // Regular floor: single category
+      if (!categoryStats[floorData.category]) {
+        categoryStats[floorData.category] = { attempts: 0, correct: 0, perfect: 0 };
+      }
+      categoryStats[floorData.category].attempts += QUESTIONS_PER_FLOOR;
+      categoryStats[floorData.category].correct += correctCount;
+      if (isPerfect) categoryStats[floorData.category].perfect += 1;
     }
-    categoryStats[floorData.category].attempts += QUESTIONS_PER_FLOOR;
-    categoryStats[floorData.category].correct += correctCount;
-    if (isPerfect) categoryStats[floorData.category].perfect += 1;
 
     // Upsert progress
     const { error: updateError } = await serviceClient
@@ -462,6 +559,7 @@ export async function POST(request: NextRequest) {
       floorNumber,
       category: floorData.category,
       difficulty: floorData.difficulty,
+      isMiniBoss: floorData.isMiniBoss,
       progress: {
         currentFloor: newCurrentFloor,
         highestFloor: newHighestFloor,

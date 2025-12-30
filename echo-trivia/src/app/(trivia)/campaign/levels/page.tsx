@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Lock, Check, Sparkles, X, Play, Trophy, RotateCcw, BookOpen, LogIn, Eye } from "lucide-react";
+import { ArrowLeft, Lock, Check, Sparkles, X, Play, Trophy, RotateCcw, BookOpen, LogIn, Eye, Shield } from "lucide-react";
 import { CATEGORIES } from "@/lib/types";
 import { useEcho } from "@merit-systems/echo-react-sdk";
 import { AdventureFlurp } from "@/components/trivia/AdventureFlurp";
@@ -32,49 +32,86 @@ export function getFloorBackground(floorId: number): string {
 }
 
 // Generate floors: all categories on Easy, then Medium, then Hard
+// Plus mini-boss floors every 10 regular floors
 const CATEGORY_COUNT = CATEGORIES.length;
-const TOTAL_FLOORS = CATEGORY_COUNT * 3;
+const BOSS_INTERVAL = 10; // Mini-boss every 10 regular floors
+const REGULAR_FLOORS = CATEGORY_COUNT * 3;
+const MINI_BOSS_COUNT = Math.floor(REGULAR_FLOORS / BOSS_INTERVAL);
+const TOTAL_FLOORS = REGULAR_FLOORS + MINI_BOSS_COUNT;
 
-const TIERS = [
-  {
-    name: "The Lower Archives",
-    difficulty: "Easy" as const,
-    start: 1,
-    end: CATEGORY_COUNT,
-    description: "Where seekers first learn to read the old texts",
-    color: "emerald"
-  },
-  {
-    name: "The Middle Stacks",
-    difficulty: "Medium" as const,
-    start: CATEGORY_COUNT + 1,
-    end: CATEGORY_COUNT * 2,
-    description: "Where the Drift begins to obscure the signal",
-    color: "amber"
-  },
-  {
-    name: "The Upper Sanctum",
-    difficulty: "Hard" as const,
-    start: CATEGORY_COUNT * 2 + 1,
-    end: CATEGORY_COUNT * 3,
-    description: "Where only true maintainers can navigate",
-    color: "rose"
-  },
-];
+// Helper to determine tier info for a given regular floor index
+function getTierForRegularFloor(regularIndex: number): { name: string; difficulty: "Easy" | "Medium" | "Hard"; color: string; description: string } {
+  if (regularIndex <= CATEGORY_COUNT) {
+    return {
+      name: "The Lower Archives",
+      difficulty: "Easy",
+      color: "emerald",
+      description: "Where seekers first learn to read the old texts"
+    };
+  } else if (regularIndex <= CATEGORY_COUNT * 2) {
+    return {
+      name: "The Middle Stacks",
+      difficulty: "Medium",
+      color: "amber",
+      description: "Where the Drift begins to obscure the signal"
+    };
+  } else {
+    return {
+      name: "The Upper Sanctum",
+      difficulty: "Hard",
+      color: "rose",
+      description: "Where only true maintainers can navigate"
+    };
+  }
+}
+
+// Get category for a regular floor index (1-based within each tier)
+function getCategoryForRegularFloor(regularIndex: number): string {
+  const categoryIndex = ((regularIndex - 1) % CATEGORY_COUNT);
+  return CATEGORIES[categoryIndex];
+}
 
 function generateFloors(): Floor[] {
   const floors: Floor[] = [];
+  let floorId = 1;
+  let regularFloorCount = 0;
+  const recentCategories: string[] = [];
 
-  for (const tier of TIERS) {
-    for (let i = 0; i < CATEGORY_COUNT; i++) {
-      const floorId = tier.start + i;
+  for (let regularIndex = 1; regularIndex <= REGULAR_FLOORS; regularIndex++) {
+    const tier = getTierForRegularFloor(regularIndex);
+    const category = getCategoryForRegularFloor(regularIndex);
+
+    // Add regular floor
+    floors.push({
+      id: floorId,
+      category,
+      difficulty: tier.difficulty,
+      tier: tier.name,
+      background: getFloorBackground(floorId),
+    });
+
+    recentCategories.push(category);
+    regularFloorCount++;
+    floorId++;
+
+    // Add mini-boss after every BOSS_INTERVAL regular floors
+    if (regularFloorCount === BOSS_INTERVAL && regularIndex < REGULAR_FLOORS) {
+      const bossCategories = [...recentCategories];
+      const bossDifficulty = tier.difficulty === "Easy" ? "Medium" : "Hard";
+
       floors.push({
         id: floorId,
-        category: CATEGORIES[i],
-        difficulty: tier.difficulty,
+        category: "Guardian's Challenge",
+        difficulty: "Boss",
         tier: tier.name,
+        isMiniBoss: true,
+        bossCategories,
         background: getFloorBackground(floorId),
       });
+
+      floorId++;
+      regularFloorCount = 0;
+      recentCategories.length = 0; // Clear for next batch
     }
   }
 
@@ -82,6 +119,34 @@ function generateFloors(): Floor[] {
 }
 
 const FLOORS = generateFloors();
+
+// Tier display info (for headers)
+const TIERS = [
+  {
+    name: "The Lower Archives",
+    difficulty: "Easy" as const,
+    start: 1,
+    end: FLOORS.filter(f => f.tier === "The Lower Archives").length,
+    description: "Where seekers first learn to read the old texts",
+    color: "emerald"
+  },
+  {
+    name: "The Middle Stacks",
+    difficulty: "Medium" as const,
+    start: FLOORS.findIndex(f => f.tier === "The Middle Stacks") + 1,
+    end: FLOORS.findIndex(f => f.tier === "The Middle Stacks") + FLOORS.filter(f => f.tier === "The Middle Stacks").length,
+    description: "Where the Drift begins to obscure the signal",
+    color: "amber"
+  },
+  {
+    name: "The Upper Sanctum",
+    difficulty: "Hard" as const,
+    start: FLOORS.findIndex(f => f.tier === "The Upper Sanctum") + 1,
+    end: FLOORS.length,
+    description: "Where only true maintainers can navigate",
+    color: "rose"
+  },
+];
 
 // Floor stats type
 interface FloorStatsMap {
@@ -91,9 +156,11 @@ interface FloorStatsMap {
 interface Floor {
   id: number;
   category: string;
-  difficulty: "Easy" | "Medium" | "Hard" | "Tutorial";
+  difficulty: "Easy" | "Medium" | "Hard" | "Tutorial" | "Boss";
   tier: string;
   isTutorial?: boolean;
+  isMiniBoss?: boolean;
+  bossCategories?: string[]; // The categories this boss covers
   background: string;
 }
 
@@ -140,6 +207,7 @@ function FloorDetailModal({
     Medium: "text-amber-400 bg-amber-500/20",
     Hard: "text-rose-400 bg-rose-500/20",
     Tutorial: "text-violet-400 bg-violet-500/20",
+    Boss: "text-amber-400 bg-amber-500/20",
   };
 
   const isTutorial = floor.isTutorial;
@@ -323,6 +391,7 @@ function FloorRow({ floor, isCompleted, isCurrent, isLocked, index, onClick, flo
   floorRef?: React.RefObject<HTMLDivElement | null>;
 }) {
   const isTutorial = floor.isTutorial;
+  const isMiniBoss = floor.isMiniBoss;
 
   return (
     <motion.div
@@ -333,20 +402,22 @@ function FloorRow({ floor, isCompleted, isCurrent, isLocked, index, onClick, flo
       onClick={onClick}
       className={`
         group flex items-center gap-3 px-4 py-3 transition-all cursor-pointer
-        ${isTutorial ? "border-b border-violet-500/20" : "border-b border-violet-900/20"}
-        ${isLocked ? "opacity-50" : "hover:bg-violet-500/5"}
-        ${isCurrent ? "bg-violet-500/10 border-l-2 border-l-violet-500" : ""}
-        ${isCompleted ? "bg-emerald-500/5" : ""}
+        ${isTutorial ? "border-b border-violet-500/20" : isMiniBoss ? "border-b-2 border-amber-500/40 bg-amber-500/5" : "border-b border-violet-900/20"}
+        ${isLocked ? "opacity-50" : isMiniBoss ? "hover:bg-amber-500/10" : "hover:bg-violet-500/5"}
+        ${isCurrent ? isMiniBoss ? "bg-amber-500/15 border-l-2 border-l-amber-500" : "bg-violet-500/10 border-l-2 border-l-violet-500" : ""}
+        ${isCompleted ? isMiniBoss ? "bg-amber-500/10" : "bg-emerald-500/5" : ""}
       `}
     >
       {/* Floor number with decorative element */}
       <div className="relative flex items-center justify-center w-12">
         <div className={`
           absolute inset-0 rounded-lg opacity-20
-          ${isCompleted ? "bg-emerald-500" : isCurrent ? "bg-violet-500" : ""}
+          ${isCompleted ? isMiniBoss ? "bg-amber-500" : "bg-emerald-500" : isCurrent ? isMiniBoss ? "bg-amber-500" : "bg-violet-500" : ""}
         `} />
         {isTutorial ? (
           <BookOpen className={`w-5 h-5 relative z-10 ${isCompleted ? "text-emerald-400" : isCurrent ? "text-violet-400" : "text-stone-500"}`} />
+        ) : isMiniBoss ? (
+          <Shield className={`w-5 h-5 relative z-10 ${isCompleted ? "text-amber-400" : isCurrent ? "text-amber-400" : "text-amber-500/70"}`} />
         ) : (
           <span className={`
             font-mono text-sm tabular-nums relative z-10
@@ -359,33 +430,34 @@ function FloorRow({ floor, isCompleted, isCurrent, isLocked, index, onClick, flo
 
       {/* Vertical connector line */}
       <div className="flex flex-col items-center w-4">
-        <div className={`w-px h-full min-h-[20px] ${isLocked ? "bg-stone-700/50" : "bg-violet-500/30"}`} />
+        <div className={`w-px h-full min-h-[20px] ${isLocked ? "bg-stone-700/50" : isMiniBoss ? "bg-amber-500/30" : "bg-violet-500/30"}`} />
       </div>
 
       {/* Category name */}
       <div className={`
         flex-1 min-w-0 font-serif text-sm
-        ${isLocked ? "text-stone-500" : "text-stone-200"}
-        ${isCurrent ? "text-violet-200" : ""}
-        ${isCompleted ? "text-emerald-200" : ""}
+        ${isLocked ? "text-stone-500" : isMiniBoss ? "text-amber-200" : "text-stone-200"}
+        ${isCurrent ? isMiniBoss ? "text-amber-100" : "text-violet-200" : ""}
+        ${isCompleted ? isMiniBoss ? "text-amber-300" : "text-emerald-200" : ""}
       `}>
         <span className="truncate block">{floor.category}</span>
         {isTutorial && <span className="text-xs text-stone-500 block">Floor 0 · Prologue</span>}
+        {isMiniBoss && <span className="text-xs text-amber-500/70 block">Mini-Boss · Mixed Categories</span>}
       </div>
 
       {/* Status icon */}
       <div className="w-8 flex justify-center">
         {isCompleted ? (
-          <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
-            <Check className="w-3.5 h-3.5 text-emerald-400" />
+          <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isMiniBoss ? "bg-amber-500/20" : "bg-emerald-500/20"}`}>
+            <Check className={`w-3.5 h-3.5 ${isMiniBoss ? "text-amber-400" : "text-emerald-400"}`} />
           </div>
         ) : isCurrent ? (
           <motion.div
-            className="w-6 h-6 rounded-full flex items-center justify-center bg-violet-500/20"
+            className={`w-6 h-6 rounded-full flex items-center justify-center ${isMiniBoss ? "bg-amber-500/20" : "bg-violet-500/20"}`}
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+            <Sparkles className={`w-3.5 h-3.5 ${isMiniBoss ? "text-amber-400" : "text-violet-400"}`} />
           </motion.div>
         ) : isLocked ? (
           <div className="w-6 h-6 rounded-full bg-stone-800/50 flex items-center justify-center">
@@ -421,9 +493,6 @@ function TierHeader({ tier, isFirst }: { tier: typeof TIERS[number]; isFirst?: b
           <span className={`text-xs font-medium px-2 py-1 rounded-full bg-stone-900/50 ${colorStyles[tier.color as keyof typeof colorStyles].split(' ').pop()}`}>
             {tier.difficulty}
           </span>
-          <p className="text-xs text-stone-500 font-mono mt-1">
-            {tier.start}–{tier.end}
-          </p>
         </div>
       </div>
     </div>
@@ -542,7 +611,6 @@ export default function CampaignLevelsPage() {
 
           <div className="text-center">
             <h1 className="font-serif text-xl font-semibold text-amber-100">The Tower</h1>
-            <p className="text-xs text-stone-500 font-mono">{TOTAL_FLOORS} floors to ascend</p>
           </div>
 
           <div className="w-20" /> {/* Spacer for centering */}

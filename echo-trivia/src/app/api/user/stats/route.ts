@@ -65,9 +65,13 @@ export async function GET(request: NextRequest) {
     const dailyQuizzesCompleted = sessions.filter(
       (s) => s.is_daily === true
     ).length
-    const faceoffCount = sessions.filter(
+    const faceoffSessions = sessions.filter(
       (s) => s.game_mode === 'faceoff'
-    ).length
+    )
+    const faceoffCount = faceoffSessions.length
+    const faceoffAvgScore = faceoffSessions.length > 0
+      ? Math.round(faceoffSessions.reduce((sum, s) => sum + s.score_percentage, 0) / faceoffSessions.length)
+      : 0
     const totalTimePlayed = sessions.reduce(
       (sum, s) => sum + (s.time_taken || 0),
       0
@@ -247,6 +251,7 @@ export async function GET(request: NextRequest) {
       scoreTrend,
       difficultyPerformance,
       faceoffCount,
+      faceoffAvgScore,
       dailyActivityMap
     })
   } catch (error) {

@@ -240,13 +240,12 @@ export default function DashboardPage() {
         totalPlaysReceived = challenges.reduce((sum: number, c: { times_played: number }) => sum + (c.times_played || 0), 0);
       }
 
-      // Get faceoff played count and avg score from difficultyPerformance (already fetched)
-      // We'll set this after we have the stats data
+      // Set faceoff stats with data from both endpoints
       setFaceoffStats({
-        challenges_played: 0, // Will be updated from stats.faceoffCount
+        challenges_played: faceoffCount,
         challenges_created: challengesCreated,
         total_plays_received: totalPlaysReceived,
-        avg_score: 0, // Will be updated from difficultyPerformance
+        avg_score: faceoffAvgScore,
       });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);

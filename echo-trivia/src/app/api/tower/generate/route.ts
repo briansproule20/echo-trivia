@@ -240,8 +240,8 @@ export async function POST(request: NextRequest) {
     // Get or create user's tower progress
     const progress = await getOrCreateTowerProgress(echoUserId);
 
-    // Validate floor access - can only attempt current floor or lower
-    if (floorNumber > progress.highest_floor) {
+    // Validate floor access - floor 1 always accessible, others require progression
+    if (floorNumber > 1 && floorNumber > progress.highest_floor) {
       return NextResponse.json(
         {
           error: "Floor not accessible",

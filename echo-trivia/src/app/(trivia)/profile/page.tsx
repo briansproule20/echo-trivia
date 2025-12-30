@@ -557,9 +557,9 @@ export default function ProfilePage() {
                   <CardContent className="flex items-center justify-between py-4">
                     <div className="flex items-center gap-3">
                       <BarChart3 className="h-5 w-5 text-muted-foreground" />
-                      <span>View detailed analytics</span>
+                      <span className="text-sm text-muted-foreground">Feeling extra nerdy? See detailed analytics here.</span>
                     </div>
-                    <Button variant="outline" size="sm" className="pointer-events-none">
+                    <Button variant="outline" size="sm" className="pointer-events-none shrink-0">
                       Dashboard
                     </Button>
                   </CardContent>

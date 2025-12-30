@@ -55,8 +55,16 @@ export default function TowerLeaderboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <div className="container mx-auto px-4 py-6 sm:py-12">
+    <div className="min-h-screen relative">
+      {/* Background Image */}
+      <div
+        className="fixed inset-0 bg-cover bg-top bg-no-repeat"
+        style={{ backgroundImage: 'url(/trivwiztower.png)' }}
+      />
+      <div className="fixed inset-0 bg-background/40 backdrop-blur-[2px]" />
+
+      {/* Content */}
+      <div className="relative container mx-auto px-4 py-6 sm:py-12">
         <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
           {/* Navigation */}
           <div className="flex items-center justify-between">

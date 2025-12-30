@@ -7,9 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Trophy, Target, Flame, Clock, Award, BarChart3, Swords, Zap, Star, Castle, HelpCircle, Lock, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
+import { Trophy, Target, Flame, Clock, Award, BarChart3, Swords, Zap, Star, Castle, HelpCircle, Lock, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import type { UserStats, UserAchievement, DailyStreak, SurvivalStats, QuizSession } from "@/lib/supabase-types";
 import type { JeopardyStats } from "@/app/api/jeopardy/stats/route";
@@ -54,7 +53,6 @@ export default function ProfilePage() {
     unlockedCount: number;
     totalCount: number;
   } | null>(null);
-  const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [selectedAchievementCategory, setSelectedAchievementCategory] = useState<string>("all");
 
   useEffect(() => {
@@ -500,31 +498,19 @@ export default function ProfilePage() {
             </TabsContent>
 
             <TabsContent value="achievements" className="space-y-6 mt-6">
-              {/* All Achievements Dropdown */}
-              <Collapsible open={achievementsOpen} onOpenChange={setAchievementsOpen}>
-                <Card>
-                  <CollapsibleTrigger asChild>
-                    <CardHeader className="cursor-pointer hover:bg-accent/50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                          <Award className="h-5 w-5 text-amber-500" />
-                          All Achievements
-                        </CardTitle>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary">
-                            {unlockedCount}/{totalCount}
-                          </Badge>
-                          {achievementsOpen ? (
-                            <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                          ) : (
-                            <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <CardContent className="pt-0 space-y-4">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Award className="h-5 w-5 text-amber-500" />
+                      All Achievements
+                    </CardTitle>
+                    <Badge variant="secondary">
+                      {unlockedCount}/{totalCount}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
                       {/* Category Filter */}
                       <div className="flex flex-wrap gap-2 pb-4 border-b">
                         {achievementCategories.map(cat => (
@@ -624,9 +610,7 @@ export default function ProfilePage() {
                         </div>
                       )}
                     </CardContent>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>

@@ -99,6 +99,15 @@ export default function DashboardPage() {
   const [dailyActivityMap, setDailyActivityMap] = useState<Record<string, { count: number; avgScore: number; totalScore: number }>>({});
   const [survivalStats, setSurvivalStats] = useState<SurvivalStats | null>(null);
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
+  const [towerAchievements, setTowerAchievements] = useState<Array<{
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    tier: string;
+    category: string;
+    unlocked: boolean;
+  }>>([]);
   const [towerProgress, setTowerProgress] = useState<{
     currentFloor: number;
     highestFloor: number;
@@ -182,6 +191,13 @@ export default function DashboardPage() {
       if (towerRes.ok) {
         const data = await towerRes.json();
         setTowerProgress(data);
+      }
+
+      // Fetch tower achievements
+      const towerAchievementsRes = await fetch(`/api/tower/achievements?echo_user_id=${echo.user.id}`);
+      if (towerAchievementsRes.ok) {
+        const data = await towerAchievementsRes.json();
+        setTowerAchievements(data.achievements || []);
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -1366,12 +1382,13 @@ export default function DashboardPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                   <Award className="h-5 w-5" />
-                  Achievements ({userAchievements.length}/{allAchievements.length})
+                  Achievements ({userAchievements.length + towerAchievements.filter(a => a.unlocked).length}/{allAchievements.length + towerAchievements.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                  {allAchievements.map((achievement) => {
+                  {/* Regular Achievements */}
+                  {allAchievements.length > 0 && allAchievements.map((achievement) => {
                     const userAchievement = userAchievements.find(
                       (ua) => ua.achievement_id === achievement.id
                     );
@@ -1387,28 +1404,75 @@ export default function DashboardPage() {
                     return (
                       <div
                         key={achievement.id}
-                        className={`flex items-start gap-3 p-3 sm:p-4 rounded-lg border ${tierColors[achievement.tier as keyof typeof tierColors]} ${!isUnlocked && 'opacity-50'}`}
+                        className={`flex items-start gap-3 p-3 rounded-lg border ${tierColors[achievement.tier as keyof typeof tierColors]} ${!isUnlocked && 'opacity-50'}`}
                       >
-                        <div className={`text-2xl sm:text-3xl flex-shrink-0 ${!isUnlocked && 'grayscale'}`}>
+                        <div className={`text-xl flex-shrink-0 ${!isUnlocked && 'grayscale'}`}>
                           {achievement.icon}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-start sm:items-center gap-2 flex-wrap mb-1">
-                            <h4 className="font-semibold text-sm sm:text-base leading-tight">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <h4 className="font-semibold text-sm leading-tight">
                               {achievement.name}
                             </h4>
-                            <div className="flex items-center gap-1.5 flex-shrink-0">
-                              <Badge variant="outline" className="text-xs leading-none">
-                                {achievement.tier}
+                            <Badge variant="outline" className="text-xs leading-none">
+                              {achievement.tier}
+                            </Badge>
+                            {!isUnlocked && (
+                              <Badge variant="secondary" className="text-xs leading-none">
+                                🔒
                               </Badge>
-                              {!isUnlocked && (
-                                <Badge variant="secondary" className="text-xs leading-none">
-                                  🔒
-                                </Badge>
-                              )}
-                            </div>
+                            )}
                           </div>
-                          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            {achievement.description}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Subtle divider */}
+                  {allAchievements.length > 0 && towerAchievements.length > 0 && (
+                    <div className="flex items-center gap-2 py-1">
+                      <div className="h-px flex-1 bg-border" />
+                      <span className="text-xs text-muted-foreground">Tower</span>
+                      <div className="h-px flex-1 bg-border" />
+                    </div>
+                  )}
+
+                  {/* Tower Achievements */}
+                  {towerAchievements.map((achievement) => {
+                    const tierColors = {
+                      bronze: achievement.unlocked ? 'border-amber-700 bg-amber-50 dark:bg-amber-950/20' : 'border-gray-300 bg-gray-50 dark:bg-gray-900',
+                      silver: achievement.unlocked ? 'border-gray-400 bg-gray-50 dark:bg-gray-950/20' : 'border-gray-300 bg-gray-50 dark:bg-gray-900',
+                      gold: achievement.unlocked ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20' : 'border-gray-300 bg-gray-50 dark:bg-gray-900',
+                      platinum: achievement.unlocked ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/20' : 'border-gray-300 bg-gray-50 dark:bg-gray-900',
+                      diamond: achievement.unlocked ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-950/20' : 'border-gray-300 bg-gray-50 dark:bg-gray-900',
+                    };
+
+                    return (
+                      <div
+                        key={achievement.id}
+                        className={`flex items-start gap-3 p-3 rounded-lg border ${tierColors[achievement.tier as keyof typeof tierColors] || tierColors.bronze} ${!achievement.unlocked && 'opacity-50'}`}
+                      >
+                        <div className={`text-xl flex-shrink-0 ${!achievement.unlocked && 'grayscale'}`}>
+                          {achievement.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <h4 className="font-semibold text-sm leading-tight">
+                              {achievement.name}
+                            </h4>
+                            <Badge variant="outline" className="text-xs leading-none capitalize">
+                              {achievement.tier}
+                            </Badge>
+                            {!achievement.unlocked && (
+                              <Badge variant="secondary" className="text-xs leading-none">
+                                🔒
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
                             {achievement.description}
                           </p>
                         </div>

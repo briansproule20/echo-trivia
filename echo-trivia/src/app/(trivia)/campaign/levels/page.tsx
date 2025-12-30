@@ -83,15 +83,10 @@ function generateFloors(): Floor[] {
 
 const FLOORS = generateFloors();
 
-// Player progress - will be fetched from DB
-const PLAYER_PROGRESS = {
-  currentFloor: 0, // 0 = tutorial, 1+ = regular floors
-  completedFloors: [] as number[],
-  tutorialCompleted: false, // Must complete tutorial to unlock floor 1
-};
-
-// Floor stats - will be fetched from DB
-const FLOOR_STATS: Record<number, { attempts: number; bestScore: number; passed: boolean }> = {};
+// Floor stats type
+interface FloorStatsMap {
+  [floorId: number]: { attempts: number; bestScore: number; passed: boolean };
+}
 
 interface Floor {
   id: number;
@@ -430,8 +425,65 @@ export default function CampaignLevelsPage() {
   const [pendingFloor, setPendingFloor] = useState<Floor | null>(null);
   const echo = useEcho();
 
+  // Tower progress state
+  const [progress, setProgress] = useState({
+    currentFloor: 1,
+    highestFloor: 1,
+    completedFloors: [] as number[],
+    tutorialCompleted: false,
+  });
+  const [floorStats, setFloorStats] = useState<FloorStatsMap>({});
+  const [loading, setLoading] = useState(true);
+
   const isAuthenticated = !!echo.user;
   const username = echo.user?.name || echo.user?.email || null;
+
+  // Fetch tower progress from API
+  useEffect(() => {
+    async function fetchProgress() {
+      if (!echo.user?.id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/tower/progress?echo_user_id=${echo.user.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          // Build completed floors array from highest floor
+          const completed: number[] = [];
+          for (let i = 1; i < data.highestFloor; i++) {
+            completed.push(i);
+          }
+          setProgress({
+            currentFloor: data.currentFloor || 1,
+            highestFloor: data.highestFloor || 1,
+            completedFloors: completed,
+            tutorialCompleted: data.hasStarted || data.highestFloor > 1 || data.totalQuestions > 0,
+          });
+
+          // Build floor stats from floor_attempts if available
+          if (data.progress?.floor_attempts) {
+            const stats: FloorStatsMap = {};
+            for (const [floorId, attempts] of Object.entries(data.progress.floor_attempts)) {
+              stats[parseInt(floorId)] = {
+                attempts: attempts as number,
+                bestScore: 0, // Would need more data to track this
+                passed: parseInt(floorId) < data.highestFloor,
+              };
+            }
+            setFloorStats(stats);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch tower progress:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProgress();
+  }, [echo.user?.id]);
 
   const handleStartFloor = (floor: Floor) => {
     setPendingFloor(floor);
@@ -494,8 +546,8 @@ export default function CampaignLevelsPage() {
       {/* Progress bar */}
       <div className="relative z-10 h-1 bg-stone-900">
         <div
-          className="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-rose-500"
-          style={{ width: `${(PLAYER_PROGRESS.currentFloor / TOTAL_FLOORS) * 100}%` }}
+          className="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-rose-500 transition-all duration-500"
+          style={{ width: `${(progress.highestFloor / TOTAL_FLOORS) * 100}%` }}
         />
       </div>
 
@@ -504,26 +556,28 @@ export default function CampaignLevelsPage() {
         {/* Lower Archives */}
         <TierHeader tier={TIERS[0]} isFirst />
 
-        {/* Floor 0 - Tutorial (must complete to unlock campaign) */}
+        {/* Floor 0 - Tutorial/Prologue */}
         <FloorRow
           floor={TUTORIAL_FLOOR}
           index={0}
-          isCompleted={PLAYER_PROGRESS.tutorialCompleted}
-          isCurrent={PLAYER_PROGRESS.currentFloor === 0 && !PLAYER_PROGRESS.tutorialCompleted}
+          isCompleted={progress.tutorialCompleted}
+          isCurrent={!progress.tutorialCompleted}
           isLocked={false} // Tutorial is always unlocked
           onClick={() => setSelectedFloor(TUTORIAL_FLOOR)}
-          floorRef={PLAYER_PROGRESS.currentFloor === 0 ? currentFloorRef : undefined}
+          floorRef={!progress.tutorialCompleted ? currentFloorRef : undefined}
         />
         {floorsByTier.lower.map((floor, index) => {
-          const isCurrent = floor.id === PLAYER_PROGRESS.currentFloor && PLAYER_PROGRESS.tutorialCompleted;
+          const isCurrent = floor.id === progress.highestFloor;
+          const isCompleted = floor.id < progress.highestFloor;
+          const isLocked = floor.id > progress.highestFloor;
           return (
             <FloorRow
               key={floor.id}
               floor={floor}
               index={index + 1}
-              isCompleted={PLAYER_PROGRESS.completedFloors.includes(floor.id)}
+              isCompleted={isCompleted}
               isCurrent={isCurrent}
-              isLocked={!PLAYER_PROGRESS.tutorialCompleted || floor.id > PLAYER_PROGRESS.currentFloor}
+              isLocked={isLocked}
               onClick={() => setSelectedFloor(floor)}
               floorRef={isCurrent ? currentFloorRef : undefined}
             />
@@ -533,15 +587,17 @@ export default function CampaignLevelsPage() {
         {/* Middle Stacks */}
         <TierHeader tier={TIERS[1]} />
         {floorsByTier.middle.map((floor, index) => {
-          const isCurrent = floor.id === PLAYER_PROGRESS.currentFloor && PLAYER_PROGRESS.tutorialCompleted;
+          const isCurrent = floor.id === progress.highestFloor;
+          const isCompleted = floor.id < progress.highestFloor;
+          const isLocked = floor.id > progress.highestFloor;
           return (
             <FloorRow
               key={floor.id}
               floor={floor}
               index={index + 1}
-              isCompleted={PLAYER_PROGRESS.completedFloors.includes(floor.id)}
+              isCompleted={isCompleted}
               isCurrent={isCurrent}
-              isLocked={!PLAYER_PROGRESS.tutorialCompleted || floor.id > PLAYER_PROGRESS.currentFloor}
+              isLocked={isLocked}
               onClick={() => setSelectedFloor(floor)}
               floorRef={isCurrent ? currentFloorRef : undefined}
             />
@@ -551,15 +607,17 @@ export default function CampaignLevelsPage() {
         {/* Upper Sanctum */}
         <TierHeader tier={TIERS[2]} />
         {floorsByTier.upper.map((floor, index) => {
-          const isCurrent = floor.id === PLAYER_PROGRESS.currentFloor && PLAYER_PROGRESS.tutorialCompleted;
+          const isCurrent = floor.id === progress.highestFloor;
+          const isCompleted = floor.id < progress.highestFloor;
+          const isLocked = floor.id > progress.highestFloor;
           return (
             <FloorRow
               key={floor.id}
               floor={floor}
               index={index + 1}
-              isCompleted={PLAYER_PROGRESS.completedFloors.includes(floor.id)}
+              isCompleted={isCompleted}
               isCurrent={isCurrent}
-              isLocked={!PLAYER_PROGRESS.tutorialCompleted || floor.id > PLAYER_PROGRESS.currentFloor}
+              isLocked={isLocked}
               onClick={() => setSelectedFloor(floor)}
               floorRef={isCurrent ? currentFloorRef : undefined}
             />
@@ -579,12 +637,12 @@ export default function CampaignLevelsPage() {
         {selectedFloor && (
           <FloorDetailModal
             floor={selectedFloor}
-            stats={FLOOR_STATS[selectedFloor.id] ?? null}
-            isLocked={selectedFloor.isTutorial ? false : (!PLAYER_PROGRESS.tutorialCompleted || selectedFloor.id > PLAYER_PROGRESS.currentFloor)}
-            isCompleted={selectedFloor.isTutorial ? PLAYER_PROGRESS.tutorialCompleted : PLAYER_PROGRESS.completedFloors.includes(selectedFloor.id)}
+            stats={floorStats[selectedFloor.id] ?? null}
+            isLocked={selectedFloor.isTutorial ? false : selectedFloor.id > progress.highestFloor}
+            isCompleted={selectedFloor.isTutorial ? progress.tutorialCompleted : selectedFloor.id < progress.highestFloor}
             isCurrent={selectedFloor.isTutorial
-              ? (PLAYER_PROGRESS.currentFloor === 0 && !PLAYER_PROGRESS.tutorialCompleted)
-              : (selectedFloor.id === PLAYER_PROGRESS.currentFloor && PLAYER_PROGRESS.tutorialCompleted)
+              ? !progress.tutorialCompleted
+              : selectedFloor.id === progress.highestFloor
             }
             isAuthenticated={isAuthenticated}
             username={username}

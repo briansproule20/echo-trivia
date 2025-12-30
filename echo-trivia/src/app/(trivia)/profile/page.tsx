@@ -347,7 +347,7 @@ export default function ProfilePage() {
                   <div className="flex items-center gap-2">
                     <Castle className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-500" />
                     <span className="text-2xl sm:text-3xl font-bold">
-                      {towerProgress?.currentFloor || 1}
+                      {towerProgress?.highestFloor || 1}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">

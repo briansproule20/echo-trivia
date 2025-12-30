@@ -273,20 +273,28 @@ export default function CampaignPage() {
             {/* Enter Tower button or Sign In */}
             <div className="flex flex-col items-center gap-3 pt-2">
               {isAuthenticated ? (
-                <Link
-                  href="/campaign/levels"
-                  className="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-amber-500/40 bg-amber-500/10 backdrop-blur-sm hover:bg-amber-500/20 hover:border-amber-500/60 transition-all text-amber-200 text-sm font-serif tracking-wide"
-                >
-                  <span>Enter the Tower</span>
-                  <motion.div
-                    className="w-2 h-2 rounded-full bg-amber-400"
-                    animate={{
-                      opacity: [0.6, 1, 0.6],
-                      scale: [1, 1.2, 1],
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
-                </Link>
+                <>
+                  <Link
+                    href="/campaign/levels"
+                    className="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-amber-500/40 bg-amber-500/10 backdrop-blur-sm hover:bg-amber-500/20 hover:border-amber-500/60 transition-all text-amber-200 text-sm font-serif tracking-wide"
+                  >
+                    <span>Enter the Tower</span>
+                    <motion.div
+                      className="w-2 h-2 rounded-full bg-amber-400"
+                      animate={{
+                        opacity: [0.6, 1, 0.6],
+                        scale: [1, 1.2, 1],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                  </Link>
+                  <Link
+                    href="/campaign/leaderboard"
+                    className="inline-flex items-center px-4 py-2 rounded-full border border-amber-500/30 bg-stone-950/50 backdrop-blur-sm hover:bg-amber-500/10 hover:border-amber-500/50 transition-all text-amber-200/80 text-sm font-serif"
+                  >
+                    Leaderboard
+                  </Link>
+                </>
               ) : (
                 <>
                   <button

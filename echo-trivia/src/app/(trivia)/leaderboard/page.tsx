@@ -521,7 +521,7 @@ export default function LeaderboardPage() {
               <p className="text-sm text-muted-foreground">
                 Looking for other leaderboards?
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 flex-wrap">
                 <Button asChild variant="outline" className="w-full sm:w-auto">
                   <Link href="/faceoff/hub">
                     <Swords className="mr-2 h-4 w-4" />
@@ -538,6 +538,11 @@ export default function LeaderboardPage() {
                   <Link href="/jeopardy/leaderboard">
                     <LayoutGrid className="mr-2 h-4 w-4" />
                     Jeopardy Leaderboards
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full sm:w-auto">
+                  <Link href="/campaign/leaderboard">
+                    Tower Leaderboard
                   </Link>
                 </Button>
               </div>

@@ -337,6 +337,68 @@ ${shareUrl}`;
     }
   };
 
+  // Handle Faceoff result sharing
+  const handleFaceoffShare = async () => {
+    const questions = session.quiz.questions || [];
+    const difficultyRow = questions
+      .map((q) => {
+        if (q.difficulty === 'easy') return '🟢';
+        if (q.difficulty === 'medium') return '🟦';
+        if (q.difficulty === 'hard') return '⬛';
+        return '🟦';
+      })
+      .join('');
+
+    const resultRow = questions
+      .map((q) => {
+        const submission = session.submissions.find(s => s.questionId === q.id);
+        return submission?.correct ? '✅' : '❌';
+      })
+      .join('');
+
+    let shareUrl = "https://trivwiz.com";
+    if (referralCode) {
+      shareUrl += `?referral_code=${referralCode}`;
+    }
+
+    // Different text for challenger vs creator
+    let text: string;
+    if (isFaceoffChallenger && creatorScore !== null && creatorScore !== undefined) {
+      const resultEmoji = matchResult === 'win' ? '🏆' : matchResult === 'lose' ? '😭' : '🤝';
+      const resultText = matchResult === 'win' ? 'I won!' : matchResult === 'lose' ? 'I lost!' : "It's a tie!";
+      text = `${resultEmoji} ${resultText} Faceoff vs ${creatorUsername}
+
+${session.quiz.category}
+${difficultyRow}
+${resultRow}
+
+Me: ${score}/${questionsCount} vs ${creatorUsername}: ${creatorScore}/${questionsCount}
+
+${shareUrl}`;
+    } else {
+      text = `⚔️ Faceoff Challenge
+
+${session.quiz.category}
+${difficultyRow}
+${resultRow}
+
+Score: ${score}/${questionsCount} (${percentage}%)
+
+${shareUrl}`;
+    }
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ text });
+      } catch (err) {
+        console.error("Share failed:", err);
+      }
+    } else {
+      await navigator.clipboard.writeText(text);
+      alert("Copied to clipboard!");
+    }
+  };
+
   // Handle Faceoff challenge creation
   const handleCreateFaceoffChallenge = async () => {
     if (!session || !echo.user?.id) return;
@@ -636,38 +698,29 @@ ${shareUrl}`;
           )}
 
           {/* Actions */}
-          {isFaceoffChallenger ? (
-            /* Simplified actions for faceoff challenger - just Home button */
-            <Button onClick={() => router.push("/")} size="lg" className="w-full">
+          <div className={`grid gap-4 ${isFaceoffMode ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3'}`}>
+            {isFaceoffMode ? (
+              <Button onClick={handleFaceoffShare} size="lg" variant="outline">
+                <Share2 className="mr-2 h-4 w-4" />
+                Share Result
+              </Button>
+            ) : (
+              <>
+                <Button onClick={handleRetry} size="lg" variant="outline">
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Play Similar
+                </Button>
+                <Button onClick={handleShare} size="lg" variant="outline">
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Share Score
+                </Button>
+              </>
+            )}
+            <Button onClick={() => router.push("/")} size="lg">
               <Home className="mr-2 h-4 w-4" />
               Home
             </Button>
-          ) : (
-            <div className={`grid grid-cols-2 ${!isFaceoffMode && quizResults ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}>
-              {!isFaceoffMode && (
-                <>
-                  <Button onClick={handleRetry} size="lg" variant="outline">
-                    <RotateCcw className="mr-2 h-4 w-4" />
-                    Play Similar
-                  </Button>
-                  <Button onClick={handleShare} size="lg" variant="outline">
-                    <Share2 className="mr-2 h-4 w-4" />
-                    Share Score
-                  </Button>
-                </>
-              )}
-              {quizResults && (
-                <Button onClick={() => setShowStatsDialog(true)} size="lg" variant="outline">
-                  <BarChart3 className="mr-2 h-4 w-4" />
-                  View Stats
-                </Button>
-              )}
-              <Button onClick={() => router.push("/")} size="lg">
-                <Home className="mr-2 h-4 w-4" />
-                Home
-              </Button>
-            </div>
-          )}
+          </div>
 
           {/* Username Display - Simple inline edit at bottom (hide for faceoff challengers) */}
           {echo.user?.id && !isLoadingUsername && !isFaceoffChallenger && (

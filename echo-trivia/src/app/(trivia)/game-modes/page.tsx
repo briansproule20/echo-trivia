@@ -507,7 +507,6 @@ export default function GameModesPage() {
                     description={mode.description}
                     icon={mode.icon}
                     href={mode.href}
-                    beta={mode.beta}
                     delay={(index + 3) * 100}
                     useStars={mode.useStars}
                     useInfiniteScroll={mode.useInfiniteScroll}

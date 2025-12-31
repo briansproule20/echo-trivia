@@ -11,7 +11,6 @@ import { ShootingStars } from "@/components/ui/shooting-stars";
 import { StarsBackground } from "@/components/ui/stars-background";
 import { InfiniteScrollBackground } from "@/components/ui/infinite-scroll-background";
 import { Calendar, Sparkles, Zap, Lock, Castle, Trophy, Swords, LayoutGrid } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
 interface GameModeCardProps {
   title: string;
@@ -19,7 +18,6 @@ interface GameModeCardProps {
   icon: React.ReactNode;
   href?: string;
   comingSoon?: boolean;
-  beta?: boolean;
   delay?: number;
   useVortex?: boolean;
   useBeams?: boolean;
@@ -28,7 +26,7 @@ interface GameModeCardProps {
   infiniteScrollDesktopSpeed?: number;
 }
 
-function GameModeCard({ title, description, icon, href, comingSoon = false, beta = false, delay = 0, useVortex = false, useBeams = false, useStars = false, useInfiniteScroll = false, infiniteScrollDesktopSpeed }: GameModeCardProps) {
+function GameModeCard({ title, description, icon, href, comingSoon = false, delay = 0, useVortex = false, useBeams = false, useStars = false, useInfiniteScroll = false, infiniteScrollDesktopSpeed }: GameModeCardProps) {
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -141,11 +139,6 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, beta
               Coming Soon
             </div>
           )}
-          {beta && (
-            <Badge variant="default" className="rounded-full px-3 py-1 text-xs font-medium">
-              Beta
-            </Badge>
-          )}
         </div>
 
         {/* Title */}
@@ -232,16 +225,8 @@ function CampaignCard({ delay = 0 }: { delay?: number }) {
           <div className="space-y-6">
             {/* Header with Badge */}
             <div className="space-y-4">
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="relative">
-                  <div className="absolute inset-0 animate-pulse rounded-full bg-primary/20 blur-xl" />
-                  <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-primary/30 bg-primary/10">
-                    <Castle className="h-8 w-8 text-primary" />
-                  </div>
-                </div>
-                <Badge variant="default" className="rounded-full px-3 py-1 text-xs font-medium">
-                  Beta
-                </Badge>
+              <div className="flex h-16 w-16 items-center justify-center rounded-full border border-primary/30 bg-primary/10">
+                <Castle className="h-8 w-8 text-primary" />
               </div>
 
               {/* Title */}
@@ -383,14 +368,12 @@ export default function GameModesPage() {
       description: "Create custom challenges and share them with friends. Generate a quiz, get a shareable link, and compete for the best score!",
       icon: <Swords className="h-7 w-7 text-primary" />,
       href: "/faceoff",
-      beta: true,
     },
     {
       title: "Endless Survival",
       description: "Answer questions until you get one wrong. How long can you survive? Push your limits.",
       icon: <Zap className="h-7 w-7 text-primary" />,
       href: "/survival",
-      beta: true,
       useInfiniteScroll: true,
       infiniteScrollDesktopSpeed: 40,
     },
@@ -399,7 +382,6 @@ export default function GameModesPage() {
       description: "A simplified Jeopardy experience. Choose categories, answer questions worth 200-1000 points, and see how high you can score.",
       icon: <LayoutGrid className="h-7 w-7 text-primary" />,
       href: "/jeopardy",
-      beta: true,
       useStars: true,
     },
   ];
@@ -497,7 +479,6 @@ export default function GameModesPage() {
                     description={mode.description}
                     icon={mode.icon}
                     href={mode.href}
-                    beta={mode.beta}
                     delay={index * 100}
                     useVortex={mode.useVortex}
                     useBeams={mode.useBeams}
@@ -513,7 +494,6 @@ export default function GameModesPage() {
                   description={gameModes[2].description}
                   icon={gameModes[2].icon}
                   href={gameModes[2].href}
-                  beta={gameModes[2].beta}
                   delay={200}
                 />
               </div>

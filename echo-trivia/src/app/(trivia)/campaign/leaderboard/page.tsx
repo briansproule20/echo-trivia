@@ -119,16 +119,15 @@ export default function TowerLeaderboardPage() {
                         className={`flex items-center justify-between p-3 sm:p-4 rounded-lg border ${getRankColor(entry.rank)} ${isCurrentUser && 'ring-2 ring-primary'}`}
                       >
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div className="flex items-center gap-2 min-w-[3rem] shrink-0">
-                            {getRankIcon(entry.rank)}
-                            {!getRankIcon(entry.rank) && (
+                          <div className="w-10 shrink-0 flex justify-center">
+                            {getRankIcon(entry.rank) || (
                               <span className="text-lg font-bold text-muted-foreground">
                                 #{entry.rank}
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="font-medium truncate">
+                          <div className="flex items-center gap-2 min-w-0 justify-start">
+                            <span className="font-medium truncate text-left">
                               {entry.username || `User ${entry.echo_user_id.slice(0, 8)}`}
                             </span>
                             {isCurrentUser && (
@@ -151,14 +150,14 @@ export default function TowerLeaderboardPage() {
                       </div>
                       <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg border ring-2 ring-primary bg-primary/5">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div className="flex items-center gap-2 min-w-[3rem] shrink-0">
+                          <div className="w-10 shrink-0 flex items-center justify-center gap-1">
                             <User className="h-5 w-5 text-primary" />
-                            <span className="text-lg font-bold text-primary">
-                              #{userPosition.rank}
-                            </span>
                           </div>
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="font-medium truncate">
+                          <span className="text-lg font-bold text-primary shrink-0">
+                            #{userPosition.rank}
+                          </span>
+                          <div className="flex items-center gap-2 min-w-0 justify-start">
+                            <span className="font-medium truncate text-left">
                               {userPosition.username || `User ${userPosition.echo_user_id.slice(0, 8)}`}
                             </span>
                             <Badge variant="default" className="text-xs shrink-0">You</Badge>

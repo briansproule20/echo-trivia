@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Swords, Loader2, Share2, Info, LayoutGrid } from "lucide-react";
 import Link from "next/link";
@@ -116,7 +115,6 @@ function FaceoffContent() {
             <div className="flex items-center justify-center gap-3">
               <Swords className="h-10 w-10 text-primary" />
               <h1 className="text-4xl font-bold">Faceoff</h1>
-              <Badge variant="default" className="ml-2">Beta</Badge>
             </div>
             <p className="text-muted-foreground">
               Create a custom challenge and share it with friends

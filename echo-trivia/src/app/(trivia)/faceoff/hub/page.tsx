@@ -379,7 +379,6 @@ export default function FaceoffHubPage() {
             <div className="flex items-center justify-center gap-3">
               <Swords className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
               <h1 className="text-3xl sm:text-4xl font-bold">Faceoff Hub</h1>
-              <Badge variant="default" className="ml-2">Beta</Badge>
             </div>
             <p className="text-muted-foreground max-w-lg mx-auto">
               Browse all challenges, compete on leaderboards, or create your own

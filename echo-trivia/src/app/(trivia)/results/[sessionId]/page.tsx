@@ -624,14 +624,13 @@ ${shareUrl}`;
             </Card>
           )}
 
-          {/* Faceoff Challenge Share Card - only for non-challenger faceoff (creator viewing results) */}
+          {/* Faceoff Challenge Share Card - only for creator (not challenger) */}
           {isFaceoffMode && !isFaceoffChallenger && (
             <Card className="border-primary/30 bg-gradient-to-br from-primary/10 via-transparent to-transparent">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                   <Swords className="h-5 w-5 text-primary" />
                   Challenge Your Friends
-                  <Badge variant="default" className="ml-2">Beta</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">

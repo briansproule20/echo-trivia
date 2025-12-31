@@ -156,6 +156,24 @@ export async function GET(
       }))
     }
 
+    // If this is a faceoff challenger session, fetch the challenge details
+    let faceoffChallenge = undefined
+    if (session.game_mode === 'faceoff' && session.faceoff_share_code) {
+      const { data: challenge } = await serviceClient
+        .from('faceoff_challenges')
+        .select('share_code, creator_username, creator_score')
+        .eq('share_code', session.faceoff_share_code)
+        .single()
+
+      if (challenge) {
+        faceoffChallenge = {
+          shareCode: challenge.share_code,
+          creatorUsername: challenge.creator_username,
+          creatorScore: challenge.creator_score,
+        }
+      }
+    }
+
     // Transform data to match the Session type expected by the results page
     const transformedSession = {
       id: session.id,
@@ -183,6 +201,7 @@ export async function GET(
       scorePercentage: session.score_percentage,
       earnedTitle: session.title,
       gameMode: session.game_mode,
+      faceoffChallenge,
     }
 
     return NextResponse.json({

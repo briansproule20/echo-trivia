@@ -20,6 +20,7 @@ import { Logo } from '@/components/logo'
 import { Session } from '@/lib/types'
 import { generateId } from '@/lib/quiz-utils'
 import { storage } from '@/lib/storage'
+import { usePlayStore } from '@/lib/store'
 
 interface FaceoffChallenge {
   id: string
@@ -44,6 +45,7 @@ export default function FaceoffChallengePage() {
   const router = useRouter()
   const shareCode = params.shareCode as string
   const echo = useEcho()
+  const { setSession } = usePlayStore()
 
   const [challenge, setChallenge] = useState<FaceoffChallenge | null>(null)
   const [loading, setLoading] = useState(true)
@@ -150,7 +152,8 @@ export default function FaceoffChallengePage() {
       },
     }
 
-    // Store in IndexedDB for proper persistence
+    // Store in both Zustand store and IndexedDB
+    setSession(session)
     await storage.saveSession(session)
 
     // Navigate to play page

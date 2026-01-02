@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { AnimatedGradientText } from '@/components/ui/animated-gradient-text'
+import { Footer } from '@/components/Footer'
 
 // Provider logo component using models.dev CDN
 function ProviderLogo({ provider, className }: { provider: string; className?: string }) {
@@ -692,7 +693,7 @@ export default function SettingsPage() {
               <div className="grid grid-cols-2 sm:flex sm:justify-center gap-3">
                 {FONTS.map((f) => {
                   const isSelected = font === f.id
-                  const fontClass = f.id === 'serif' ? 'font-serif' : f.id === 'dyslexic' ? 'font-dyslexic' : f.id === 'tech' ? 'font-tech' : ''
+                  const fontClass = f.id === 'sans' ? 'font-sans' : f.id === 'serif' ? 'font-serif' : f.id === 'dyslexic' ? 'font-dyslexic' : f.id === 'tech' ? 'font-tech' : ''
                   return (
                     <button
                       key={f.id}
@@ -723,6 +724,7 @@ export default function SettingsPage() {
           </Card>
         </div>
       </div>
+      <Footer />
     </DotBackground>
   )
 }

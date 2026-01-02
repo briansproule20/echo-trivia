@@ -204,7 +204,7 @@ export default function ChatPage() {
 
   // Create display messages with welcome
   const displayMessages = messages.length === 0
-    ? [{ id: 'welcome', role: 'assistant' as const, text: `Greetings, ${getUserDisplayName()}! I am the Wizard's Hat—a sentient artifact that has rested upon the great Wizard's head for countless ages. From the Tower's archive, I've absorbed knowledge beyond measure. Ask me anything about trivia, curious facts, or the nature of knowing itself.`, triviaQuestion: null }]
+    ? [{ id: 'welcome', role: 'assistant' as const, text: `Hey ${getUserDisplayName()}! I'm the Wizard's Hat. Ask me anything, or tap a button below to start a trivia warmup.`, triviaQuestion: null }]
     : messages.map(m => ({ id: m.id, role: m.role, text: getMessageText(m), triviaQuestion: m.role === 'assistant' ? getTriviaQuestion(m) : null }))
 
   return (

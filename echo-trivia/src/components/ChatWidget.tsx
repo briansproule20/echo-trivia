@@ -92,7 +92,7 @@ export function ChatWidget() {
 
   // Create display messages with welcome
   const displayMessages = messages.length === 0
-    ? [{ id: 'welcome', role: 'assistant' as const, text: `Greetings, ${getUserDisplayName()}! I am the Wizard's Hat—sentient keeper of the Tower's archive. Ask me anything!` }]
+    ? [{ id: 'welcome', role: 'assistant' as const, text: `Hey ${getUserDisplayName()}! I'm the Wizard's Hat. Ask me anything or head to the full chat for trivia practice.` }]
     : messages.map(m => ({ id: m.id, role: m.role, text: getMessageText(m) }))
 
   return (

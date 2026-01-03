@@ -368,6 +368,7 @@ export default function GameModesPage() {
       description: "Create custom challenges and share them with friends. Generate a quiz, get a shareable link, and compete for the best score!",
       icon: <Swords className="h-7 w-7 text-primary" />,
       href: "/faceoff",
+      useBeams: true,
     },
     {
       title: "Endless Survival",
@@ -495,6 +496,7 @@ export default function GameModesPage() {
                   icon={gameModes[2].icon}
                   href={gameModes[2].href}
                   delay={200}
+                  useBeams={gameModes[2].useBeams}
                 />
               </div>
 

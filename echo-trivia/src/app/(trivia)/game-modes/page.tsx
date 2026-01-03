@@ -354,7 +354,7 @@ export default function GameModesPage() {
       description: "One curated quiz every day. Test yourself against the global leaderboard and climb the ranks.",
       icon: <Calendar className="h-7 w-7 text-primary" />,
       href: "/daily",
-      useVortex: true,
+      useBeams: true,
     },
     {
       title: "Freeplay",

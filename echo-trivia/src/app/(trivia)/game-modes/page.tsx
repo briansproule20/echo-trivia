@@ -336,28 +336,28 @@ export default function GameModesPage() {
   const gameModes = [
     {
       title: "Daily Challenge",
-      description: "One curated quiz every day. Test yourself against the global leaderboard and climb the ranks.",
+      description: "One category every day, unlimited attempts. Test yourself against friends and family and contribute to the Wizard's knowledge!",
       icon: <Calendar className="h-7 w-7 text-primary" />,
       href: "/daily",
       useBeams: true,
     },
     {
       title: "Freeplay",
-      description: "Unlimited custom quizzes on any topic. Choose your difficulty, categories, and question count.",
+      description: "Custom quizzes on any topic. Choose your difficulty, categories, and question count.",
       icon: <Sparkles className="h-7 w-7 text-primary" />,
       href: "/freeplay",
       useBeams: true,
     },
     {
       title: "Faceoff",
-      description: "Create custom challenges and share them with friends. Generate a quiz, get a shareable link, and compete for the best score!",
+      description: "Create custom challenges and play head to head with friends. Generate a quiz, get a shareable link, and compete for the best score!",
       icon: <Swords className="h-7 w-7 text-primary" />,
       href: "/faceoff",
       useBeams: true,
     },
     {
       title: "Endless Survival",
-      description: "Answer questions until you get one wrong. How long can you survive? Push your limits.",
+      description: "Answer questions until you get one wrong. How long can you survive?",
       icon: <Zap className="h-7 w-7 text-primary" />,
       href: "/survival",
       useInfiniteScroll: true,

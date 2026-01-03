@@ -8,30 +8,22 @@ import { Illustration } from "@/components/ui/glowing-stars";
 import { ShootingStars } from "@/components/ui/shooting-stars";
 import { StarsBackground } from "@/components/ui/stars-background";
 import { InfiniteScrollBackground } from "@/components/ui/infinite-scroll-background";
-import { Calendar, Sparkles, Zap, Lock, Castle, Trophy, Swords, LayoutGrid, Sliders, Infinity, BarChart3 } from "lucide-react";
-
-interface GameModeFeature {
-  icon: React.ReactNode;
-  label: string;
-}
+import { Calendar, Sparkles, Zap, Lock, Castle, Trophy, Swords, LayoutGrid } from "lucide-react";
 
 interface GameModeCardProps {
   title: string;
-  subtitle?: string;
   description: string;
   icon: React.ReactNode;
   href?: string;
   comingSoon?: boolean;
   delay?: number;
-  useVortex?: boolean;
   useBeams?: boolean;
   useStars?: boolean;
   useInfiniteScroll?: boolean;
   infiniteScrollDesktopSpeed?: number;
-  features?: GameModeFeature[];
 }
 
-function GameModeCard({ title, subtitle, description, icon, href, comingSoon = false, delay = 0, useVortex = false, useBeams = false, useStars = false, useInfiniteScroll = false, infiniteScrollDesktopSpeed, features }: GameModeCardProps) {
+function GameModeCard({ title, description, icon, href, comingSoon = false, delay = 0, useBeams = false, useStars = false, useInfiniteScroll = false, infiniteScrollDesktopSpeed }: GameModeCardProps) {
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -55,7 +47,7 @@ function GameModeCard({ title, subtitle, description, icon, href, comingSoon = f
   return (
     <div
       ref={cardRef}
-      className={`group relative overflow-hidden rounded-2xl border border-border/40 ${useVortex || useBeams || useStars || useInfiniteScroll ? 'bg-transparent' : 'bg-card/50 backdrop-blur-sm'} transition-all duration-500 ${
+      className={`group relative overflow-hidden rounded-2xl border border-border/40 ${useBeams || useStars || useInfiniteScroll ? 'bg-transparent' : 'bg-card/50 backdrop-blur-sm'} transition-all duration-500 ${
         comingSoon ? "opacity-60" : "cursor-pointer hover:border-primary/40"
       }`}
       style={{
@@ -71,19 +63,7 @@ function GameModeCard({ title, subtitle, description, icon, href, comingSoon = f
       {/* Solid backgrounds for all cards */}
       <div className="absolute inset-0 bg-card"></div>
 
-      {useVortex ? (
-        /* Vortex background for Daily Challenge */
-        <div className="absolute inset-0 h-full z-[1]">
-          <Vortex
-            backgroundColor="transparent"
-            rangeY={800}
-            particleCount={500}
-            baseHue={220}
-            className="flex items-center flex-col justify-center w-full h-full opacity-70"
-            containerClassName="h-full"
-          />
-        </div>
-      ) : useBeams ? (
+      {useBeams ? (
         /* Animated beams for Freeplay */
         <div className="absolute inset-0 h-full w-full z-[1]">
           <BackgroundBeamsWithCollision className="h-full w-full rounded-2xl">
@@ -129,12 +109,12 @@ function GameModeCard({ title, subtitle, description, icon, href, comingSoon = f
         />
       )}
 
-      <div className="relative p-6 sm:p-8 z-10 h-full flex flex-col">
+      <div className="relative p-8 z-10">
         {/* Icon with glow */}
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between">
           <div className="relative">
             <div className="absolute inset-0 animate-pulse rounded-full bg-primary/20 blur-xl" />
-            <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-primary/30 bg-primary/10">
+            <div className="relative flex h-14 w-14 items-center justify-center rounded-full border border-primary/30 bg-primary/10">
               {icon}
             </div>
           </div>
@@ -146,43 +126,18 @@ function GameModeCard({ title, subtitle, description, icon, href, comingSoon = f
           )}
         </div>
 
-        {/* Title & Subtitle */}
-        <div className="mb-3">
-          <h3 className="text-xl sm:text-2xl font-bold tracking-tight">
-            {title}
-          </h3>
-          {subtitle && (
-            <p className="mt-1 text-sm font-medium text-primary/80">
-              {subtitle}
-            </p>
-          )}
-        </div>
+        {/* Title */}
+        <h3 className="mb-3 text-2xl font-bold">
+          {title}
+        </h3>
 
         {/* Description */}
-        <p className="text-sm leading-relaxed text-muted-foreground">
+        <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
           {description}
         </p>
 
-        {/* Features */}
-        {features && features.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-1.5 rounded-full border border-border/50 bg-muted/30 px-3 py-1.5 text-xs font-medium text-muted-foreground"
-              >
-                {feature.icon}
-                <span>{feature.label}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Spacer */}
-        <div className="flex-1 min-h-4" />
-
         {/* Button */}
-        <div className="mt-4">
+        <div>
         {!comingSoon && (
           <button className="group/btn relative overflow-hidden rounded-full border border-border bg-background px-6 py-2.5 text-sm font-medium transition-all duration-300 hover:scale-105">
             <span className="relative z-10">Start Playing</span>
@@ -384,20 +339,14 @@ export default function GameModesPage() {
       description: "One curated quiz every day. Test yourself against the global leaderboard and climb the ranks.",
       icon: <Calendar className="h-7 w-7 text-primary" />,
       href: "/daily",
-      useVortex: true,
+      useBeams: true,
     },
     {
       title: "Freeplay",
-      subtitle: "Practice Mode",
-      description: "Create unlimited custom quizzes tailored to your interests. Perfect for learning at your own pace.",
-      icon: <Sparkles className="h-6 w-6 text-primary" />,
+      description: "Unlimited custom quizzes on any topic. Choose your difficulty, categories, and question count.",
+      icon: <Sparkles className="h-7 w-7 text-primary" />,
       href: "/freeplay",
       useBeams: true,
-      features: [
-        { icon: <Sliders className="h-3 w-3" />, label: "Custom Difficulty" },
-        { icon: <Infinity className="h-3 w-3" />, label: "Unlimited Plays" },
-        { icon: <BarChart3 className="h-3 w-3" />, label: "Any Category" },
-      ],
     },
     {
       title: "Faceoff",
@@ -513,14 +462,11 @@ export default function GameModesPage() {
                   <GameModeCard
                     key={mode.title}
                     title={mode.title}
-                    subtitle={mode.subtitle}
                     description={mode.description}
                     icon={mode.icon}
                     href={mode.href}
                     delay={index * 100}
-                    useVortex={mode.useVortex}
                     useBeams={mode.useBeams}
-                    features={mode.features}
                   />
                 ))}
               </div>

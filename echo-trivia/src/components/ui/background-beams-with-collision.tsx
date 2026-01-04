@@ -6,9 +6,11 @@ import React, { useRef, useState, useEffect } from "react";
 export const BackgroundBeamsWithCollision = ({
   children,
   className,
+  delayOffset = 0,
 }: {
   children: React.ReactNode;
   className?: string;
+  delayOffset?: number;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
@@ -63,7 +65,10 @@ export const BackgroundBeamsWithCollision = ({
       {beams.map((beam, idx) => (
         <CollisionMechanism
           key={idx + "beam-idx"}
-          beamOptions={beam}
+          beamOptions={{
+            ...beam,
+            delay: (beam.delay || 0) + delayOffset,
+          }}
           containerRef={containerRef}
           parentRef={parentRef}
         />

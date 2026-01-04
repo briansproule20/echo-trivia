@@ -18,12 +18,13 @@ interface GameModeCardProps {
   comingSoon?: boolean;
   delay?: number;
   useBeams?: boolean;
+  beamDelayOffset?: number;
   useStars?: boolean;
   useInfiniteScroll?: boolean;
   infiniteScrollDesktopSpeed?: number;
 }
 
-function GameModeCard({ title, description, icon, href, comingSoon = false, delay = 0, useBeams = false, useStars = false, useInfiniteScroll = false, infiniteScrollDesktopSpeed }: GameModeCardProps) {
+function GameModeCard({ title, description, icon, href, comingSoon = false, delay = 0, useBeams = false, beamDelayOffset = 0, useStars = false, useInfiniteScroll = false, infiniteScrollDesktopSpeed }: GameModeCardProps) {
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -66,7 +67,7 @@ function GameModeCard({ title, description, icon, href, comingSoon = false, dela
       {useBeams ? (
         /* Animated beams for Freeplay */
         <div className="absolute inset-0 h-full w-full z-[1]">
-          <BackgroundBeamsWithCollision className="h-full w-full rounded-2xl">
+          <BackgroundBeamsWithCollision className="h-full w-full rounded-2xl" delayOffset={beamDelayOffset}>
             <div className="absolute inset-0 pointer-events-none" />
           </BackgroundBeamsWithCollision>
         </div>
@@ -340,6 +341,7 @@ export default function GameModesPage() {
       icon: <Calendar className="h-7 w-7 text-primary" />,
       href: "/daily",
       useBeams: true,
+      beamDelayOffset: 0,
     },
     {
       title: "Freeplay",
@@ -347,6 +349,7 @@ export default function GameModesPage() {
       icon: <Sparkles className="h-7 w-7 text-primary" />,
       href: "/freeplay",
       useBeams: true,
+      beamDelayOffset: 2,
     },
     {
       title: "Faceoff",
@@ -354,6 +357,7 @@ export default function GameModesPage() {
       icon: <Swords className="h-7 w-7 text-primary" />,
       href: "/faceoff",
       useBeams: true,
+      beamDelayOffset: 4,
     },
     {
       title: "Endless Survival",
@@ -467,6 +471,7 @@ export default function GameModesPage() {
                     href={mode.href}
                     delay={index * 100}
                     useBeams={mode.useBeams}
+                    beamDelayOffset={mode.beamDelayOffset}
                   />
                 ))}
               </div>
@@ -481,6 +486,7 @@ export default function GameModesPage() {
                   href={gameModes[2].href}
                   delay={200}
                   useBeams={gameModes[2].useBeams}
+                  beamDelayOffset={gameModes[2].beamDelayOffset}
                 />
               </div>
 

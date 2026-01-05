@@ -34,7 +34,7 @@ async function getDailyChallenge(date: string) {
         description: `${date} - A new challenge every day at midnight EST`,
         numQuestions: 5,
         difficulty: "mixed" as const,
-        type: "mixed" as const,
+        type: "multiple_choice" as const,
       };
     },
     [`daily-challenge-${CACHE_VERSION}-${date}`], // Include version and date in cache key

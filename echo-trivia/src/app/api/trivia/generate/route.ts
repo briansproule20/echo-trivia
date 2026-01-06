@@ -295,9 +295,19 @@ export async function POST(req: Request) {
     // Convert difficulty curve values to difficulty labels based on user's preference
     const difficultyLabels = curve.map(val => {
       if (settings.difficulty !== "mixed") {
+        // For daily quizzes, cap difficulty at medium (no hard questions)
+        if (dailyDate && settings.difficulty === "hard") {
+          return "medium";
+        }
         return settings.difficulty; // Respect user's difficulty choice
       }
       // Use curve for mixed difficulty
+      // For daily quizzes: only easy and medium (hard becomes medium, some medium becomes easy)
+      if (dailyDate) {
+        if (val < 0.5) return "easy";
+        return "medium";
+      }
+      // For freeplay: full difficulty range
       if (val < 0.4) return "easy";
       if (val < 0.7) return "medium";
       return "hard";

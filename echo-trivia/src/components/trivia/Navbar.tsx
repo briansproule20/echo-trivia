@@ -138,6 +138,7 @@ export function Navbar() {
                       <Compass className="h-4 w-4 text-muted-foreground" />
                     </motion.button>
                   </SheetTitle>
+                  <p className="text-xs text-muted-foreground/60 font-light italic">I used to be an adventurer like you...</p>
                 </SheetHeader>
 
                 {/* Theme Toggle - Fixed at top, outside scrollable area */}

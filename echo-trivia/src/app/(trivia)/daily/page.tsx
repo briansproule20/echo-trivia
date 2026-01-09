@@ -236,30 +236,28 @@ export default function DailyQuizPage() {
       <div className="container mx-auto px-3 py-6 sm:px-4 sm:py-12">
         <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
           {/* Header */}
-          <div className="text-center mb-6 sm:mb-12 space-y-2 sm:space-y-4">
+          <div className="text-center mb-4 sm:mb-6 space-y-2 sm:space-y-3">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent leading-tight pb-1">
               Daily Challenge
             </h1>
-            <div className="space-y-1">
-              <p className="text-base sm:text-lg font-semibold text-foreground flex items-baseline justify-center gap-[0.3em]">
-                {(() => {
-                  const { day, month, year, suffix } = getTodayDateParts();
-                  return (
-                    <>
-                      <span className="inline-block animate-in slide-in-from-bottom-4 fade-in duration-500 fill-mode-both" style={{ animationDelay: '0ms' }}>
-                        {day}<sup className="text-[0.6em] ml-[0.05em]">{suffix}</sup>
-                      </span>
-                      <span className="inline-block animate-in slide-in-from-bottom-4 fade-in duration-500 fill-mode-both" style={{ animationDelay: '100ms' }}>
-                        {month}
-                      </span>
-                      <span className="inline-block animate-in slide-in-from-bottom-4 fade-in duration-500 fill-mode-both" style={{ animationDelay: '200ms' }}>
-                        {year}
-                      </span>
-                    </>
-                  );
-                })()}
-              </p>
-            </div>
+            <p className="text-base sm:text-lg font-semibold text-foreground flex items-baseline justify-center gap-[0.3em]">
+              {(() => {
+                const { day, month, year, suffix } = getTodayDateParts();
+                return (
+                  <>
+                    <span className="inline-block animate-in slide-in-from-bottom-4 fade-in duration-500 fill-mode-both" style={{ animationDelay: '0ms' }}>
+                      {day}<sup className="text-[0.6em] ml-[0.05em]">{suffix}</sup>
+                    </span>
+                    <span className="inline-block animate-in slide-in-from-bottom-4 fade-in duration-500 fill-mode-both" style={{ animationDelay: '100ms' }}>
+                      {month}
+                    </span>
+                    <span className="inline-block animate-in slide-in-from-bottom-4 fade-in duration-500 fill-mode-both" style={{ animationDelay: '200ms' }}>
+                      {year}
+                    </span>
+                  </>
+                );
+              })()}
+            </p>
           </div>
 
           {/* Warmup Prompt */}

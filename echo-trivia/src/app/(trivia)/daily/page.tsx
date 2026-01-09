@@ -259,9 +259,6 @@ export default function DailyQuizPage() {
                   );
                 })()}
               </p>
-              <p className="text-xs sm:text-sm text-muted-foreground animate-in fade-in duration-500 fill-mode-both" style={{ animationDelay: '400ms' }}>
-                One challenge per day, infinite attempts
-              </p>
             </div>
           </div>
 

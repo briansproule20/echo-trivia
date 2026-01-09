@@ -31,7 +31,7 @@ async function getDailyChallenge(date: string) {
         date,
         category,
         title: `Today's Challenge: ${category}`,
-        description: `${date} - A new challenge every day at midnight EST`,
+        description: "",
         numQuestions: 5,
         difficulty: "mixed" as const,
         type: "multiple_choice" as const,

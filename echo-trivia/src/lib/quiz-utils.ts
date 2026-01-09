@@ -76,13 +76,30 @@ export function getTodayString(): string {
   return `${year}-${month}-${day}`;
 }
 
-// Get current date in human-readable format: "25 October 2025"
-export function getTodayFormatted(): string {
+// Get ordinal suffix for a day number (st, nd, rd, th)
+export function getOrdinalSuffix(day: number): string {
+  if (day > 3 && day < 21) return 'th';
+  switch (day % 10) {
+    case 1: return 'st';
+    case 2: return 'nd';
+    case 3: return 'rd';
+    default: return 'th';
+  }
+}
+
+// Get today's date parts for formatting
+export function getTodayDateParts(): { day: number; month: string; year: number; suffix: string } {
   const now = new Date();
   const estDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
   const day = estDate.getDate();
   const month = estDate.toLocaleString('en-US', { month: 'long' });
   const year = estDate.getFullYear();
+  return { day, month, year, suffix: getOrdinalSuffix(day) };
+}
+
+// Get current date in human-readable format: "25 October 2025"
+export function getTodayFormatted(): string {
+  const { day, month, year } = getTodayDateParts();
   return `${day} ${month} ${year}`;
 }
 

@@ -9,7 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Sparkles, Loader2, Lock, ChevronDown, Calendar, CalendarDays, Clock, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { storage } from "@/lib/storage";
-import { getTodayString, getTodayFormatted, generateId } from "@/lib/quiz-utils";
+import { getTodayString, getTodayDateParts, getOrdinalSuffix, generateId } from "@/lib/quiz-utils";
 import { usePlayStore } from "@/lib/store";
 import type { Quiz, Session } from "@/lib/types";
 import { useEcho } from "@merit-systems/echo-react-sdk";
@@ -219,7 +219,7 @@ export default function DailyQuizPage() {
     return `${hours}h ${minutes}m`;
   };
 
-  const getTomorrowFormatted = () => {
+  const getTomorrowDateParts = () => {
     const now = new Date();
     const estNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
     const tomorrow = new Date(estNow);
@@ -228,7 +228,7 @@ export default function DailyQuizPage() {
     const day = tomorrow.getDate();
     const month = tomorrow.toLocaleString('en-US', { month: 'long' });
     const year = tomorrow.getFullYear();
-    return `${day} ${month} ${year}`;
+    return { day, month, year, suffix: getOrdinalSuffix(day) };
   };
 
   return (
@@ -241,10 +241,25 @@ export default function DailyQuizPage() {
               Daily Challenge
             </h1>
             <div className="space-y-1">
-              <p className="text-base sm:text-lg font-semibold text-foreground">
-                {getTodayFormatted()}
+              <p className="text-base sm:text-lg font-semibold text-foreground flex items-baseline justify-center gap-[0.3em]">
+                {(() => {
+                  const { day, month, year, suffix } = getTodayDateParts();
+                  return (
+                    <>
+                      <span className="inline-block animate-in slide-in-from-bottom-4 fade-in duration-500 fill-mode-both" style={{ animationDelay: '0ms' }}>
+                        {day}<sup className="text-[0.6em] ml-[0.05em]">{suffix}</sup>
+                      </span>
+                      <span className="inline-block animate-in slide-in-from-bottom-4 fade-in duration-500 fill-mode-both" style={{ animationDelay: '100ms' }}>
+                        {month}
+                      </span>
+                      <span className="inline-block animate-in slide-in-from-bottom-4 fade-in duration-500 fill-mode-both" style={{ animationDelay: '200ms' }}>
+                        {year}
+                      </span>
+                    </>
+                  );
+                })()}
               </p>
-              <p className="text-xs sm:text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground animate-in fade-in duration-500 fill-mode-both" style={{ animationDelay: '400ms' }}>
                 One challenge per day, infinite attempts
               </p>
             </div>
@@ -392,7 +407,14 @@ export default function DailyQuizPage() {
                   <CardTitle className="text-base sm:text-lg">Upcoming Challenge</CardTitle>
                 </div>
                 <CardDescription className="text-xs sm:text-sm">
-                  {getTomorrowFormatted()}
+                  {(() => {
+                    const { day, month, year, suffix } = getTomorrowDateParts();
+                    return (
+                      <>
+                        {day}<sup className="text-[0.6em] ml-[0.05em]">{suffix}</sup> {month} {year}
+                      </>
+                    );
+                  })()}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 sm:space-y-4">

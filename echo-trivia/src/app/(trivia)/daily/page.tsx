@@ -355,18 +355,6 @@ export default function DailyQuizPage() {
                   </div>
                 )}
 
-                {/* Challenge Info */}
-                <div className="grid grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 bg-muted rounded-lg">
-                  <div>
-                    <div className="text-xs sm:text-sm text-muted-foreground">Category</div>
-                    <div className="font-semibold text-sm sm:text-base truncate">{challenge.category}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs sm:text-sm text-muted-foreground">Questions</div>
-                    <div className="font-semibold text-sm sm:text-base">{challenge.numQuestions}</div>
-                  </div>
-                </div>
-
                 {/* Countdown */}
                 <div className="text-center p-3 sm:p-4 border rounded-lg bg-muted/50">
                   <div className="text-xs sm:text-sm text-muted-foreground mb-1">Next challenge in</div>

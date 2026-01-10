@@ -303,12 +303,9 @@ export default function DailyQuizPage() {
           {challenge && !loading && (
             <Card className="shadow-xl overflow-hidden">
               <CardHeader className="space-y-3">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="space-y-2 flex-1 min-w-0">
-                    <CardTitle className="text-2xl sm:text-3xl">{challenge.title}</CardTitle>
-                    <CardDescription className="text-sm sm:text-base line-clamp-2">{challenge.description}</CardDescription>
-                  </div>
-                  <Sparkles className="h-7 w-7 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
+                <div className="space-y-2">
+                  <CardTitle className="text-2xl sm:text-3xl">{challenge.title}</CardTitle>
+                  <CardDescription className="text-sm sm:text-base line-clamp-2">{challenge.description}</CardDescription>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4 sm:space-y-6">

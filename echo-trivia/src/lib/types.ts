@@ -504,7 +504,6 @@ export const CATEGORIES = [
   "Galápagos Islands",
   "Iceland's Volcanic Landscape",
   "Norwegian Fjords",
-  "New Zealand Geography",
 
   // ═══════════════════════════════════════════════════════════════════════════
   // MILITARY HISTORY SPECIFICS (10)
@@ -610,10 +609,6 @@ export const CATEGORIES = [
   "Drones & UAVs",
   "Robotics",
   "3D Printing",
-  "Virtual Reality",
-  "Augmented Reality",
-  "Podcasting History",
-  "YouTube & Content Creators",
   "Film Scores & Soundtracks",
   "Horror Films",
   "Comedy Films",

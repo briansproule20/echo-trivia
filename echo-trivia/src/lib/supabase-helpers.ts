@@ -1,5 +1,6 @@
 import type { Session } from './types'
 import type { SaveQuizSessionRequest } from './supabase-types'
+import { getTodayString } from './quiz-utils'
 
 /**
  * Submit a completed quiz session to Supabase
@@ -28,10 +29,15 @@ export async function submitQuizToSupabase(
         )
       : undefined
 
-    // Extract daily date if it's a daily quiz
-    const dailyDate = session.quiz.seeded && session.quiz.description
-      ? session.quiz.description.match(/^(\d{4}-\d{2}-\d{2})/)?.[1]
-      : undefined
+    // Determine if this is a daily challenge based on gameMode (most reliable)
+    const isDaily = session.gameMode === 'daily'
+
+    // Get daily date - use getTodayString() for daily quizzes, or try to extract from description
+    const dailyDate = isDaily
+      ? getTodayString()
+      : session.quiz.seeded && session.quiz.description
+        ? session.quiz.description.match(/^(\d{4}-\d{2}-\d{2})/)?.[1]
+        : undefined
 
     // Infer difficulty
     const difficulties = session.quiz.questions.map(q => q.difficulty)
@@ -66,9 +72,6 @@ export async function submitQuizToSupabase(
       answer: q.answer,
       explanation: q.explanation,
     }))
-
-    // Determine if this is a daily challenge based on gameMode (most reliable)
-    const isDaily = session.gameMode === 'daily'
 
     const payload: SaveQuizSessionRequest = {
       echo_user_id: echoUserId,

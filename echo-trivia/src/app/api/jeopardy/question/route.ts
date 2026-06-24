@@ -142,7 +142,7 @@ This is for a Jeopardy-style game. The question is worth ${points} points.
 Make it appropriately ${difficulty} - ${points === 200 ? "accessible to most players" : points === 1000 ? "challenging but fair" : "balanced for the difficulty level"}.`;
 
     const result = await generateText({
-      model: anthropic("claude-sonnet-4-20250514"),
+      model: anthropic("claude-sonnet-4-6"),
       system: getJeopardySystemPrompt(difficulty),
       prompt,
       temperature: 1.0,

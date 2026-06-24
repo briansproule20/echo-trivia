@@ -133,7 +133,7 @@ The question should be appropriate for a survival game mode where players answer
 Make it challenging but fair. Difficulty should be easy or medium.`;
 
     const result = await generateText({
-      model: anthropic("claude-sonnet-4-20250514"),
+      model: anthropic("claude-sonnet-4-6"),
       system: SURVIVAL_SYSTEM_PROMPT,
       prompt,
       temperature: 1.0, // High variety

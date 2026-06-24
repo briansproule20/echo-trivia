@@ -148,7 +148,7 @@ export async function POST(req: Request) {
       } else if (isAuthenticated !== false) {
         // Use LLM for fuzzy matching only if authenticated
         const evalResult = await generateText({
-          model: anthropic("claude-sonnet-4-20250514"),
+          model: anthropic("claude-sonnet-4-6"),
           system: FUZZY_EVAL_SYSTEM_PROMPT,
           prompt: `Question: ${question_prompt}\nCanonical Answer: ${answerKey.answer}\nUser Response: ${response}\n\nIs the user response acceptable?`,
           temperature: 0.3,

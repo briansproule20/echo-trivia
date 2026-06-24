@@ -86,7 +86,7 @@ Generate a creative title and description for this quiz.
 
     // Generate with Echo LLM
     const result = await generateText({
-      model: anthropic("claude-sonnet-4-20250514"),
+      model: anthropic("claude-sonnet-4-6"),
       system: SYSTEM_PROMPT,
       prompt: userPrompt,
       temperature: 0.8,
@@ -131,7 +131,7 @@ Generate a creative title and description for this quiz.
 }`;
 
       const repairResult = await generateText({
-        model: anthropic("claude-sonnet-4-20250514"),
+        model: anthropic("claude-sonnet-4-6"),
         system: "You fix invalid JSON to match a schema. Return ONLY the corrected JSON.",
         prompt: `Fix this JSON to match the schema:\n\nInvalid JSON:\n${result.text}\n\nRequired Schema:\n${SCHEMA_TEMPLATE}`,
       });

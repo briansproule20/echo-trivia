@@ -403,7 +403,7 @@ ${SCHEMA_TEMPLATE}`;
     }
 
     const result = await generateText({
-      model: anthropic("claude-sonnet-4-20250514"),
+      model: anthropic("claude-sonnet-4-6"),
       system: TOWER_SYSTEM_PROMPT,
       prompt,
       temperature: 1.0, // Higher temperature for variety
@@ -427,7 +427,7 @@ ${SCHEMA_TEMPLATE}`;
       console.error("JSON parsing failed, attempting repair:", parseError);
 
       const repairResult = await generateText({
-        model: anthropic("claude-sonnet-4-20250514"),
+        model: anthropic("claude-sonnet-4-6"),
         system: "You fix invalid JSON to match a schema. Return ONLY the corrected JSON.",
         prompt: `Fix this JSON to match the schema:\n\nInvalid JSON:\n${result.text}\n\nRequired Schema:\n${SCHEMA_TEMPLATE}`,
       });

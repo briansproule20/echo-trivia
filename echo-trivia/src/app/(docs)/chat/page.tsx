@@ -69,13 +69,13 @@ export default function ChatPage() {
       primer: `Give me a quick primer on ${dailyCategory || 'History'} - today's daily challenge category. Share some interesting facts, key dates, notable figures, and context that might help me prepare for trivia questions on this topic.`,
     }
 
-    sendMessage({ text: prompts[type] }, { body: { model: 'claude-sonnet-4-20250514' } })
+    sendMessage({ text: prompts[type] }, { body: { model: 'claude-sonnet-4-6' } })
   }, [dailyCategory, sendMessage])
 
   // Handle trivia answer submission
   const handleTriviaAnswer = useCallback((toolCallId: string, answerId: string, answerText: string) => {
     setAnsweredQuestions(prev => new Set(prev).add(toolCallId))
-    sendMessage({ text: `My answer is ${answerId}: "${answerText}"` }, { body: { model: 'claude-sonnet-4-20250514' } })
+    sendMessage({ text: `My answer is ${answerId}: "${answerText}"` }, { body: { model: 'claude-sonnet-4-6' } })
   }, [sendMessage])
 
   // Get user display name: name > random fallback
@@ -118,7 +118,7 @@ export default function ChatPage() {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || isLoading) return
-    sendMessage({ text: input }, { body: { model: 'claude-sonnet-4-20250514' } })
+    sendMessage({ text: input }, { body: { model: 'claude-sonnet-4-6' } })
     setInput('')
   }
 

@@ -37,11 +37,9 @@ function ProviderLogo({ provider, className }: { provider: string; className?: s
 }
 
 const AI_MODELS = [
-  { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', provider: 'anthropic', isDefault: true, available: true },
-  { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', provider: 'anthropic', available: false },
-  { id: 'claude-sonnet-4-5-20250929', name: 'Claude Sonnet 4.5', provider: 'anthropic', available: false },
-  { id: 'claude-opus-4-20250514', name: 'Claude Opus 4', provider: 'anthropic', available: false },
-  { id: 'claude-opus-4-1-20250805', name: 'Claude Opus 4.1', provider: 'anthropic', available: false },
+  { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', provider: 'anthropic', isDefault: true, available: true },
+  { id: 'claude-haiku-4-5', name: 'Claude Haiku 4.5', provider: 'anthropic', available: false },
+  { id: 'claude-opus-4-8', name: 'Claude Opus 4.8', provider: 'anthropic', available: false },
   { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai', available: false },
   { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai', available: false },
   { id: 'gpt-5-pro', name: 'GPT-5 Pro', provider: 'openai', available: false },
@@ -151,7 +149,7 @@ export default function SettingsPage() {
   const [newUsername, setNewUsername] = useState('')
   const [currentUsername, setCurrentUsername] = useState('')
   const [saving, setSaving] = useState(false)
-  const [selectedModel, setSelectedModel] = useState('claude-sonnet-4-20250514')
+  const [selectedModel, setSelectedModel] = useState('claude-sonnet-4-6')
 
   useEffect(() => {
     if (echo.user?.id) {

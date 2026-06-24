@@ -79,7 +79,7 @@ export function ChatWidget() {
     e.preventDefault()
     if (!input.trim() || isLoading) return
     setHasInteracted(true)
-    sendMessage({ text: input }, { body: { model: 'claude-sonnet-4-20250514', source: 'widget' } })
+    sendMessage({ text: input }, { body: { model: 'claude-sonnet-4-6', source: 'widget' } })
     setInput('')
   }
 

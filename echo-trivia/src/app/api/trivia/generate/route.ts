@@ -168,7 +168,7 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
 
     // Generate without recipe system
     const result = await generateText({
-      model: anthropic("claude-sonnet-4-20250514"),
+      model: anthropic("claude-sonnet-4-6"),
       system: GENERATION_SYSTEM_PROMPT,
       prompt,
       temperature: 1.0, // Higher temperature for more variety in custom quizzes
@@ -192,7 +192,7 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
       console.error("JSON parsing failed, attempting repair:", error);
 
       const repairResult = await generateText({
-        model: anthropic("claude-sonnet-4-20250514"),
+        model: anthropic("claude-sonnet-4-6"),
         system: "You fix invalid JSON to match a schema. Return ONLY the corrected JSON.",
         prompt: `Fix this JSON to match the schema:\n\nInvalid JSON:\n${result.text}\n\nRequired Schema:\n${SCHEMA_TEMPLATE}`,
       });
@@ -353,7 +353,7 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
 
     // Generate with Echo LLM with higher temperature for variety
     const result = await generateText({
-      model: anthropic("claude-sonnet-4-20250514"),
+      model: anthropic("claude-sonnet-4-6"),
       system: GENERATION_SYSTEM_PROMPT,
       prompt,
       temperature: 1.0, // Higher temperature for more variety in freeplay quizzes
@@ -377,7 +377,7 @@ Make the quiz engaging and educational. Ensure all questions are factually accur
       console.error("JSON parsing failed, attempting repair:", error);
       
       const repairResult = await generateText({
-        model: anthropic("claude-sonnet-4-20250514"),
+        model: anthropic("claude-sonnet-4-6"),
         system: "You fix invalid JSON to match a schema. Return ONLY the corrected JSON.",
         prompt: `Fix this JSON to match the schema:\n\nInvalid JSON:\n${result.text}\n\nRequired Schema:\n${SCHEMA_TEMPLATE}`,
       });
